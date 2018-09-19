@@ -210,7 +210,9 @@ int perturb_init(
                "Non-adiabatic initial conditions not coded in presence of decaying dark matter");
 
   }
-
+  if(pba->has_dcdm == _FALSE_ && pba->has_dr == _TRUE_){
+    pba->has_dr = _FALSE_;
+  }
   class_test(ppt->has_vectors == _TRUE_,
              ppt->error_message,
              "Vectors not coded yet");
@@ -437,7 +439,9 @@ int perturb_init(
   } /* end loop over modes */
 
   free(pppw);
-
+  if(pba->Gamma_neutrinos > 0 && pba->m_dcdm == 0){
+    pba->has_dr = _TRUE_;
+  }
   return _SUCCESS_;
 }
 
@@ -4485,7 +4489,7 @@ int perturb_initial_conditions(struct precision * ppr,
         theta_ur += k*k*alpha;
         /* shear and l3 are gauge invariant */
 
-        if (pba->has_dr == _TRUE_)
+        if (pba->has_dr == _TRUE_ && pba->has_dcdm == _TRUE_)
           delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_dcdm*ppw->pvecback[pba->index_bg_rho_dcdm]/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
 
       }
@@ -6623,7 +6627,7 @@ int perturb_print_variables(double tau,
         theta_ur += k*k*alpha;
       }
 
-      if (pba->has_dr == _TRUE_) {
+      if (pba->has_dr == _TRUE_ && pba->has_dcdm == _TRUE_) {
         delta_dr += (-4.*a*H+a*pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]/pvecback[pba->index_bg_rho_dr])*alpha;
 
         theta_dr += k*k*alpha;

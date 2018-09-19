@@ -798,6 +798,9 @@ int background_indices(
       pba->has_ncdm = _TRUE_;
   }
 
+  if(pba->Gamma_neutrinos > 0 &&  pba->m_dcdm == 0.)
+    pba->has_dr = _TRUE_;
+
   if (pba->Omega0_scf != 0.)
     pba->has_scf = _TRUE_;
 
@@ -2065,6 +2068,9 @@ int background_initial_conditions(
       f = 1./3.*pow(a/pba->a_today,6)*pvecback_integration[pba->index_bi_rho_dcdm]*pba->Gamma_dcdm/pow(pba->H0,3)/sqrt(Omega_rad);
       pvecback_integration[pba->index_bi_rho_dr] = f*pba->H0*pba->H0/pow(a/pba->a_today,4);
     }
+    else if(pba->has_ncdm == _TRUE_){
+      pvecback_integration[pba->index_bi_rho_dr] = 0; /*currently ignore the small amount of decay from a=0 to a=a_ini_class.*/
+    }
     else{
       /** There is also a space reserved for a future case where dr is not sourced by dcdm */
       pvecback_integration[pba->index_bi_rho_dr] = 0.0;
@@ -2354,10 +2360,13 @@ int background_derivs(
       y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
   }
 
-  if ((pba->has_dcdm == _TRUE_) && (pba->has_dr == _TRUE_)){
+  if ((pba->has_dr == _TRUE_)){
     /** - Compute dr density \f$ \rho' = -4aH \rho - a \Gamma \rho \f$ */
-    dy[pba->index_bi_rho_dr] = -4.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*y[pba->index_bi_rho_dr]+
-      y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
+    dy[pba->index_bi_rho_dr] = -4.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*y[pba->index_bi_rho_dr];
+    if(pba->has_dcdm == _TRUE_)
+      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
+    if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0)
+      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1];
   }
 
   if (pba->has_fld == _TRUE_) {
