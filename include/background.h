@@ -11,7 +11,7 @@
 #include "parser.h"
 
 enum spatial_curvature {flat,open,closed};
-
+enum background_ncdm_distribution {fermi_dirac,decaying_cdm,decaying_neutrinos};
 /**
  * All background parameters and evolution that other modules need to know.
  *
@@ -71,6 +71,9 @@ struct background
   double Omega0_dcdmdr; /**< \f$ \Omega_{0 dcdm}+\Omega_{0 dr} \f$: decaying cold dark matter (dcdm) decaying to dark radiation (dr) */
 
   double Gamma_dcdm; /**< \f$ \Gamma_{dcdm} \f$: decay constant for decaying cold dark matter */
+  double Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: decay constant for decaying neutrinos */
+  double M_dcdm; /**< \f$ M_{dcdm} \f$: mass [GeV] of the  decaying cold dark matter */
+  double m_dcdm; /**< \f$ m_{dcdm} \f$: mass [GeV] of the  daugher particle */
 
   double Omega_ini_dcdm;    /**< \f$ \Omega_{ini,dcdm} \f$: rescaled initial value for dcdm density (see 1407.2418 for definitions) */
 
@@ -119,6 +122,9 @@ struct background
 					     p-s-d is passed through file */
   char * ncdm_psd_files;                /**< list of filenames for tabulated p-s-d */
   /* end of parameters for tabulated ncdm p-s-d */
+  enum background_ncdm_distribution background_ncdm_distribution; /**< list of possible background ncdm distribution */
+  short print_ncdm_distribution;
+  int* is_q_initialized_dcdm;	/**< table used to know whether a given momentum bin has been initialised in perts. only relevant for dcdm with massive daugthers. */
 
   //@}
 
@@ -435,6 +441,7 @@ extern "C" {
 
 
   int background_ncdm_momenta(
+                             struct background *pba,
                              double * qvec,
                              double * wvec,
                              int qsize,
@@ -442,10 +449,10 @@ extern "C" {
                              double factor,
                              double z,
                              double * n,
-		             double * rho,
+		                         double * rho,
                              double * p,
                              double * drho_dM,
-			     double * pseudo_p
+			                       double * pseudo_p
                              );
 
   int background_ncdm_M_from_Omega(
@@ -528,7 +535,7 @@ extern "C" {
 #define _eV_ 1.602176487e-19        /**< 1 eV expressed in J */
 
 /* parameters entering in Stefan-Boltzmann constant sigma_B */
-#define _k_B_ 1.3806504e-23
+#define _k_B_ 1.3806504e-23 // in J/K
 #define _h_P_ 6.62606896e-34
 /* remark: sigma_B = 2 pi^5 k_B^4 / (15h^3c^2) = 5.670400e-8
                    = Stefan-Boltzmann constant in W/m^2/K^4 = Kg/K^4/s^3 */

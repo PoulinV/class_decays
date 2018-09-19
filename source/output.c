@@ -154,7 +154,6 @@ int output_init(
                      pop->error_message);
     }
   }
-
   /** - deal with density and matter power spectra */
 
   if ((ppt->has_density_transfers == _TRUE_) || (ppt->has_velocity_transfers == _TRUE_)) {

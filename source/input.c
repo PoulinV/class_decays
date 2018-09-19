@@ -794,9 +794,68 @@ int input_read_parameters(
   class_read_double("Gamma_dcdm",pba->Gamma_dcdm);
   /* Convert to Mpc */
   pba->Gamma_dcdm *= (1.e3 / _c_);
+  /** - Read Gamma in same units as H0, i.e. km/(s Mpc)*/
+  class_read_double("Gamma_neutrinos",pba->Gamma_neutrinos);
+  /* Convert to Mpc */
+  pba->Gamma_neutrinos *= (1.e3 / _c_);
+
+  /** - for massive daughters */
+
+  class_read_double("M_dcdm",pba->M_dcdm); //mass [GeV] of the  decaying cold dark matter
+  class_read_double("m_dcdm",pba->m_dcdm); //mass [GeV] of the  daugher particle
+
+  class_call(parser_read_string(pfc,"background_ncdm_distribution",&string1,&flag1,errmsg),
+             errmsg,
+             errmsg);
+
+  if (flag1 == _TRUE_) {
+    flag2=_FALSE_;
+    if (strcmp(string1,"fermi_dirac") == 0) {
+      pba->background_ncdm_distribution=fermi_dirac;
+      flag2=_TRUE_;
+    }
+    if (strcmp(string1,"decaying_cdm") == 0) {
+      pba->background_ncdm_distribution=decaying_cdm;
+      flag2=_TRUE_;
+    }
+    if (strcmp(string1,"decaying_neutrinos") == 0) {
+      printf("here 1\n");
+      pba->background_ncdm_distribution=decaying_neutrinos;
+      pba->M_dcdm *= 1e-9; //convert eV to GeV.
+      flag2=_TRUE_;
+    }
+
+    class_test(flag2==_FALSE_,
+               errmsg,
+               "could not identify background_ncdm_distribution value, check that it is one of 'fermi_dirac' or 'decaying_cdm'.");
+  }
+  class_call(parser_read_string(pfc,"print_ncdm_distribution",&string1,&flag1,errmsg),
+             errmsg,
+             errmsg);
+
+  if (flag1 == _TRUE_){
+    if((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)){
+      pba->print_ncdm_distribution = _TRUE_;
+      class_read_double("c_gamma_over_c_fld",pba->c_gamma_over_c_fld);
+    }
+    else {
+      pba->print_ncdm_distribution = _FALSE_;
+    }
+  }
+  else{
+    pba->print_ncdm_distribution = _FALSE_;
+  }
 
   /** - non-cold relics (ncdm) */
   class_read_int("N_ncdm",N_ncdm);
+  if(pba->Gamma_dcdm > 0  && (pba->m_dcdm > 0)){
+    flag1 = _TRUE_;
+    N_ncdm = 1;
+  }
+  if(pba->Gamma_neutrinos > 0  && (pba->M_dcdm > 0)){
+    flag1 = _TRUE_;
+    N_ncdm = 1;
+  }
   if ((flag1 == _TRUE_) && (N_ncdm > 0)){
     pba->N_ncdm = N_ncdm;
     /* Precision parameters for ncdm has to be read now since they are used here:*/
@@ -814,9 +873,23 @@ int input_read_parameters(
     /* Number of momentum bins */
     class_read_list_of_integers_or_default("Number of momentum bins",pba->ncdm_input_q_size,-1,N_ncdm);
 
+
+
+
     /* qmax, if relevant */
     class_read_list_of_doubles_or_default("Maximum q",pba->ncdm_qmax,15,N_ncdm);
+    if(pba->Gamma_dcdm >0 && pba->M_dcdm > 0 && pba->m_dcdm > 0){
+      //eventually implement a loop over n_ncdm.
+      pba->ncdm_qmax[0]=5*pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2/(pba->T_cmb*8.617343e-05*1e-9);//5 has been optimized to capture enough of the distribution around the maximum.
+      /* is q bin initialised in perts? set here to "no" (0) */
+      class_alloc(pba->is_q_initialized_dcdm,pba->ncdm_input_q_size[0]*sizeof(int),errmsg);
+      printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
 
+      for(i = 0; i<pba->ncdm_input_q_size[0]; i++){
+        pba->is_q_initialized_dcdm[i]=0;
+        printf("%d\n", pba->is_q_initialized_dcdm[i]);
+      }
+    }
     /* Read temperatures: */
     class_read_list_of_doubles_or_default("T_ncdm",pba->T_ncdm,pba->T_ncdm_default,N_ncdm);
 
@@ -892,11 +965,63 @@ int input_read_parameters(
     /* We must calculate M from omega or vice versa if one of them is missing.
        If both are present, we must update the degeneracy parameter to
        reflect the implicit normalization of the distribution function.*/
+    pba->Omega0_ncdm_tot = 0;
     for (n=0; n < N_ncdm; n++){
-      if (pba->m_ncdm_in_eV[n] != 0.0){
+      if(pba->Gamma_dcdm == 0 && pba->Gamma_neutrinos==0){
+            if (pba->m_ncdm_in_eV[n] != 0.0){
+              /* Case of only mass or mass and Omega/omega: */
+              pba->M_ncdm[n] = pba->m_ncdm_in_eV[n]/_k_B_*_eV_/pba->T_ncdm[n]/pba->T_cmb;
+
+              // pba->M_ncdm[n] = pba->m_ncdm_in_eV[n]/_k_B_*_eV_/pba->T_ncdm[n]/pba->T_cmb;
+              class_call(background_ncdm_momenta(pba,
+                                                 pba->q_ncdm_bg[n],
+                                                 pba->w_ncdm_bg[n],
+                                                 pba->q_size_ncdm_bg[n],
+                                                 pba->M_ncdm[n],
+                                                 pba->factor_ncdm[n],
+                                                 0.,
+                                                 NULL,
+                                                 &rho_ncdm,
+                                                 NULL,
+                                                 NULL,
+                                                 NULL),
+                         pba->error_message,
+                         errmsg);
+              if (pba->Omega0_ncdm[n] == 0.0){
+                pba->Omega0_ncdm[n] = rho_ncdm/pba->H0/pba->H0;
+              }
+              else{
+                fnu_factor = (pba->H0*pba->H0*pba->Omega0_ncdm[n]/rho_ncdm);
+                pba->factor_ncdm[n] *= fnu_factor;
+                /* dlnf0dlnq is already computed, but it is
+                   independent of any normalization of f0.
+                   We don't need the factor anymore, but we
+                   store it nevertheless:*/
+                pba->deg_ncdm[n] *=fnu_factor;
+              }
+            }
+            else{
+              /* Case of only Omega/omega: */
+              class_call(background_ncdm_M_from_Omega(ppr,pba,n),
+                         pba->error_message,
+                         errmsg);
+              //printf("M_ncdm:%g\n",pba->M_ncdm[n]);
+              pba->m_ncdm_in_eV[n] = _k_B_/_eV_*pba->T_ncdm[n]*pba->M_ncdm[n]*pba->T_cmb;
+            }
+            pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];
+            //printf("Adding %g to total Omega..\n",pba->Omega0_ncdm[n]);
+          }
+      else {
         /* Case of only mass or mass and Omega/omega: */
-        pba->M_ncdm[n] = pba->m_ncdm_in_eV[n]/_k_B_*_eV_/pba->T_ncdm[n]/pba->T_cmb;
-        class_call(background_ncdm_momenta(pba->q_ncdm_bg[n],
+        if(pba->background_ncdm_distribution == decaying_cdm){
+          pba->M_ncdm[n] = pba->m_dcdm/(pba->T_ncdm[n]*pba->T_cmb*8.617e-5*1e-9);//M_ncdm in unit of T
+        }
+        else if(pba->background_ncdm_distribution == decaying_neutrinos){
+          pba->M_ncdm[n] = pba->M_dcdm/(pba->T_ncdm[n]*pba->T_cmb*8.617e-5*1e-9);//M_ncdm in unit of T
+          printf("pba->M_ncdm[n] %e pba->M_dcdm %e\n", pba->M_ncdm[n],pba->M_dcdm);
+        }
+        class_call(background_ncdm_momenta(pba,
+                                           pba->q_ncdm_bg[n],
                                            pba->w_ncdm_bg[n],
                                            pba->q_size_ncdm_bg[n],
                                            pba->M_ncdm[n],
@@ -909,29 +1034,10 @@ int input_read_parameters(
                                            NULL),
                    pba->error_message,
                    errmsg);
-        if (pba->Omega0_ncdm[n] == 0.0){
           pba->Omega0_ncdm[n] = rho_ncdm/pba->H0/pba->H0;
-        }
-        else{
-          fnu_factor = (pba->H0*pba->H0*pba->Omega0_ncdm[n]/rho_ncdm);
-          pba->factor_ncdm[n] *= fnu_factor;
-          /* dlnf0dlnq is already computed, but it is
-             independent of any normalization of f0.
-             We don't need the factor anymore, but we
-             store it nevertheless:*/
-          pba->deg_ncdm[n] *=fnu_factor;
-        }
+          pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];
+
       }
-      else{
-        /* Case of only Omega/omega: */
-        class_call(background_ncdm_M_from_Omega(ppr,pba,n),
-                   pba->error_message,
-                   errmsg);
-        //printf("M_ncdm:%g\n",pba->M_ncdm[n]);
-        pba->m_ncdm_in_eV[n] = _k_B_/_eV_*pba->T_ncdm[n]*pba->M_ncdm[n]*pba->T_cmb;
-      }
-      pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];
-      //printf("Adding %g to total Omega..\n",pba->Omega0_ncdm[n]);
     }
   }
   Omega_tot += pba->Omega0_ncdm_tot;
@@ -2881,6 +2987,10 @@ int input_default_params(
   pba->Omega0_dcdmdr = 0.0;
   pba->Omega0_dcdm = 0.0;
   pba->Gamma_dcdm = 0.0;
+  pba->Gamma_neutrinos = 0.0;
+  pba->M_dcdm = 0.0;
+  pba->m_dcdm = 0.0;
+  pba->background_ncdm_distribution=fermi_dirac;
   pba->N_ncdm = 0;
   pba->Omega0_ncdm_tot = 0.;
   pba->ksi_ncdm_default = 0.;
@@ -3287,14 +3397,17 @@ int input_default_precision ( struct precision * ppr ) {
   ppr->tol_perturb_integration=1.e-5;
   ppr->perturb_sampling_stepsize=0.10;
 
-  ppr->radiation_streaming_approximation = rsa_MD_with_reio;
+  // ppr->radiation_streaming_approximation = rsa_MD_with_reio;
+  ppr->radiation_streaming_approximation = rsa_none;
   ppr->radiation_streaming_trigger_tau_over_tau_k = 45.;
   ppr->radiation_streaming_trigger_tau_c_over_tau = 5.;
 
-  ppr->ur_fluid_approximation = ufa_CLASS;
+  // ppr->ur_fluid_approximation = ufa_CLASS;
+  ppr->ur_fluid_approximation = ufa_none;
   ppr->ur_fluid_trigger_tau_over_tau_k = 30.;
 
-  ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
+  // ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
+  ppr->ncdm_fluid_approximation = ncdmfa_none;
   ppr->ncdm_fluid_trigger_tau_over_tau_k = 31.;
 
   ppr->neglect_CMB_sources_below_visibility = 1.e-3;

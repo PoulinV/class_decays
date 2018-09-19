@@ -18,8 +18,9 @@ int get_qsampling_manual(double *x,
 
   double y, h, t;
   double *b, *c;
-  int i;
-  switch (method){ 
+  int i,j;
+	double qmin;
+  switch (method){
   case (qm_auto) :
     return _FAILURE_;
   case (qm_Laguerre) :
@@ -55,6 +56,26 @@ int get_qsampling_manual(double *x,
       (*function)(params_for_function,x[i],&y);
       w[i] = y*h/t/t;
     }
+  case (qm_simpson_log) :
+    /** Simpson rule on a log interval. */
+	qmin = qmax*1e-14;
+	// qmin = 0.1;
+	h = (log10(qmax)-log10(qmin))/(N-1)/2;
+	j=0;
+	for (i=0; i<N; i++){
+		if(j==2)j=0;
+		x[i] = qmin*pow(10,2*i*h);
+		// printf("%d %e %e\n",i,x[i],qmax);
+		(*function)(params_for_function,x[i],&y);
+		w[i] = y*h/3*x[i];
+		if(j == 1 ){
+			w[i] *= 4;
+		}
+		j++;
+		// printf("%e\n", 	w[i]);
+		// if (i==N-1)
+		// w[i] *=0.5;
+	}
     return _SUCCESS_;
   }
   return _SUCCESS_;
@@ -890,4 +911,3 @@ int cubature_order_eleven(
 
   return _SUCCESS_;
 }
-

@@ -787,7 +787,7 @@ int background_indices(
   if (pba->Omega0_cdm != 0.)
     pba->has_cdm = _TRUE_;
 
-  if (pba->N_ncdm != 0.)
+  if (pba->Omega0_ncdm_tot != 0.)
     pba->has_ncdm = _TRUE_;
 
   if (pba->Omega0_dcdmdr != 0.){
@@ -996,8 +996,7 @@ int background_ncdm_distribution(
   double qlast,dqlast,f0last,df0last;
   double *param;
   double _eV_to_invMpc_ = 1.56e+29;
-  double hbar_c_over_kb = 2.3e-3; //in m*K.
-  double PDmax,H,t,aq,Omega_m,Omega_r,rho_dcdm,n_dcdm,qcube;
+  double PDmax,H,t,aq,Omega_m,Omega_r,rho_dcdm,n_dcdm;
   /* Variables corresponding to entries in param: */
   //double square_s12,square_s23,square_s13;
   //double mixing_matrix[3][3];
@@ -1125,46 +1124,30 @@ int background_ncdm_distribution(
 
       // PDmax = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // in GeV
       PDmax = pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2; // in GeV
-      aq = q/PDmax*pba->T_cmb*8.617343e-05*1e-9; //convert Tcmb to GeV using k_b*1e-9
-      // printf("aq %e  PDmax %e q %e qmax %e\n", aq,PDmax,q,PDmax/(pba->T_cmb*8.617343e-05*1e-9));
+      aq = q/PDmax*pba->T_ncdm[n_ncdm]*pba->T_cmb*8.617343e-05*1e-9; //convert Tcmb to GeV using k_b*1e-9
+      // printf("aq %e pba->T_cmb %e PDmax %e q %e\n", aq,pba->T_cmb,PDmax,q);
       Omega_m = pba->Omega0_cdm+pba->Omega0_b+pba->Omega_ini_dcdm;
       Omega_r = pba->Omega0_g;
-      if (pba->Omega0_ur > 0.0)
+      if (pba->has_ur == _TRUE_)
         Omega_r += pba->Omega0_ur;
       // printf("Omega_m %e Omega_r %e\n",Omega_m,Omega_r);
       H = pba->H0*sqrt(Omega_m * pow(aq,-3)+ Omega_r * pow(aq,-4) + pba->Omega0_lambda);
-      // printf("H %e %e %e %e\n",H,Omega_m,Omega_r,pba->Omega0_lambda);
       t = 2*(Omega_m*pow(Omega_r+Omega_m*aq,0.5)+2*pow(Omega_r,1.5)/aq-2*Omega_r*pow((Omega_r/aq+Omega_m)/aq,0.5))/(3*pow(Omega_m,2)/aq*pba->H0);
       t=MAX(0,t);
       // printf("aq %e exp(-pba->Gamma_dcdm * t) %e t %e pba->Gamma_dcdm %e pba->H0 %e\n", aq,exp(-pba->Gamma_dcdm * t),t,pba->Gamma_dcdm,pba->H0);
       // rho_dcdm = pba->Omega_ini_dcdm*pow(aq,-3)*exp(-pba->Gamma_dcdm * t)*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_/_Mpc_over_m_;  // convert to kg/Mpc^3
-      rho_dcdm = pba->Omega_ini_dcdm*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
-      n_dcdm = rho_dcdm/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg
+      rho_dcdm = pba->Omega_ini_dcdm*pow(aq,-3)*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_/_Mpc_over_m_;  // convert to kg/Mpc^3
+      n_dcdm = rho_dcdm*pow(aq,3)/(pba->M_dcdm*1.78e-27*_eV_ / (_c_ * _c_));//(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg
       // printf("q %e aq %e t %e H %e Gamma %e M_dcdm %e rho_dcdm %e n_dcdm %e\n",q,aq,t,pba->H0,pba->Gamma_dcdm,pba->M_dcdm,rho_dcdm,n_dcdm);
-
-
-      // *f0 = pba->Gamma_dcdm*n_dcdm*exp(-pba->Gamma_dcdm*t)/(4*_PI_*H*pow(q*pba->T_cmb*8.617343e-05*_eV_to_invMpc_,3));
-      qcube=q*q*q*pba->T_cmb/hbar_c_over_kb*_Mpc_over_m_*pba->T_cmb/hbar_c_over_kb*_Mpc_over_m_*pba->T_cmb/hbar_c_over_kb*_Mpc_over_m_;
-      // printf("%e\n", 1/hbar_c_over_kb*_Mpc_over_m_);
-      *f0 = pba->Gamma_dcdm*n_dcdm*exp(-pba->Gamma_dcdm*t)/qcube/4/_PI_/H;
-      // *f0 = pba->Gamma_dcdm*n_dcdm/qcube/4/_PI_;
-      // *f0  /= (H*_eV_to_invMpc_*_eV_to_invMpc_*_eV_to_invMpc_);
-      // *f0  *= 2;//Include both daughter particles of same mass.
+      // if(q>0.1) *f0 = pba->Gamma_dcdm*n_dcdm/(4*_PI_*H*q*q*q*pba->T_cmb*8.617343e-05*_eV_to_invMpc_*pba->T_cmb*8.617343e-05*_eV_to_invMpc_*pba->T_cmb*8.617343e-05*_eV_to_invMpc_); //issue with normalisation to be resolved
+      // else *f0 = 0;
+      *f0 = pba->Gamma_dcdm*n_dcdm*exp(-pba->Gamma_dcdm*t)/(4*_PI_*H*pow(q*pba->T_cmb*8.617343e-05*_eV_to_invMpc_,3));
       // if(q<0.01) *f0 =0;
-      // *f0 *= (1-exp(-1*pow(q,2.65)/20));
+   //   *f0 *= (1-exp(-1*pow(q,2.65)/20));
       if(pba->print_ncdm_distribution == _TRUE_){
-        printf("%e %e %e %e\n",q,aq,*f0*q*q,n_dcdm*exp(-pba->Gamma_dcdm*t));
-        if(q==pba->ncdm_qmax[n_ncdm])pba->print_ncdm_distribution = _FALSE_;
+        printf("%e %e \n",q,*f0);
+        // if(pba->a)pba->print_ncdm_distribution = _FALSE_;
       }
-    }
-    else if (pba->background_ncdm_distribution == decaying_neutrinos){
-          /*********************************************************/
-          /*    Decaying massive particles with massive daughters  */
-          /*   To deal with the time dependence, we assume H=HLCDM */
-          /*   We will correct for it in background_ncdm_momenta   */
-          /*********************************************************/
-
-      *f0 = 1.0/pow(2*_PI_,3)*(1./(exp(q-ksi)+1.) +1./(exp(q+ksi)+1.));
     }
 
 
@@ -1333,23 +1316,10 @@ int background_ncdm_init(
       /** Manual q-sampling for this species. Same sampling used for both perturbation and background sampling, since this will usually be a high precision setting anyway */
       pba->q_size_ncdm_bg[k] = pba->ncdm_input_q_size[k];
       pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
-      // pba->q_size_ncdm[k] = 10;
       class_alloc(pba->q_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
       class_alloc(pba->w_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
       class_alloc(pba->q_ncdm[k],pba->q_size_ncdm[k]*sizeof(double),pba->error_message);
       class_alloc(pba->w_ncdm[k],pba->q_size_ncdm[k]*sizeof(double),pba->error_message);
-      class_call(get_qsampling_manual(pba->q_ncdm_bg[k],
-				      pba->w_ncdm_bg[k],
-				      pba->q_size_ncdm_bg[k],
-				      pba->ncdm_qmax[k],
-				      pba->ncdm_quadrature_strategy[k],
-				      pbadist.q,
-				      pbadist.tablesize,
-				      background_ncdm_distribution,
-				      &pbadist,
-				      pba->error_message),
-		 pba->error_message,
-		 pba->error_message);
       class_call(get_qsampling_manual(pba->q_ncdm[k],
 				      pba->w_ncdm[k],
 				      pba->q_size_ncdm[k],
@@ -1362,10 +1332,10 @@ int background_ncdm_init(
 				      pba->error_message),
 		 pba->error_message,
 		 pba->error_message);
-     // for (index_q=0; index_q<pba->q_size_ncdm[k]; index_q++) {
-    	// pba->q_ncdm_bg[k][index_q] = pba->q_ncdm[k][index_q];
-    	// pba->w_ncdm_bg[k][index_q] = pba->w_ncdm[k][index_q];
-     // }
+     for (index_q=0; index_q<pba->q_size_ncdm[k]; index_q++) {
+    	pba->q_ncdm_bg[k][index_q] = pba->q_ncdm[k][index_q];
+    	pba->w_ncdm_bg[k][index_q] = pba->w_ncdm[k][index_q];
+     }
     if(pba->background_ncdm_distribution == decaying_cdm){
       //we need to correct w_ncdm because we use a slightly different definition for the description of dcdm perturbations
       for (index_q=0; index_q<pba->q_size_ncdm[k];index_q++){
@@ -1373,10 +1343,9 @@ int background_ncdm_init(
                                      pba->q_ncdm[k][index_q],
                                      &f0);
         // printf("before pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e\n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
-        if(f0!=0)pba->w_ncdm[k][index_q] /= f0 ;
-        else pba->w_ncdm[k][index_q] =0;
+        pba->w_ncdm[k][index_q] /= f0 ;
         // pba->w_ncdm_bg[k][index_q] *= f0;
-        // printf("after pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e  \n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
+        // printf("after pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e\n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
       }
     }
     /** - in verbose mode, inform user of number of sampled momenta
@@ -1415,7 +1384,7 @@ int background_ncdm_init(
         class_call(background_ncdm_distribution(&pbadist,q+2*dq,&f0p2),
                    pba->error_message,pba->error_message);
 
-        if (fabs((f0p2-f0m2)/f0)>sqrt(ppr->smallest_allowed_variation) && f0!= 0) break;
+        if (fabs((f0p2-f0m2)/f0)>sqrt(ppr->smallest_allowed_variation)) break;
       }
 
       class_call(background_ncdm_distribution(&pbadist,q-dq,&f0m1),
@@ -1424,7 +1393,7 @@ int background_ncdm_init(
                  pba->error_message,pba->error_message);
       //5 point estimate of the derivative:
       df0dq = (+f0m2-8*f0m1+8*f0p1-f0p2)/12.0/dq;
-      // printf("df0dq[%g] = %g. dlf=%g ?= %g. f0 =%g.\n",q,df0dq,q/f0*df0dq,
+      //printf("df0dq[%g] = %g. dlf=%g ?= %g. f0 =%g.\n",q,df0dq,q/f0*df0dq,
       //Avoid underflow in extreme tail:
       if (fabs(f0)==0.)
         pba->dlnf0_dlnq_ncdm[k][index_q] = -q; /* valid for whatever f0 with exponential tail in exp(-q) */
@@ -1498,7 +1467,7 @@ int background_ncdm_momenta(
   double tauq, Hq;
   int last_index;
   double * pvecback;
-  double Omega_m, Omega_r, t, H;
+
   /** Summary: */
 
   /** - rescale normalization at given redshift */
@@ -1518,7 +1487,7 @@ int background_ncdm_momenta(
       // PDmax = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // convert to GeV
       PDmax = pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2; // in GeV
       zq = 1/(qvec[index_q]*pba->T_cmb*8.617e-5*1e-9/PDmax)-1; // in CLASS, q is defined as p/T0. We therefore multiply by T0*8.617e-5*1e-9 to get a result in GeV.
-      // printf("%e %e zq %e\n",PDmax,qvec[index_q],zq);
+      // printf("%e %e %e\n",PDmax,qvec[index_q],zq);
       // printf("z %e zq %e \n",z,zq);
 
     }
@@ -1550,25 +1519,6 @@ int background_ncdm_momenta(
   }
 
   /** - adjust normalization */
-
-  if(pba->background_ncdm_distribution == decaying_cdm){
-    factor2 *= 2;
-    factor2 *= 5;//Where does this come from?!
-  }
-  else if(pba->background_ncdm_distribution == decaying_neutrinos){
-    Omega_m = pba->Omega0_cdm+pba->Omega0_b+pba->Omega_ini_dcdm;
-    Omega_r = pba->Omega0_g;
-    if (pba->Omega0_ur > 0.0)
-      Omega_r += pba->Omega0_ur;
-    H = pba->H0*sqrt(Omega_m * pow((1+z),3)+ Omega_r * pow((1+z),4) + pba->Omega0_lambda);
-    t = 2*(Omega_m*pow(Omega_r+Omega_m*(1/(1+z)),0.5)+2*pow(Omega_r,1.5)/(1/(1+z))-2*Omega_r*pow((Omega_r/(1/(1+z))+Omega_m)/(1/(1+z)),0.5))/(3*pow(Omega_m,2)/(1/(1+z))*pba->H0);
-    if(t<0)t=0;
-    factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t);
-    // factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon)*t);
-    // printf("exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t) %e epsilon %e pba->Gamma_neutrinos %e M %e pba->M_dcdm %e t %e\n" ,exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t),epsilon,pba->Gamma_neutrinos,M,pba->M_dcdm,t);
-    // printf("here 2\n");
-  }
-
   if (n!=NULL) *n *= factor2*(1.+z);
   if (rho!=NULL) *rho *= factor2;
   if (p!=NULL) *p *= factor2;
