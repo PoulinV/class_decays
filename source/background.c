@@ -262,7 +262,7 @@ int background_functions(
   /* scale factor relative to scale factor today */
   double a_rel;
   /* background ncdm quantities */
-  double rho_ncdm,p_ncdm,pseudo_p_ncdm;
+  double num_ncdm,rho_ncdm,p_ncdm,pseudo_p_ncdm;
   double rho_dcdm;
   /* index for n_ncdm species */
   int n_ncdm;
@@ -366,7 +366,7 @@ int background_functions(
                                          // pba->m_dcdm,
                                          pba->factor_ncdm[n_ncdm],
                                          1./a_rel-1.,
-                                         NULL,
+                                         &num_ncdm,
                                          &rho_ncdm,
                                          &p_ncdm,
                                          NULL,
@@ -375,6 +375,7 @@ int background_functions(
                  pba->error_message);
 
 
+      pvecback[pba->index_bg_n_ncdm1+n_ncdm] = num_ncdm;
       pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
       rho_tot += rho_ncdm;
       pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
@@ -842,6 +843,7 @@ int background_indices(
   /* - indices for ncdm. We only define the indices for ncdm1
      (density, pressure, pseudo-pressure), the other ncdm indices
      are contiguous */
+  class_define_index(pba->index_bg_n_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_rho_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_p_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_pseudo_p_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
@@ -2251,6 +2253,7 @@ int background_output_data(
     class_store_double(dataptr,pvecback[pba->index_bg_rho_cdm],pba->has_cdm,storeidx);
     if (pba->has_ncdm == _TRUE_){
       for (n=0; n<pba->N_ncdm; n++){
+        class_store_double(dataptr,pvecback[pba->index_bg_n_ncdm1+n],_TRUE_,storeidx);
         class_store_double(dataptr,pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
         class_store_double(dataptr,pvecback[pba->index_bg_p_ncdm1+n],_TRUE_,storeidx);
       }
@@ -2365,8 +2368,11 @@ int background_derivs(
     dy[pba->index_bi_rho_dr] = -4.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*y[pba->index_bi_rho_dr];
     if(pba->has_dcdm == _TRUE_)
       dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
-    if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0)
-      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1];
+    if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
+      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
+      // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*5.06e15*_Mpc_over_m_; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
+      // printf("pba->M_dcdm* %e pvecback[pba->index_bg_n_ncdm1] %e pvecback[pba->index_bg_rho_ncdm1] %e 5.06e11*_Mpc_over_m_ %e\n",pba->M_dcdm,pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*5.06e15*_Mpc_over_m_, pvecback[pba->index_bg_rho_ncdm1],5.06e11*_Mpc_over_m_);
+    }
   }
 
   if (pba->has_fld == _TRUE_) {

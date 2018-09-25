@@ -181,7 +181,8 @@ struct background
   int index_bg_rho_scf;       /**< scalar field energy density */
   int index_bg_p_scf;         /**< scalar field pressure */
 
-  int index_bg_rho_ncdm1;     /**< density of first ncdm species (others contiguous) */
+  int index_bg_n_ncdm1;     /**< number density of first ncdm species (others contiguous) */
+  int index_bg_rho_ncdm1;     /**< energy density of first ncdm species (others contiguous) */
   int index_bg_p_ncdm1;       /**< pressure of first ncdm species (others contiguous) */
   int index_bg_pseudo_p_ncdm1;/**< another statistical momentum useful in ncdma approximation */
 
