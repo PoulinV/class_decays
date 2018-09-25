@@ -381,7 +381,7 @@ int background_functions(
       pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
       p_tot += p_ncdm;
       pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm] = pseudo_p_ncdm;
-      // printf("%e %e %e \n", rho_ncdm,p_ncdm,pseudo_p_ncdm);
+      printf("%e %e %e %e \n", num_ncdm,rho_ncdm,p_ncdm,pseudo_p_ncdm);
 
       /* (3 p_ncdm1) is the "relativistic" contribution to rho_ncdm1 */
       rho_r += 3.* p_ncdm;
@@ -1574,7 +1574,7 @@ int background_ncdm_momenta(
     // printf("here 2\n");
   }
 
-  if (n!=NULL) *n *= factor2*(1.+z);
+  if (n!=NULL) *n *= factor2/(1.+z);
   if (rho!=NULL) *rho *= factor2;
   if (p!=NULL) *p *= factor2;
   if (drho_dM!=NULL) *drho_dM *= factor2;
@@ -2199,6 +2199,8 @@ int background_output_titles(struct background * pba,
   class_store_columntitle(titles,"(.)rho_cdm",pba->has_cdm);
   if (pba->has_ncdm == _TRUE_){
     for (n=0; n<pba->N_ncdm; n++){
+      sprintf(tmp,"(.)n_ncdm[%d]",n);
+      class_store_columntitle(titles,tmp,_TRUE_);
       sprintf(tmp,"(.)rho_ncdm[%d]",n);
       class_store_columntitle(titles,tmp,_TRUE_);
       sprintf(tmp,"(.)p_ncdm[%d]",n);
@@ -2369,9 +2371,11 @@ int background_derivs(
     if(pba->has_dcdm == _TRUE_)
       dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
     if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
-      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*5.06e15*_Mpc_over_m_; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      // printf("pba->M_dcdm* %e pvecback[pba->index_bg_n_ncdm1] %e pvecback[pba->index_bg_rho_ncdm1] %e 5.06e11*_Mpc_over_m_ %e\n",pba->M_dcdm,pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*5.06e15*_Mpc_over_m_, pvecback[pba->index_bg_rho_ncdm1],5.06e11*_Mpc_over_m_);
+      // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
+      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*5.06e15*_Mpc_over_m_; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
+      // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*8.06e12; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
+      // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
+      // printf("pba->M_dcdm* %e pvecback[pba->index_bg_n_ncdm1] %e pvecback[pba->index_bg_rho_ncdm1] %e \n",pba->M_dcdm,pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*5.06e15*_Mpc_over_m_, pvecback[pba->index_bg_rho_ncdm1]);
     }
   }
 
