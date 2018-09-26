@@ -381,7 +381,7 @@ int background_functions(
       pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
       p_tot += p_ncdm;
       pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm] = pseudo_p_ncdm;
-      printf("%e %e %e %e \n", num_ncdm,rho_ncdm,p_ncdm,pseudo_p_ncdm);
+      // printf("%e %e %e %e \n", num_ncdm,rho_ncdm,p_ncdm,pseudo_p_ncdm);
 
       /* (3 p_ncdm1) is the "relativistic" contribution to rho_ncdm1 */
       rho_r += 3.* p_ncdm;
@@ -2372,10 +2372,7 @@ int background_derivs(
       dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
     if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
       // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*5.06e15*_Mpc_over_m_; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*8.06e12; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      // printf("pba->M_dcdm* %e pvecback[pba->index_bg_n_ncdm1] %e pvecback[pba->index_bg_rho_ncdm1] %e \n",pba->M_dcdm,pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm*5.06e15*_Mpc_over_m_, pvecback[pba->index_bg_rho_ncdm1]);
+      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm/pba->T_cmb/8.617e-5*1e9; ///pba->T_cmb/8.617e-5*1e9 convert from GeV to dimensionless. Note that n_ncdm does has the same unit as rho_ncdm. 
     }
   }
 

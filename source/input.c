@@ -819,7 +819,6 @@ int input_read_parameters(
       flag2=_TRUE_;
     }
     if (strcmp(string1,"decaying_neutrinos") == 0) {
-      printf("here 1\n");
       pba->background_ncdm_distribution=decaying_neutrinos;
       pba->M_dcdm *= 1e-9; //convert eV to GeV.
       flag2=_TRUE_;
@@ -883,11 +882,11 @@ int input_read_parameters(
       pba->ncdm_qmax[0]=5*pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2/(pba->T_cmb*8.617343e-05*1e-9);//5 has been optimized to capture enough of the distribution around the maximum.
       /* is q bin initialised in perts? set here to "no" (0) */
       class_alloc(pba->is_q_initialized_dcdm,pba->ncdm_input_q_size[0]*sizeof(int),errmsg);
-      printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
+      // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
 
       for(i = 0; i<pba->ncdm_input_q_size[0]; i++){
         pba->is_q_initialized_dcdm[i]=0;
-        printf("%d\n", pba->is_q_initialized_dcdm[i]);
+        // printf("%d\n", pba->is_q_initialized_dcdm[i]);
       }
     }
     /* Read temperatures: */
@@ -1018,7 +1017,7 @@ int input_read_parameters(
         }
         else if(pba->background_ncdm_distribution == decaying_neutrinos){
           pba->M_ncdm[n] = pba->M_dcdm/(pba->T_ncdm[n]*pba->T_cmb*8.617e-5*1e-9);//M_ncdm in unit of T
-          printf("pba->M_ncdm[n] %e pba->M_dcdm %e\n", pba->M_ncdm[n],pba->M_dcdm);
+          // printf("pba->M_ncdm[n] %e pba->M_dcdm %e\n", pba->M_ncdm[n],pba->M_dcdm);
         }
         class_call(background_ncdm_momenta(pba,
                                            pba->q_ncdm_bg[n],
