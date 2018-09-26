@@ -4491,6 +4491,8 @@ int perturb_initial_conditions(struct precision * ppr,
 
         if (pba->has_dr == _TRUE_ && pba->has_dcdm == _TRUE_)
           delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_dcdm*ppw->pvecback[pba->index_bg_rho_dcdm]/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
+        else if(pba->has_dr == _TRUE_ && pba->Gamma_neutrinos > 0)
+          delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm/pba->T_cmb/8.617e-5*1e9)/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
 
       }
 
@@ -5552,8 +5554,6 @@ int perturb_total_stress_energy(
               if(y[idx+2]!=0) rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
               if(y[idx]!=0) delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
               }
-              //Jump to next momentum bin:
-              idx+=(ppw->pv->l_max_ncdm[n_ncdm]+1);
               // printf("aq %e q2 %e  epsilon %e pba->w_ncdm[n_ncdm][index_q] %e y[idx] %e \n", aq, q2 ,  epsilon , pba->w_ncdm[n_ncdm][index_q] , y[idx]);
             }
             else{
@@ -5562,6 +5562,8 @@ int perturb_total_stress_energy(
               rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
               delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
             }
+            //Jump to next momentum bin:
+            idx+=(ppw->pv->l_max_ncdm[n_ncdm]+1);
           }
           // printf("pba->w_ncdm[n_ncdm][index_q] %e\n", pba->w_ncdm[n_ncdm][index_q]);
           rho_delta_ncdm *= factor;
@@ -6632,7 +6634,10 @@ int perturb_print_variables(double tau,
 
         theta_dr += k*k*alpha;
       }
-
+      if (pba->has_dr == _TRUE_ && pba->Gamma_neutrinos > 0) {
+      delta_dr += (-4.*a*H+a*pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm/pba->T_cmb/8.617e-5*1e9)/pvecback[pba->index_bg_rho_dr])*alpha;
+      theta_dr += k*k*alpha;
+      }
       if (pba->has_cdm == _TRUE_) {
         delta_cdm -= 3. * pvecback[pba->index_bg_H]*pvecback[pba->index_bg_a]*alpha;
         theta_cdm += k*k*alpha;
@@ -7286,7 +7291,7 @@ int perturb_derivs(double tau,
 
     /** - ---> dr */
 
-    if ((pba->has_dcdm == _TRUE_)&&(pba->has_dr == _TRUE_)) {
+    if ((pba->has_dr == _TRUE_)) {
 
 
       /* f = rho_dr*a^4/rho_crit_today. In CLASS density units
@@ -7294,15 +7299,34 @@ int perturb_derivs(double tau,
       */
 
       f_dr = pow(pow(a/pba->a_today,2)/pba->H0,2)*pvecback[pba->index_bg_rho_dr];
-      fprime_dr = pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]*pow(a,5)/pow(pba->H0,2);
+      if(pba->has_dcdm == _TRUE_){
+        fprime_dr = pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]*pow(a,5)/pow(pba->H0,2);
+      }
+      else if(pba->Gamma_neutrinos > 0){
+        fprime_dr = pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm/pba->T_cmb/8.617e-5*1e9)*pow(a,5)/pow(pba->H0,2);
+      }
 
       /** - ----> dr F0 */
-      dy[pv->index_pt_F0_dr] = -k*y[pv->index_pt_F0_dr+1]-4./3.*metric_continuity*f_dr+
-        fprime_dr*(y[pv->index_pt_delta_dcdm]+metric_euler/k2);
+      dy[pv->index_pt_F0_dr] = -k*y[pv->index_pt_F0_dr+1]-4./3.*metric_continuity*f_dr;
+      if(pba->has_dcdm == _TRUE_){
+        dy[pv->index_pt_F0_dr] +=  fprime_dr*(y[pv->index_pt_delta_dcdm]+metric_euler/k2);
+      }
+      else if(pba->Gamma_neutrinos > 0){
+        for(n_ncdm = 0; n_ncdm < pba->N_ncdm ; n_ncdm++){
+          dy[pv->index_pt_F0_dr] +=  fprime_dr*(ppw->delta_ncdm[n_ncdm]+metric_euler/k2);
+        }
+      }
 
       /** - ----> dr F1 */
-      dy[pv->index_pt_F0_dr+1] = k/3.*y[pv->index_pt_F0_dr]-2./3.*k*y[pv->index_pt_F0_dr+2]*s2_squared +
-        4*metric_euler/(3.*k)*f_dr + fprime_dr/k*y[pv->index_pt_theta_dcdm];
+      dy[pv->index_pt_F0_dr+1] = k/3.*y[pv->index_pt_F0_dr]-2./3.*k*y[pv->index_pt_F0_dr+2]*s2_squared;
+      if(pba->has_dcdm == _TRUE_){
+        dy[pv->index_pt_F0_dr+1] += 4*metric_euler/(3.*k)*f_dr + fprime_dr/k*y[pv->index_pt_theta_dcdm];
+      }
+      else if(pba->Gamma_neutrinos > 0){
+        for(n_ncdm = 0; n_ncdm < pba->N_ncdm ; n_ncdm++){
+          dy[pv->index_pt_F0_dr+1] +=  4*metric_euler/(3.*k)*f_dr + fprime_dr/k*ppw->theta_ncdm[n_ncdm];
+        }
+      }
 
       /** - ----> exact dr F2 */
       dy[pv->index_pt_F0_dr+2] = 8./15.*(3./4.*k*y[pv->index_pt_F0_dr+1]+metric_shear*f_dr) -3./5.*k*s_l[3]/s_l[2]*y[pv->index_pt_F0_dr+3];
