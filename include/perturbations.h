@@ -374,6 +374,9 @@ struct perturbs
 
   ErrorMsg error_message; /**< zone for writing error messages */
 
+
+  /** do we want to include DR pertubations? */
+  short dark_radiation_perturbations;
   //@}
 
 };

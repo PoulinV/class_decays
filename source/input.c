@@ -799,6 +799,20 @@ int input_read_parameters(
   /* Convert to Mpc */
   pba->Gamma_neutrinos *= (1.e3 / _c_);
 
+  /** do we want to include DR pertubations? */
+  class_call(parser_read_string(pfc,"dark_radiation_perturbations",&string1,&flag1,errmsg),
+             errmsg,
+             errmsg);
+
+  if (flag1 == _TRUE_){
+    if((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)){
+      ppt->dark_radiation_perturbations = _TRUE_;
+    }
+    else {
+      ppt->dark_radiation_perturbations = _FALSE_;
+    }
+  }
+
   /** - for massive daughters */
 
   class_read_double("M_dcdm",pba->M_dcdm); //mass [GeV] of the  decaying cold dark matter
@@ -3128,6 +3142,7 @@ int input_default_params(
   ppt->selection_mean[0]=1.;
   ppt->selection_width[0]=0.1;
 
+  ppt->dark_radiation_perturbations = _TRUE_;
   /** - primordial structure */
 
   ppm->primordial_spec_type = analytic_Pk;

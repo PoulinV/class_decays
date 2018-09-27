@@ -210,7 +210,7 @@ int perturb_init(
                "Non-adiabatic initial conditions not coded in presence of decaying dark matter");
 
   }
-  if(pba->has_dcdm == _FALSE_ && pba->has_dr == _TRUE_){
+  if(ppt->dark_radiation_perturbations == _FALSE_){
     pba->has_dr = _FALSE_;
   }
   class_test(ppt->has_vectors == _TRUE_,
@@ -439,7 +439,7 @@ int perturb_init(
   } /* end loop over modes */
 
   free(pppw);
-  if(pba->Gamma_neutrinos > 0 && pba->m_dcdm == 0){
+  if(ppt->dark_radiation_perturbations == _FALSE_ && pba->Gamma_neutrinos > 0 && pba->m_dcdm == 0){
     pba->has_dr = _TRUE_;
   }
   return _SUCCESS_;
@@ -5582,16 +5582,13 @@ int perturb_total_stress_energy(
             if(rho_plus_p_shear_ncdm!= 0)ppw->shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm/
               (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           }
-          // printf("a %e ppw->rho_plus_p_theta %e rho_plus_p_theta_ncdm %e\n",a,ppw->rho_plus_p_theta,rho_plus_p_theta_ncdm);
-          // printf("a %e ppw->rho_plus_p_shear %e rho_plus_p_shear_ncdm %e\n",a,ppw->rho_plus_p_shear,rho_plus_p_shear_ncdm);
-          // printf("delta_rho %e rho_delta_ncdm %e\n",ppw->delta_rho,rho_delta_ncdm);
             ppw->delta_rho += rho_delta_ncdm;
             ppw->rho_plus_p_theta += rho_plus_p_theta_ncdm;
             ppw->rho_plus_p_shear += rho_plus_p_shear_ncdm;
             ppw->delta_p += delta_p_ncdm;
             rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
 
-          // printf("rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm] %e\n",rho_delta_ncdm,rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
+          // printf("a %e rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm] %e\n",a,rho_delta_ncdm,rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
         }
       }
     }
@@ -7651,13 +7648,10 @@ int perturb_derivs(double tau,
               // dy[idx] = -qk_div_epsilon*y[idx+1];
 
               dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2]) - epsilon*metric_euler/(3*q*k)*dlnf0_dlnq;
-              // dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2]);
 
               /** - -----> ncdm shear for given momentum bin */
 
               dy[idx+2] = qk_div_epsilon/5.0*(2*s_l[2]*y[idx+1]-3.*s_l[3]*y[idx+3]) -s_l[2]*metric_shear*2./15.*dlnf0_dlnq;
-              // dy[idx+2] = qk_div_epsilon/5.0*(2*s_l[2]*y[idx+1]-3.*s_l[3]*y[idx+3]);
-//
               /** - -----> ncdm l>3 for given momentum bin */
 
               for(l=3; l<pv->l_max_ncdm[n_ncdm]; l++){

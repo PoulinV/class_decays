@@ -1294,14 +1294,14 @@ int background_ncdm_init(
 			       background_ncdm_distribution,
 			       &pbadist,
 			       pba->error_message),
-		 pba->error_message,
-		 pba->error_message);
+		  pba->error_message,
+		  pba->error_message);
       pba->q_ncdm[k]=realloc(pba->q_ncdm[k],pba->q_size_ncdm[k]*sizeof(double));
       pba->w_ncdm[k]=realloc(pba->w_ncdm[k],pba->q_size_ncdm[k]*sizeof(double));
 
 
       if (pba->background_verbose > 0)
-	printf("ncdm species i=%d sampled with %d points for purpose of perturbation integration\n",
+         printf("ncdm species i=%d sampled with %d points for purpose of perturbation integration\n",
 	       k+1,
 	       pba->q_size_ncdm[k]);
 
@@ -1320,8 +1320,8 @@ int background_ncdm_init(
 			       background_ncdm_distribution,
 			       &pbadist,
 			       pba->error_message),
-		 pba->error_message,
-		 pba->error_message);
+		  pba->error_message,
+		  pba->error_message);
 
 
       pba->q_ncdm_bg[k]=realloc(pba->q_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double));
@@ -1429,7 +1429,7 @@ int background_ncdm_init(
                  pba->error_message,pba->error_message);
       //5 point estimate of the derivative:
       df0dq = (+f0m2-8*f0m1+8*f0p1-f0p2)/12.0/dq;
-      // printf("df0dq[%g] = %g. dlf=%g ?= %g. f0 =%g.\n",q,df0dq,q/f0*df0dq,
+      // printf("pba->q_size_ncdm[k]q %e df0dq = %g. dlf=%g f0 =%g.\n",pba->q_size_ncdm[k],q,df0dq,q/f0*df0dq,f0);
       //Avoid underflow in extreme tail:
       if (fabs(f0)==0.)
         pba->dlnf0_dlnq_ncdm[k][index_q] = -q; /* valid for whatever f0 with exponential tail in exp(-q) */
@@ -2372,7 +2372,7 @@ int background_derivs(
       dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
     if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
       // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm/pba->T_cmb/8.617e-5*1e9; ///pba->T_cmb/8.617e-5*1e9 convert from GeV to dimensionless. Note that n_ncdm does has the same unit as rho_ncdm. 
+      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm/pba->T_cmb/8.617e-5*1e9; ///pba->T_cmb/8.617e-5*1e9 convert from GeV to dimensionless. Note that n_ncdm does has the same unit as rho_ncdm.
     }
   }
 
