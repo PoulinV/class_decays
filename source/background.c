@@ -2325,7 +2325,7 @@ int background_derivs(
   struct background_parameters_and_workspace * pbpaw;
   struct background * pba;
   double * pvecback, a, H, rho_M;
-
+  int n_ncdm;
   pbpaw = parameters_and_workspace;
   pba =  pbpaw->pba;
   pvecback = pbpaw->pvecback;
@@ -2372,7 +2372,9 @@ int background_derivs(
       dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
     if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
       // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_dcdm/pba->T_cmb/8.617e-5*1e9; ///pba->T_cmb/8.617e-5*1e9 convert from GeV to dimensionless. Note that n_ncdm does has the same unit as rho_ncdm.
+      for(n_ncdm = 0; n_ncdm<pba->N_ncdm; n_ncdm++){
+        dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_ncdm[n_ncdm]/(2*_PI_);///pba->T_cmb/8.617e-5*1e9 convert from GeV to dimensionless. Note that n_ncdm does has the same unit as rho_ncdm.
+      }
     }
   }
 
