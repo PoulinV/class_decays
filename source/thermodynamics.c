@@ -255,6 +255,14 @@ int thermodynamics_init(
                         struct thermo * pth
                         ) {
 
+
+
+  /** Preliminary **/
+  /** if decaying_neutrinos, we will loop over the background module to make sure that Omega_Lambda satisfies the closure relation Omega_Lambda = 1- Omega_tot*/
+  if(pba->Gamma_neutrinos > 0 && pba->loop_over_background == _TRUE_){
+    class_call(loop_over_background(pba,ppr),pth->error_message,pth->error_message);
+  }
+
   /** Summary: */
 
   /** - define local variables */
@@ -3762,6 +3770,76 @@ int thermodynamics_tanh(double x,
                         double * result) {
 
   *result = before + (after-before)*(tanh((x-center)/width)+1.)/2.;
+
+  return _SUCCESS_;
+}
+
+
+int loop_over_background(struct background * pba,
+                         struct precision * ppr){
+  double convergence, Omega_tot, Old_Omega_neutrinos;
+  int n_ncdm;
+  convergence = 1;
+  Old_Omega_neutrinos = 0;
+  Omega_tot = 0;
+
+
+  while(convergence > pba->convergence_tol_decaying_neutrinos){
+    if(pba->background_verbose>0)printf("Old Omega_lambda = %e\n", pba->Omega0_lambda);
+    pba->free_input_parameters = _FALSE_;
+
+    //update pba->Omega0_lambda.
+    Omega_tot = 0;
+    Omega_tot += pba->Omega0_g;
+    Omega_tot += pba->Omega0_b;
+    if(pba->has_ur == _TRUE_)  Omega_tot += pba->Omega0_ur;
+    if(pba->has_cdm == _TRUE_)  Omega_tot += pba->Omega0_cdm;
+    if(pba->has_dcdm == _TRUE_)  Omega_tot += pba->Omega0_dcdm;
+    if(pba->has_dr == _TRUE_)  Omega_tot += pba->Omega0_dr;
+    if(pba->has_scf == _TRUE_)  Omega_tot += pba->Omega0_scf;
+    if(pba->has_fld == _TRUE_)  Omega_tot += pba->Omega0_fld;
+    if(pba->has_ncdm == _TRUE_) Omega_tot += pba->Omega0_ncdm_tot;
+    pba->Omega0_lambda = 1. - pba->Omega0_k - Omega_tot;
+    //update Old_Omega_neutrinos;
+    for(n_ncdm = 0;n_ncdm < pba->N_ncdm;n_ncdm ++){
+      if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_) Old_Omega_neutrinos = pba->Omega0_ncdm[n_ncdm];
+    }
+    //free the background structure
+    if (background_free(pba) == _FAILURE_) {
+      printf("\n\nError in background_free when iterating \n=>%s\n",pba->error_message);
+      return _FAILURE_;
+    }
+    //re-calculate the background structure
+    if (background_init(ppr,pba) == _FAILURE_) {
+      printf("\n\nError in background_init when iterating \n=>%s\n",pba->error_message);
+      return _FAILURE_;
+    }
+
+
+
+    for(n_ncdm = 0;n_ncdm < pba->N_ncdm;n_ncdm ++){
+      if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_){
+        printf("pba->Omega0_ncdm[n_ncdm] %e Old_Omega_neutrinos %e \n",pba->Omega0_ncdm[n_ncdm],Old_Omega_neutrinos);
+        convergence = fabs(pba->Omega0_ncdm[n_ncdm]/Old_Omega_neutrinos-1);
+      }
+    }
+    if(convergence<=pba->convergence_tol_decaying_neutrinos){
+      //store the new pba->Omega0_lambda.
+      Omega_tot = 0;
+      Omega_tot += pba->Omega0_g;
+      Omega_tot += pba->Omega0_b;
+      if(pba->has_ur == _TRUE_)  Omega_tot += pba->Omega0_ur;
+      if(pba->has_cdm == _TRUE_)  Omega_tot += pba->Omega0_cdm;
+      if(pba->has_dcdm == _TRUE_)  Omega_tot += pba->Omega0_dcdm;
+      if(pba->has_dr == _TRUE_)  Omega_tot += pba->Omega0_dr;
+      if(pba->has_scf == _TRUE_)  Omega_tot += pba->Omega0_scf;
+      if(pba->has_fld == _TRUE_)  Omega_tot += pba->Omega0_fld;
+      if(pba->has_ncdm == _TRUE_) Omega_tot += pba->Omega0_ncdm_tot;
+      pba->Omega0_lambda = 1. - pba->Omega0_k - Omega_tot;
+    }
+    if(pba->background_verbose>0)printf("New Omega_lambda = %e, convergence = %e\n", pba->Omega0_lambda, convergence);
+
+  }
 
   return _SUCCESS_;
 }

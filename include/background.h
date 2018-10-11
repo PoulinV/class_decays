@@ -11,7 +11,6 @@
 #include "parser.h"
 
 enum spatial_curvature {flat,open,closed};
-enum background_ncdm_distribution {fermi_dirac,decaying_cdm,decaying_neutrinos};
 /**
  * All background parameters and evolution that other modules need to know.
  *
@@ -122,10 +121,13 @@ struct background
 					     p-s-d is passed through file */
   char * ncdm_psd_files;                /**< list of filenames for tabulated p-s-d */
   /* end of parameters for tabulated ncdm p-s-d */
-  enum background_ncdm_distribution background_ncdm_distribution; /**< list of possible background ncdm distribution */
+  int * background_ncdm_distribution; /**< list of possible background ncdm distribution: 0 = fermi_dirac, 1 = decaying_cdm, 2 = decaying_neutrinos */
   short print_ncdm_distribution;
   int* is_q_initialized_dcdm;	/**< table used to know whether a given momentum bin has been initialised in perts. only relevant for dcdm with massive daugthers. */
 
+  double convergence_tol_decaying_neutrinos;
+  short loop_over_background;
+  short free_input_parameters;
   //@}
 
   /** @name - related parameters */
@@ -448,7 +450,9 @@ extern "C" {
                              int qsize,
                              double M,
                              double factor,
+                             int background_ncdm_distribution,
                              double z,
+                             double t,
                              double * n,
 		                         double * rho,
                              double * p,

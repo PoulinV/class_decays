@@ -598,6 +598,9 @@ extern "C" {
                           double after,
                           double width,
                           double * result);
+                          
+  int loop_over_background(struct background * pba,
+                           struct precision * ppr);
 
 #ifdef __cplusplus
 }

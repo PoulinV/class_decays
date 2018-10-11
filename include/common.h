@@ -48,6 +48,10 @@ typedef char FileName[_FILENAMESIZE_];
 
 #define _QUADRATURE_MAX_BG_ 800 /**< maximum allowed number of abssices in quadrature integral estimation */
 
+#define _fermi_dirac_ 0 /**< integer associated to fermi_dirac distribution for ncdm species */
+#define _massive_daughter_ 1 /**< integer associated to decaying_cdm distribution for the daugther ncdm species */
+#define _decaying_neutrinos_ 2 /**< integer associated to decaying_neutrinos distribution for a decaying ncdm species  */
+
 #define _TOLVAR_ 100. /**< The minimum allowed variation is the machine precision times this number */
 
 #define _HUGE_ 1.e99

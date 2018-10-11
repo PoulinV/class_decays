@@ -269,7 +269,7 @@ int background_functions(
   /* fluid's time-dependent equation of state parameter */
   double w_fld, dw_over_da, integral_fld;
   /* scale factor */
-  double a;
+  double a, t;
   /* scalar field quantities */
   double phi, phi_prime;
 
@@ -358,37 +358,45 @@ int background_functions(
       // }
       /* function returning background ncdm[n_ncdm] quantities (only
          those for which non-NULL pointers are passed) */
-      class_call(background_ncdm_momenta(pba,
-                                         pba->q_ncdm_bg[n_ncdm],
-                                         pba->w_ncdm_bg[n_ncdm],
-                                         pba->q_size_ncdm_bg[n_ncdm],
-                                         pba->M_ncdm[n_ncdm],
-                                         // pba->m_dcdm,
-                                         pba->factor_ncdm[n_ncdm],
-                                         1./a_rel-1.,
-                                         &num_ncdm,
-                                         &rho_ncdm,
-                                         &p_ncdm,
-                                         NULL,
-                                         &pseudo_p_ncdm),
-                 pba->error_message,
-                 pba->error_message);
+      if(isnan(pvecback_B[pba->index_bi_time]) || pvecback_B[pba->index_bi_time] < 0){
+        t = 0;
+      }else{
+        t = pvecback_B[pba->index_bi_time];
+      }
+        class_call(background_ncdm_momenta(pba,
+                                           pba->q_ncdm_bg[n_ncdm],
+                                           pba->w_ncdm_bg[n_ncdm],
+                                           pba->q_size_ncdm_bg[n_ncdm],
+                                           pba->M_ncdm[n_ncdm],
+                                           pba->factor_ncdm[n_ncdm],
+                                           pba->background_ncdm_distribution[n_ncdm],
+                                           1./a_rel-1.,
+                                           t,
+                                           &num_ncdm,
+                                           &rho_ncdm,
+                                           &p_ncdm,
+                                           NULL,
+                                           &pseudo_p_ncdm),
+                   pba->error_message,
+                   pba->error_message);
 
 
-      pvecback[pba->index_bg_n_ncdm1+n_ncdm] = num_ncdm;
-      pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
-      rho_tot += rho_ncdm;
-      pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
-      p_tot += p_ncdm;
-      pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm] = pseudo_p_ncdm;
-      // printf("%e %e %e %e \n", num_ncdm,rho_ncdm,p_ncdm,pseudo_p_ncdm);
+        pvecback[pba->index_bg_n_ncdm1+n_ncdm] = num_ncdm;
+        pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
+        pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
+        pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm] = pseudo_p_ncdm;
+        rho_tot += rho_ncdm;
+        p_tot += p_ncdm;
 
-      /* (3 p_ncdm1) is the "relativistic" contribution to rho_ncdm1 */
-      rho_r += 3.* p_ncdm;
+        /* (3 p_ncdm1) is the "relativistic" contribution to rho_ncdm1 */
+        rho_r += 3.* p_ncdm;
+        /* (rho_ncdm1 - 3 p_ncdm1) is the "non-relativistic" contribution
+           to rho_ncdm1 */
+        rho_m += rho_ncdm - 3.* p_ncdm;
+        // if( 1./a_rel-1.<10000 &&  1./a_rel-1. > 9800) printf("%e %e \n",1./a_rel-1., rho_ncdm - 3.* p_ncdm);
 
-      /* (rho_ncdm1 - 3 p_ncdm1) is the "non-relativistic" contribution
-         to rho_ncdm1 */
-      rho_m += rho_ncdm - 3.* p_ncdm;
+
+
     }
   }
 
@@ -532,7 +540,7 @@ int background_init(
   double Neff;
   double w_fld, dw_over_da, integral_fld;
   int filenum=0;
-
+  pba->free_input_parameters = _TRUE_; //this is set to FALSE only if we loop over background in thermo.c
   /** - in verbose mode, provide some information */
   if (pba->background_verbose > 0) {
     printf("Running CLASS version %s\n",_VERSION_);
@@ -551,7 +559,6 @@ int background_init(
           printf(" -> ncdm species i=%d read from file %s\n",n_ncdm+1,pba->ncdm_psd_files+filenum*_ARGUMENT_LENGTH_MAX_);
           filenum++;
         }
-
         /* call this function to get rho_ncdm */
         background_ncdm_momenta(pba,
                                 pba->q_ncdm_bg[n_ncdm],
@@ -559,7 +566,9 @@ int background_init(
                                 pba->q_size_ncdm_bg[n_ncdm],
                                 0.,
                                 pba->factor_ncdm[n_ncdm],
+                                pba->background_ncdm_distribution[n_ncdm],
                                 0.,
+                                0,
                                 NULL,
                                 &rho_ncdm_rel,
                                 NULL,
@@ -664,6 +673,9 @@ int background_init(
              pba->error_message,
              pba->error_message);
 
+
+
+
   return _SUCCESS_;
 
 }
@@ -687,7 +699,7 @@ int background_free(
   free(pba->background_table);
   free(pba->d2background_dtau2_table);
 
-  err = background_free_input(pba);
+  if(pba->free_input_parameters == _TRUE_) err = background_free_input(pba);
 
   return err;
 }
@@ -722,6 +734,7 @@ int background_free_input(
     }
 
     free(pba->ncdm_quadrature_strategy);
+    free(pba->background_ncdm_distribution);
     free(pba->ncdm_input_q_size);
     free(pba->ncdm_qmax);
     free(pba->q_ncdm);
@@ -927,7 +940,6 @@ int background_indices(
 
   /* -> scale factor */
   class_define_index(pba->index_bi_a,_TRUE_,index_bi,1);
-
   /* -> energy density in DCDM */
   class_define_index(pba->index_bi_rho_dcdm,pba->has_dcdm,index_bi,1);
 
@@ -957,6 +969,12 @@ int background_indices(
   /* -> index for conformal time in vector of variables to integrate */
   class_define_index(pba->index_bi_tau,_TRUE_,index_bi,1);
 
+  // for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm ++){
+    // if(pba->background_ncdm_distribution == _decaying_neutrinos_ || pba->background_ncdm_distribution == _massive_daughter_){
+      /* -> index for ncdm energy density in vector of variables to integrate; note that it is not integrated, however it needs */
+
+    // }
+  // }
   /* -> end of indices in the vector of variables to integrate */
   pba->bi_size = index_bi;
 
@@ -1061,7 +1079,7 @@ int background_ncdm_distribution(
        species.
     */
 
-    if(pba->background_ncdm_distribution == fermi_dirac){
+    if(pba->background_ncdm_distribution[n_ncdm] == _fermi_dirac_){
 
           /**************************************************/
           /*    FERMI-DIRAC INCLUDING CHEMICAL POTENTIALS   */
@@ -1121,7 +1139,7 @@ int background_ncdm_distribution(
         // if(pba->a)pba->print_ncdm_distribution = _FALSE_;
       }
     } /* end of Fermi-Dirac distribution */
-    else if (pba->background_ncdm_distribution == decaying_cdm){
+    else if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
           /*********************************************************/
           /*    Decaying massive particles with massive daughters  */
           /*   To deal with the time dependence, we assume H=HLCDM */
@@ -1162,7 +1180,7 @@ int background_ncdm_distribution(
         if(q==pba->ncdm_qmax[n_ncdm])pba->print_ncdm_distribution = _FALSE_;
       }
     }
-    else if (pba->background_ncdm_distribution == decaying_neutrinos){
+    else if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
           /*********************************************************/
           /*    Decaying massive particles with massive daughters  */
           /*   To deal with the time dependence, we assume H=HLCDM */
@@ -1324,9 +1342,23 @@ int background_ncdm_init(
 		  pba->error_message);
 
 
+
       pba->q_ncdm_bg[k]=realloc(pba->q_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double));
       pba->w_ncdm_bg[k]=realloc(pba->w_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double));
 
+    if(pba->background_ncdm_distribution[k] == _massive_daughter_ || pba->background_ncdm_distribution[k] == _decaying_neutrinos_){
+      //we need to correct w_ncdm because we use a slightly different definition for the description of dcdm perturbations
+      for (index_q=0; index_q<pba->q_size_ncdm[k];index_q++){
+        background_ncdm_distribution(&pbadist,
+                                     pba->q_ncdm[k][index_q],
+                                     &f0);
+        // printf("before pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e\n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
+        if(f0!=0)pba->w_ncdm[k][index_q] /= f0 ;
+        else pba->w_ncdm[k][index_q] = 0;
+        // pba->w_ncdm_bg[k][index_q] *= f0;
+        // printf("after pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e  \n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
+      }
+    }
       /** - in verbose mode, inform user of number of sampled momenta
 	  for background quantities */
       if (pba->background_verbose > 0)
@@ -1371,7 +1403,7 @@ int background_ncdm_init(
     	// pba->q_ncdm_bg[k][index_q] = pba->q_ncdm[k][index_q];
     	// pba->w_ncdm_bg[k][index_q] = pba->w_ncdm[k][index_q];
      // }
-    if(pba->background_ncdm_distribution == decaying_cdm){
+    if(pba->background_ncdm_distribution[k] == _massive_daughter_){
       //we need to correct w_ncdm because we use a slightly different definition for the description of dcdm perturbations
       for (index_q=0; index_q<pba->q_size_ncdm[k];index_q++){
         background_ncdm_distribution(&pbadist,
@@ -1434,7 +1466,7 @@ int background_ncdm_init(
       if (fabs(f0)==0.)
         pba->dlnf0_dlnq_ncdm[k][index_q] = -q; /* valid for whatever f0 with exponential tail in exp(-q) */
       else{
-        if(pba->background_ncdm_distribution == decaying_cdm){
+        if(pba->background_ncdm_distribution[k] == _massive_daughter_ || pba->background_ncdm_distribution[k] == _decaying_neutrinos_){
           pba->dlnf0_dlnq_ncdm[k][index_q] = q*df0dq; //Instead of evolving psi, we directly evolve f0*psi. Hence, the f0 at the denominator cancels out.
         }
         else{
@@ -1445,7 +1477,7 @@ int background_ncdm_init(
 
     pba->factor_ncdm[k]=pba->deg_ncdm[k]*4*_PI_*pow(pba->T_cmb*pba->T_ncdm[k]*_k_B_,4)*8*_PI_*_G_
       /3./pow(_h_P_/2./_PI_,3)/pow(_c_,7)*_Mpc_over_m_*_Mpc_over_m_;
-
+    // printf("fac %e %e %e\n",pba->factor_ncdm[k],pba->deg_ncdm[k],pba->T_ncdm[k]);
     /* If allocated, deallocate interpolation table:  */
     if ((pba->got_files!=NULL)&&(pba->got_files[k]==_TRUE_)){
       free(pbadist.q);
@@ -1486,7 +1518,9 @@ int background_ncdm_momenta(
                             int qsize,
                             double M,
                             double factor,
+                            int background_ncdm_distribution,
                             double z,
+                            double t,
                             double * n,
                             double * rho, // density
                             double * p,   // pressure
@@ -1503,7 +1537,7 @@ int background_ncdm_momenta(
   double tauq, Hq;
   int last_index;
   double * pvecback;
-  double Omega_m, Omega_r, t, H;
+  // double Omega_m, Omega_r, t, H;
   /** Summary: */
 
   /** - rescale normalization at given redshift */
@@ -1519,7 +1553,7 @@ int background_ncdm_momenta(
   /** - loop over momenta */
   for (index_q=0; index_q<qsize; index_q++) {
 
-    if(pba->background_ncdm_distribution == decaying_cdm){
+    if(background_ncdm_distribution == _massive_daughter_){
       // PDmax = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // convert to GeV
       PDmax = pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2; // in GeV
       zq = 1/(qvec[index_q]*pba->T_cmb*8.617e-5*1e-9/PDmax)-1; // in CLASS, q is defined as p/T0. We therefore multiply by T0*8.617e-5*1e-9 to get a result in GeV.
@@ -1530,7 +1564,7 @@ int background_ncdm_momenta(
 
     if(z>zq){
         /** a heavyside function kills the integral; this condition is never satisfied if
-        pba->background_ncdm_distribution is different from decaying_cdm */
+        pba->background_ncdm_distribution is different from _massive_daughter_ */
          if (n!=NULL) *n += 0;
          if (rho!=NULL) *rho += 0;
          if (p!=NULL) *p += 0;
@@ -1550,31 +1584,42 @@ int background_ncdm_momenta(
       if (p!=NULL) *p += q2*q2/3./epsilon*wvec[index_q];
       if (drho_dM!=NULL) *drho_dM += q2*M/(1.+z)/(1.+z)/epsilon*wvec[index_q];
       if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q];
+
+      // printf("%e %e %e\n",q2,wvec[index_q],factor2);
     }
 
   }
 
   /** - adjust normalization */
 
-  if(pba->background_ncdm_distribution == decaying_cdm){
+  if(background_ncdm_distribution == _massive_daughter_){
     factor2 *= 2;
     factor2 *= 5;//Where does this come from?!
   }
-  else if(pba->background_ncdm_distribution == decaying_neutrinos){
-    Omega_m = pba->Omega0_cdm+pba->Omega0_b+pba->Omega_ini_dcdm;
-    Omega_r = pba->Omega0_g;
-    if (pba->Omega0_ur > 0.0)
-      Omega_r += pba->Omega0_ur;
-    H = pba->H0*sqrt(Omega_m * pow((1+z),3)+ Omega_r * pow((1+z),4) + pba->Omega0_lambda);
-    t = 2*(Omega_m*pow(Omega_r+Omega_m*(1/(1+z)),0.5)+2*pow(Omega_r,1.5)/(1/(1+z))-2*Omega_r*pow((Omega_r/(1/(1+z))+Omega_m)/(1/(1+z)),0.5))/(3*pow(Omega_m,2)/(1/(1+z))*pba->H0);
-    if(t<0)t=0;
+  else if(background_ncdm_distribution == _decaying_neutrinos_){
+    /* deprecated: old way to calculate t
+    // Omega_m = pba->Omega0_cdm+pba->Omega0_b+pba->Omega_ini_dcdm;
+    // Omega_r = pba->Omega0_g;
+    // if (pba->Omega0_ur > 0.0)
+    //   Omega_r += pba->Omega0_ur;
+    // H = pba->H0*sqrt(Omega_m * pow((1+z),3)+ Omega_r * pow((1+z),4) + pba->Omega0_lambda);
+    // t = 2*(Omega_m*pow(Omega_r+Omega_m*(1/(1+z)),0.5)+2*pow(Omega_r,1.5)/(1/(1+z))-2*Omega_r*pow((Omega_r/(1/(1+z))+Omega_m)/(1/(1+z)),0.5))/(3*pow(Omega_m,2)/(1/(1+z))*pba->H0);
+    // if(t<0)t=0;
+    */
+    // printf("t %e\n", t);
     factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t);
     // factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon)*t);
-    // printf("exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t) %e epsilon %e pba->Gamma_neutrinos %e M %e pba->M_dcdm %e t %e\n" ,exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t),epsilon,pba->Gamma_neutrinos,M,pba->M_dcdm,t);
+    // printf("factor2 %e exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t) %e epsilon %e pba->Gamma_neutrinos %e M %e t %e\n" ,factor2,exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t),epsilon,pba->Gamma_neutrinos,M,t);
     // printf("here 2\n");
   }
 
-  if (n!=NULL) *n *= factor2/(1.+z);
+  // if (n!=NULL) *n *= factor2/(1.+z);
+  // if (n!=NULL) *n *= factor2/(1.+z)/(pba->T_cmb*0.71*_k_B_/_eV_);
+  // if (n!=NULL) *n *= factor2/(1.+z)/(pba->T_cmb*0.71*_k_B_/_eV_)/1.56e+29/2/_PI_;
+  if (n!=NULL) *n *= factor2/(1.+z)/(pba->T_cmb*0.71*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_); //one extra factor of 2pi is weird...
+  // pba->factor_ncdm[k]=pba->deg_ncdm[k]*4*_PI_*pow(pba->T_cmb*pba->T_ncdm[k]*_k_B_,4)*8*_PI_*_G_
+  //   /3./pow(_h_P_/2./_PI_,3)/pow(_c_,7)*_Mpc_over_m_*_Mpc_over_m_; //(Js4/m7 = (kg*m2/s2)*s4/m7 = kg*s2/m5)* m^3/Kg/s^2 = 1/m2
+  // printf("%e %e\n",1/(_k_B_/_h_P_/2./_PI_*_c_/_Mpc_over_m_),1.56e29/2/_PI_);
   if (rho!=NULL) *rho *= factor2;
   if (p!=NULL) *p *= factor2;
   if (drho_dM!=NULL) *drho_dM *= factor2;
@@ -1610,6 +1655,8 @@ int background_ncdm_M_from_Omega(
                           pba->q_size_ncdm_bg[n_ncdm],
                           M,
                           pba->factor_ncdm[n_ncdm],
+                          pba->background_ncdm_distribution[n_ncdm],
+                          0.,
                           0.,
                           &n,
                           &rho,
@@ -1633,6 +1680,8 @@ int background_ncdm_M_from_Omega(
                             pba->q_size_ncdm_bg[n_ncdm],
                             M,
                             pba->factor_ncdm[n_ncdm],
+                            pba->background_ncdm_distribution[n_ncdm],
+                            0.,
                             0.,
                             NULL,
                             &rho,
@@ -1686,7 +1735,7 @@ int background_solve(
   /* final conformal time */
   double tau_end;
   /* an index running over bi indices */
-  int i;
+  int i, n;
   /* vector of quantities to be integrated */
   double * pvecback_integration;
   /* vector of all background quantities */
@@ -1695,6 +1744,9 @@ int background_solve(
   int last_index=0;
   /* comoving radius coordinate in Mpc (equal to conformal distance in flat case) */
   double comoving_radius=0.;
+
+  /*ncdm variables */
+  double number_density_ncdm, rho_ncdm, p_ncdm, pseudo_p_ncdm;
 
   bpaw.pba = pba;
   class_alloc(pvecback,pba->bg_size*sizeof(double),pba->error_message);
@@ -1827,6 +1879,7 @@ int background_solve(
   }
 
 
+
   /** - allocate background tables */
   class_alloc(pba->tau_table,pba->bt_size * sizeof(double),pba->error_message);
 
@@ -1921,6 +1974,17 @@ int background_solve(
                -pba->background_table[pba->index_bg_rho_g])
     /(7./8.*pow(4./11.,4./3.)*pba->background_table[pba->index_bg_rho_g]);
 
+  if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
+    pba->Omega0_ncdm_tot = 0;
+    for(n = 0; n < pba->N_ncdm; n++){
+        pba->Omega0_ncdm[n] = pvecback[pba->index_bg_rho_ncdm1+n]/pba->H0/pba->H0;
+        pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];
+        printf("pba->Omega0_ncdm[n]  %e\n", pba->Omega0_ncdm[n] );
+    }
+  }
+
+
+
   /** - done */
   if (pba->background_verbose > 0) {
     printf(" -> age = %f Gyr\n",pba->age);
@@ -1989,7 +2053,7 @@ int background_initial_conditions(
   double scf_lambda;
   double rho_fld_today;
   double w_fld,dw_over_da_fld,integral_fld;
-  double rho_dcdm;
+  double number_density_ncdm,rho_dcdm,pseudo_p_ncdm;
   /** - fix initial value of \f$ a \f$ */
   a = ppr->a_ini_over_a_today_default * pba->a_today;
 
@@ -2004,7 +2068,6 @@ int background_initial_conditions(
 
       is_early_enough = _TRUE_;
       rho_ncdm_rel_tot = 0.;
-
       for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
         // if(pba->m_dcdm > 0){
         //   pba->M_ncdm[n_ncdm] = pba->m_dcdm * (_c_ * _c_)/_k_B_;
@@ -2016,26 +2079,34 @@ int background_initial_conditions(
   					   pba->q_size_ncdm_bg[n_ncdm],
   					   pba->M_ncdm[n_ncdm],
   					   pba->factor_ncdm[n_ncdm],
+  					   pba->background_ncdm_distribution[n_ncdm],
   					   pba->a_today/a-1.0,
-  					   NULL,
+               0,
+  					   &number_density_ncdm,
   					   &rho_ncdm,
   					   &p_ncdm,
   					   NULL,
-  					   NULL),
+  					   &pseudo_p_ncdm),
                      pba->error_message,
                      pba->error_message);
 
-	if (fabs(p_ncdm/rho_ncdm-1./3.)>ppr->tol_ncdm_initial_w)
-	  is_early_enough = _FALSE_;
+	if (fabs(p_ncdm/rho_ncdm-1./3.)>ppr->tol_ncdm_initial_w)is_early_enough = _FALSE_;
       }
-      if (is_early_enough == _TRUE_)
-	break;
+      if (is_early_enough == _TRUE_){
+        for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
+        rho_ncdm_rel_tot += 3.*p_ncdm;
+        }
+        break;
+
+      }
       else
 	a *= _SCALE_BACK_;
     }
     class_test(counter == _MAX_IT_,
 	       pba->error_message,
 	       "Search for initial scale factor a such that all ncdm species are relativistic failed.");
+
+
   }
 
   pvecback_integration[pba->index_bi_a] = a;
@@ -2134,11 +2205,11 @@ int background_initial_conditions(
                pvecback_integration[pba->index_bi_phi_scf]);
   }
 
+
   /* Infer pvecback from pvecback_integration */
   class_call(background_functions(pba, pvecback_integration, pba->normal_info, pvecback),
 	     pba->error_message,
 	     pba->error_message);
-
   /* Just checking that our initial time indeed is deep enough in the radiation
      dominated regime */
   class_test(fabs(pvecback[pba->index_bg_Omega_r]-1.) > ppr->tol_initial_Omega_r,
@@ -2373,7 +2444,10 @@ int background_derivs(
     if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
       // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
       for(n_ncdm = 0; n_ncdm<pba->N_ncdm; n_ncdm++){
-        dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1]*pba->M_ncdm[n_ncdm]/(2*_PI_);///pba->T_cmb/8.617e-5*1e9 convert from GeV to dimensionless. Note that n_ncdm does has the same unit as rho_ncdm.
+        if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+          dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_/2/_PI_;///_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ convert from eV to 1/Mpc. One extra factor of 1/2pi is weird.
+          // printf("pvecback[pba->index_bg_rho_ncdm1] %e pvecback[pba->index_bg_n_ncdm1]*pba->M_ncdm[n_ncdm] %e _eV_/_h_P_/2./_PI_*_c_/_Mpc_over_m_ %e\n",pvecback[pba->index_bg_rho_ncdm1+n_ncdm],pvecback[pba->index_bg_n_ncdm1]*pba->m_ncdm_in_eV[n_ncdm]*1.56e+29,_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
+        }
       }
     }
   }
