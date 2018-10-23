@@ -1587,6 +1587,22 @@ int background_ncdm_momenta(
 
       // printf("%e %e %e\n",q2,wvec[index_q],factor2);
     }
+    if(background_ncdm_distribution == _decaying_neutrinos_){
+      /* deprecated: old way to calculate t
+      // Omega_m = pba->Omega0_cdm+pba->Omega0_b+pba->Omega_ini_dcdm;
+      // Omega_r = pba->Omega0_g;
+      // if (pba->Omega0_ur > 0.0)
+      //   Omega_r += pba->Omega0_ur;
+      // H = pba->H0*sqrt(Omega_m * pow((1+z),3)+ Omega_r * pow((1+z),4) + pba->Omega0_lambda);
+      // t = 2*(Omega_m*pow(Omega_r+Omega_m*(1/(1+z)),0.5)+2*pow(Omega_r,1.5)/(1/(1+z))-2*Omega_r*pow((Omega_r/(1/(1+z))+Omega_m)/(1/(1+z)),0.5))/(3*pow(Omega_m,2)/(1/(1+z))*pba->H0);
+      // if(t<0)t=0;
+      */
+      // printf("t %e\n", t);
+      factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t);
+      // factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon)*t);
+      // printf("factor2 %e exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t) %e epsilon %e pba->Gamma_neutrinos %e M %e t %e\n" ,factor2,exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t),epsilon,pba->Gamma_neutrinos,M,t);
+      // printf("here 2\n");
+    }
 
   }
 
@@ -1595,22 +1611,6 @@ int background_ncdm_momenta(
   if(background_ncdm_distribution == _massive_daughter_){
     factor2 *= 2;
     factor2 *= 5;//Where does this come from?!
-  }
-  else if(background_ncdm_distribution == _decaying_neutrinos_){
-    /* deprecated: old way to calculate t
-    // Omega_m = pba->Omega0_cdm+pba->Omega0_b+pba->Omega_ini_dcdm;
-    // Omega_r = pba->Omega0_g;
-    // if (pba->Omega0_ur > 0.0)
-    //   Omega_r += pba->Omega0_ur;
-    // H = pba->H0*sqrt(Omega_m * pow((1+z),3)+ Omega_r * pow((1+z),4) + pba->Omega0_lambda);
-    // t = 2*(Omega_m*pow(Omega_r+Omega_m*(1/(1+z)),0.5)+2*pow(Omega_r,1.5)/(1/(1+z))-2*Omega_r*pow((Omega_r/(1/(1+z))+Omega_m)/(1/(1+z)),0.5))/(3*pow(Omega_m,2)/(1/(1+z))*pba->H0);
-    // if(t<0)t=0;
-    */
-    // printf("t %e\n", t);
-    factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t);
-    // factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon)*t);
-    // printf("factor2 %e exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t) %e epsilon %e pba->Gamma_neutrinos %e M %e t %e\n" ,factor2,exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t),epsilon,pba->Gamma_neutrinos,M,t);
-    // printf("here 2\n");
   }
 
   // if (n!=NULL) *n *= factor2/(1.+z);
