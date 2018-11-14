@@ -724,13 +724,8 @@ int background_free_input(
 
       free(pba->w_ncdm[k]);
 
-      // free(pba->q_ncdm_bg[k]);
-      // printf("4 ");
-
-      // free(pba->w_ncdm_bg[k]);
-      // printf("5 ");
-
       free(pba->dlnf0_dlnq_ncdm[k]);
+      free(pba->f0[k]);
     }
 
     free(pba->ncdm_quadrature_strategy);
@@ -742,6 +737,7 @@ int background_free_input(
     free(pba->q_ncdm_bg);
     free(pba->w_ncdm_bg);
     free(pba->dlnf0_dlnq_ncdm);
+    free(pba->f0);
     free(pba->q_size_ncdm);
     free(pba->q_size_ncdm_bg);
     free(pba->M_ncdm);
@@ -1250,6 +1246,7 @@ int background_ncdm_init(
   class_alloc(pba->q_ncdm_bg, sizeof(double*)*pba->N_ncdm,pba->error_message);
   class_alloc(pba->w_ncdm_bg, sizeof(double*)*pba->N_ncdm,pba->error_message);
   class_alloc(pba->dlnf0_dlnq_ncdm, sizeof(double*)*pba->N_ncdm,pba->error_message);
+  class_alloc(pba->f0, sizeof(double*)*pba->N_ncdm,pba->error_message);
 
   /* Allocate pointers: */
   class_alloc(pba->q_size_ncdm,sizeof(int)*pba->N_ncdm,pba->error_message);
@@ -1428,6 +1425,10 @@ int background_ncdm_init(
                 pba->q_size_ncdm[k]*sizeof(double),
                 pba->error_message);
 
+    class_alloc(pba->f0[k],
+                pba->q_size_ncdm[k]*sizeof(double),
+                pba->error_message);
+
 
     for (index_q=0; index_q<pba->q_size_ncdm[k]; index_q++) {
       q = pba->q_ncdm[k][index_q];
@@ -1472,6 +1473,7 @@ int background_ncdm_init(
         else{
           pba->dlnf0_dlnq_ncdm[k][index_q] = q/f0*df0dq;
         }
+        pba->f0[k][index_q] = f0; //We also store f0, only useful in the decaying neutrino case;
       }
     }
 

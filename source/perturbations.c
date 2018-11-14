@@ -5559,13 +5559,13 @@ int perturb_total_stress_energy(
               // printf("aq %e q2 %e  epsilon %e pba->w_ncdm[n_ncdm][index_q] %e y[idx] %e \n", aq, q2 ,  epsilon , pba->w_ncdm[n_ncdm][index_q] , y[idx]);
             }
             else if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-              t = ppw->pvecback[pba->index_bg_time];
-              exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+              // t = ppw->pvecback[pba->index_bg_time];
+              // exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
               // if(exp_factor<1)printf("exp_factor %e t %e\n",exp_factor,t);
-              rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx]*exp_factor;
-              rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1]*exp_factor;
-              rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2]*exp_factor;
-              delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx]*exp_factor;
+              rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+              rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
+              rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
+              delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
             }
             else{
               rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
@@ -6941,6 +6941,7 @@ int perturb_derivs(double tau,
   /* for use with non-cold dark matter (ncdm): */
   int index_q,n_ncdm,idx;
   double q,epsilon,dlnf0_dlnq,qk_div_epsilon;
+  double t, exp_factor;
   double rho_ncdm_bg,p_ncdm_bg,pseudo_p_ncdm,w_ncdm,ca2_ncdm,ceff2_ncdm=0.,cvis2_ncdm=0.,rho_dcdm,n_dcdm,FD_ncdm;
   double _eV_to_invMpc_ = 2.4688e+28, aq,PDmax;
   /* for use with curvature */
@@ -7593,10 +7594,18 @@ int perturb_derivs(double tau,
 
             /** - -----> define intermediate quantities */
 
-            dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
             q = pba->q_ncdm[n_ncdm][index_q];
             epsilon = sqrt(q*q+a2*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
             qk_div_epsilon = k*q/epsilon;
+            if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+              t = ppw->pvecback[pba->index_bg_time];
+              exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+              dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
+              +exp_factor*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
+            }
+            else {
+              dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
+            }
             // printf("index %d a %e aq %e\n", index_q, a,aq);
 
             // /** - -----> ncdm density for given momentum bin */
@@ -7660,6 +7669,8 @@ int perturb_derivs(double tau,
 
             }
             else if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+              t = ppw->pvecback[pba->index_bg_time];
+              exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
               // M = pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;
               dy[idx] = -qk_div_epsilon*y[idx+1]+metric_continuity*dlnf0_dlnq/3.- a*a*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/epsilon*y[idx];
               /** - -----> ncdm velocity for given momentum bin */
