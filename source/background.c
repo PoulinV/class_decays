@@ -358,11 +358,19 @@ int background_functions(
       // }
       /* function returning background ncdm[n_ncdm] quantities (only
          those for which non-NULL pointers are passed) */
-      if(isnan(pvecback_B[pba->index_bi_time]) || pvecback_B[pba->index_bi_time] < 0){
-        t = 0;
-      }else{
-        t = pvecback_B[pba->index_bi_time];
-      }
+     if(a ==  1e-14){
+       t = 0;
+     }
+     else{
+       if(isnan(pvecback_B[pba->index_bi_time]) || pvecback_B[pba->index_bi_time] < 0 ){
+         t = 0;
+       }
+       else{
+         t = pvecback_B[pba->index_bi_time];
+       }
+     }
+
+      // printf("t %e\n", t/_Gyr_over_Mpc_);
         class_call(background_ncdm_momenta(pba,
                                            pba->q_ncdm_bg[n_ncdm],
                                            pba->w_ncdm_bg[n_ncdm],
@@ -887,6 +895,10 @@ int background_indices(
 
   /* - put here additional ingredients that you want to appear in the
      normal vector */
+
+   /* -> proper time (for age of the Universe) */
+   class_define_index(pba->index_bg_time,_TRUE_,index_bg,1);
+
   /*    */
   /*    */
 
@@ -909,9 +921,6 @@ int background_indices(
 
   /* -> luminosity distance */
   class_define_index(pba->index_bg_lum_distance,_TRUE_,index_bg,1);
-
-  /* -> proper time (for age of the Universe) */
-  class_define_index(pba->index_bg_time,_TRUE_,index_bg,1);
 
   /* -> conformal sound horizon */
   class_define_index(pba->index_bg_rs,_TRUE_,index_bg,1);
@@ -1350,7 +1359,7 @@ int background_ncdm_init(
                                      pba->q_ncdm[k][index_q],
                                      &f0);
         // printf("before pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e\n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
-        if(f0!=0)pba->w_ncdm[k][index_q] /= f0 ;
+        if(f0!=0)pba->w_ncdm[k][index_q] /= f0;
         else pba->w_ncdm[k][index_q] = 0;
         // pba->w_ncdm_bg[k][index_q] *= f0;
         // printf("after pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e  \n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
@@ -1538,6 +1547,7 @@ int background_ncdm_momenta(
   double zq = 1e100;
   double tauq, Hq;
   int last_index;
+  double exp_factor;
   double * pvecback;
   // double Omega_m, Omega_r, t, H;
   /** Summary: */
@@ -1581,31 +1591,25 @@ int background_ncdm_momenta(
       epsilon = sqrt(q2+M*M/(1.+z)/(1.+z));
 
       /* integrand of the various quantities */
-      if (n!=NULL) *n += q2*wvec[index_q];
-      if (rho!=NULL) *rho += q2*epsilon*wvec[index_q];
-      if (p!=NULL) *p += q2*q2/3./epsilon*wvec[index_q];
-      if (drho_dM!=NULL) *drho_dM += q2*M/(1.+z)/(1.+z)/epsilon*wvec[index_q];
-      if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q];
+      if(background_ncdm_distribution == _decaying_neutrinos_){
+        exp_factor = exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t);
+        if (n!=NULL) *n += q2*wvec[index_q]*exp_factor;
+        if (rho!=NULL) *rho += q2*epsilon*wvec[index_q]*exp_factor;
+        if (p!=NULL) *p += q2*q2/3./epsilon*wvec[index_q]*exp_factor;
+        if (drho_dM!=NULL) *drho_dM += q2*M/(1.+z)/(1.+z)/epsilon*wvec[index_q]*exp_factor;
+        if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q]*exp_factor;
+      }
+      else{
+        if (n!=NULL) *n += q2*wvec[index_q];
+        if (rho!=NULL) *rho += q2*epsilon*wvec[index_q];
+        if (p!=NULL) *p += q2*q2/3./epsilon*wvec[index_q];
+        if (drho_dM!=NULL) *drho_dM += q2*M/(1.+z)/(1.+z)/epsilon*wvec[index_q];
+        if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q];
+      }
+
 
       // printf("%e %e %e\n",q2,wvec[index_q],factor2);
     }
-    if(background_ncdm_distribution == _decaying_neutrinos_){
-      /* deprecated: old way to calculate t
-      // Omega_m = pba->Omega0_cdm+pba->Omega0_b+pba->Omega_ini_dcdm;
-      // Omega_r = pba->Omega0_g;
-      // if (pba->Omega0_ur > 0.0)
-      //   Omega_r += pba->Omega0_ur;
-      // H = pba->H0*sqrt(Omega_m * pow((1+z),3)+ Omega_r * pow((1+z),4) + pba->Omega0_lambda);
-      // t = 2*(Omega_m*pow(Omega_r+Omega_m*(1/(1+z)),0.5)+2*pow(Omega_r,1.5)/(1/(1+z))-2*Omega_r*pow((Omega_r/(1/(1+z))+Omega_m)/(1/(1+z)),0.5))/(3*pow(Omega_m,2)/(1/(1+z))*pba->H0);
-      // if(t<0)t=0;
-      */
-      // printf("t %e\n", t);
-      factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t);
-      // factor2 *= exp(-pba->Gamma_neutrinos*M/(epsilon)*t);
-      // printf("factor2 %e exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t) %e epsilon %e pba->Gamma_neutrinos %e M %e t %e\n" ,factor2,exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t),epsilon,pba->Gamma_neutrinos,M,t);
-      // printf("here 2\n");
-    }
-
   }
 
   /** - adjust normalization */

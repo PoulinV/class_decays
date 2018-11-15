@@ -3394,6 +3394,7 @@ int thermodynamics_derivs_with_recfast(
   pvecback = ptpaw->pvecback;
 
   x_H = y[0];
+  // printf("x_H %e\n",x_H);
   x_He = y[1];
   x = x_H + preco->fHe * x_He;
   Tmat = y[2];
