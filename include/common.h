@@ -51,7 +51,8 @@ typedef char FileName[_FILENAMESIZE_];
 #define _fermi_dirac_ 0 /**< integer associated to fermi_dirac distribution for ncdm species */
 #define _massive_daughter_ 1 /**< integer associated to decaying_cdm distribution for the daugther ncdm species */
 #define _decaying_neutrinos_ 2 /**< integer associated to decaying_neutrinos distribution for a decaying ncdm species  */
-
+#define _Gyr_over_Mpc_ 3.06601394e2 /**< conversion factor from megaparsecs to gigayears
+				         (c=1 units, Julian years of 365.25 days) */
 #define _TOLVAR_ 100. /**< The minimum allowed variation is the machine precision times this number */
 
 #define _HUGE_ 1.e99
