@@ -4078,7 +4078,7 @@ int perturb_initial_conditions(struct precision * ppr,
   /** for the decaying DM with massive daugthers */
   double * pvecback;
   int first_index_back;
-
+  double exp_factor, dlnf0_dlnq, t;
   /** --> For scalars */
 
   if (_scalars_) {
@@ -4099,7 +4099,7 @@ int perturb_initial_conditions(struct precision * ppr,
     a = ppw->pvecback[pba->index_bg_a];
 
     a_prime_over_a = ppw->pvecback[pba->index_bg_H]*a;
-
+    // printf("a %e\n", a);
     /* 8piG/3 rho_r(t_i) */
     rho_r = ppw->pvecback[pba->index_bg_rho_g];
 
@@ -4140,7 +4140,6 @@ int perturb_initial_conditions(struct precision * ppr,
 
     /* f_nu = Omega_nu(t_i) / Omega_r(t_i) */
     fracnu = rho_nu/rho_r;
-
     /* f_g = Omega_g(t_i) / Omega_r(t_i) */
     fracg = ppw->pvecback[pba->index_bg_rho_g]/rho_r;
 
@@ -4152,6 +4151,7 @@ int perturb_initial_conditions(struct precision * ppr,
 
     /* Omega_m(t_i) / Omega_r(t_i) */
     rho_m_over_rho_r = rho_m/rho_r;
+    // printf("fracnu %e fracg %e fracb %e fraccdm %e\n", rho_nu,rho_r,ppw->pvecback[pba->index_bg_rho_b],rho_m);
 
     /* omega = Omega_m(t_i) a(t_i) H(t_i) / sqrt(Omega_r(t_i))
        = Omega_m(t_0) a(t_0) H(t_0) / sqrt(Omega_r(t_0)) assuming rho_m in a-3 and rho_r in a^-4
@@ -4198,7 +4198,7 @@ int perturb_initial_conditions(struct precision * ppr,
       /* photon density */
       ppw->pv->y[ppw->pv->index_pt_delta_g] = - ktau_two/3. * (1.-om*tau/5.)
         * ppr->curvature_ini * s2_squared;
-
+     // printf("%e\n", ppw->pv->y[ppw->pv->index_pt_delta_g]);
       /* photon velocity */
       ppw->pv->y[ppw->pv->index_pt_theta_g] = - k*ktau_three/36. * (1.-3.*(1.+5.*fracb-fracnu)/20./(1.-fracnu)*om*tau)
         * ppr->curvature_ini * s2_squared;
@@ -4209,6 +4209,7 @@ int perturb_initial_conditions(struct precision * ppr,
 
       if (pba->has_cdm == _TRUE_) {
         ppw->pv->y[ppw->pv->index_pt_delta_cdm] = 3./4.*ppw->pv->y[ppw->pv->index_pt_delta_g]; /* cdm density */
+        // printf("ppw->pv->y[ppw->pv->index_pt_delta_cdm] %e\n", ppw->pv->y[ppw->pv->index_pt_delta_cdm]);
         /* cdm velocity vanishes in the synchronous gauge */
       }
 
@@ -4491,10 +4492,12 @@ int perturb_initial_conditions(struct precision * ppr,
 
         if (pba->has_dr == _TRUE_ && pba->has_dcdm == _TRUE_)
           delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_dcdm*ppw->pvecback[pba->index_bg_rho_dcdm]/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
-        else if(pba->has_dr == _TRUE_ && pba->Gamma_neutrinos > 0)
-        for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
-          if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_) delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
+        else if(pba->has_dr == _TRUE_ && pba->Gamma_neutrinos > 0){
+          for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
+            if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_) delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
+          }
         }
+
 
       }
 
@@ -4559,14 +4562,23 @@ int perturb_initial_conditions(struct precision * ppr,
           }
           else{
             epsilon = sqrt(q*q+a*a*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
+            t = ppw->pvecback[pba->index_bg_time];
+            if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+              exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+              dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
+              +exp_factor*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
+              // printf("1+z %e t %e pba->Gamma_neutrinos %e exp_factor %e\n",1/a,t/_Gyr_over_Mpc_,pba->Gamma_neutrinos,exp_factor);
+            }
+            else {
+              dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
+            }
+            ppw->pv->y[idx] = -0.25 * delta_ur * dlnf0_dlnq;
 
-            ppw->pv->y[idx] = -0.25 * delta_ur * pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
+            ppw->pv->y[idx+1] =  -epsilon/3./q/k*theta_ur* dlnf0_dlnq;
 
-            ppw->pv->y[idx+1] =  -epsilon/3./q/k*theta_ur* pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
+            ppw->pv->y[idx+2] = -0.5 * shear_ur * dlnf0_dlnq;
 
-            ppw->pv->y[idx+2] = -0.5 * shear_ur * pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
-
-            ppw->pv->y[idx+3] = -0.25 * l3_ur * pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
+            ppw->pv->y[idx+3] = -0.25 * l3_ur * dlnf0_dlnq;
 
           }
 
@@ -5562,10 +5574,10 @@ int perturb_total_stress_energy(
               // t = ppw->pvecback[pba->index_bg_time];
               // exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
               // if(exp_factor<1)printf("exp_factor %e t %e\n",exp_factor,t/_Gyr_over_Mpc_);
-              rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx]*exp_factor;
-              rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1]*exp_factor;
-              rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2]*exp_factor;
-              delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx]*exp_factor;
+              rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+              rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
+              rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
+              delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
             }
             else{
               rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
