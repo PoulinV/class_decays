@@ -428,7 +428,7 @@ int perturb_init(
       thread=omp_get_thread_num();
 #endif
 
-      class_call_parallel(perturb_workspace_free(ppt,index_md,pppw[thread]),
+      class_call_parallel(perturb_workspace_free(pba,ppt,index_md,pppw[thread]),
                           ppt->error_message,
                           ppt->error_message);
 
@@ -1882,7 +1882,7 @@ int perturb_workspace_init(
   int index_mt=0;
   int index_ap;
   int l;
-
+  int n_ncdm;
   /** - Compute maximum l_max for any multipole */;
   if (_scalars_) {
     ppw->max_l_max = MAX(ppr->l_max_g, ppr->l_max_pol_g);
@@ -2015,6 +2015,12 @@ int perturb_workspace_init(
       class_alloc(ppw->delta_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->theta_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->shear_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
+      if(pba->Gamma_neutrinos > 0 && pba->has_dr == _TRUE_){
+        class_alloc(ppw->N_ncdm_perts,pba->N_ncdm*sizeof(double),ppt->error_message);
+          for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
+            class_alloc(ppw->N_ncdm_perts[n_ncdm],(ppr->l_max_ncdm+1)*sizeof(double),ppt->error_message);
+          }
+      }
 
     }
 
@@ -2035,11 +2041,13 @@ int perturb_workspace_init(
  */
 
 int perturb_workspace_free (
+                            struct background * pba,
                             struct perturbs * ppt,
                             int index_md,
                             struct perturb_workspace * ppw
                             ) {
 
+  int n_ncdm;
   free(ppw->s_l);
   free(ppw->pvecback);
   free(ppw->pvecthermo);
@@ -2053,6 +2061,12 @@ int perturb_workspace_free (
       free(ppw->delta_ncdm);
       free(ppw->theta_ncdm);
       free(ppw->shear_ncdm);
+      if(pba->Gamma_neutrinos > 0 && pba->has_dr == _TRUE_){
+          for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
+            free(ppw->N_ncdm_perts[n_ncdm]);
+          }
+      free(ppw->N_ncdm_perts);
+      }
     }
   }
 
@@ -5382,6 +5396,7 @@ int perturb_total_stress_energy(
   double c_gamma_k_H_square;
   double Gamma_prime_plus_a_prime_over_a_Gamma, alpha=0., s2sq=1.;
   double exp_factor, t;
+  int l;
   /** - wavenumber and scale factor related quantities */
 
   a = ppw->pvecback[pba->index_bg_a];
@@ -5554,23 +5569,23 @@ int perturb_total_stress_energy(
           factor = pba->factor_ncdm[n_ncdm]*pow(pba->a_today/a,4);
 
           for (index_q=0; index_q < ppw->pv->q_size_ncdm[n_ncdm]; index_q ++) {
-
             q = pba->q_ncdm[n_ncdm][index_q];
             q2 = q*q;
             epsilon = sqrt(q2+pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]*a2);
+
             if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && pba->m_dcdm > 0 && pba->Gamma_dcdm > 0 && pba->has_dcdm == _TRUE_ ){
               PDmax = pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2; // in GeV
               aq = q/PDmax*pba->T_cmb*1e-9*8.617e-5;
               if(a>=aq){
-
-              if(y[idx]!=0) rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
-              if(y[idx+1]!=0) rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
-              if(y[idx+2]!=0) rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
-              if(y[idx]!=0) delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+                if(y[idx]!=0) rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+                if(y[idx+1]!=0) rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
+                if(y[idx+2]!=0) rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
+                if(y[idx]!=0) delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
               }
               // printf("aq %e q2 %e  epsilon %e pba->w_ncdm[n_ncdm][index_q] %e y[idx] %e \n", aq, q2 ,  epsilon , pba->w_ncdm[n_ncdm][index_q] , y[idx]);
             }
             else if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+
               // t = ppw->pvecback[pba->index_bg_time];
               // exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
               // if(exp_factor<1)printf("exp_factor %e t %e\n",exp_factor,t/_Gyr_over_Mpc_);
@@ -5578,6 +5593,21 @@ int perturb_total_stress_energy(
               rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
               rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
               delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+              if(pba->has_dr == _TRUE_){
+                if(index_q==0){
+                  for(l = 0; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
+                    ppw->N_ncdm_perts[n_ncdm][l] = 0;
+                    // printf("a %e %d %e \n",a,l, ppw->N_ncdm_perts[n_ncdm][l]);
+                  }
+                }
+                // printf("init %e \n", ppw->N_ncdm_perts[n_ncdm][l]);
+                //we compute additional variables to be used in the dr Boltzmann hierarchy
+                for(l = 0; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
+                  ppw->N_ncdm_perts[n_ncdm][l] += q2*pba->w_ncdm[n_ncdm][index_q]*y[idx+l]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
+                  // if(pow(ppw->N_ncdm_perts[n_ncdm][l]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_,2)>pow(rho_delta_ncdm*factor,2))printf("a %e %d %e %e \n",a,l, ppw->N_ncdm_perts[n_ncdm][l]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_,rho_delta_ncdm*factor);
+                }
+              }
+
             }
             else{
               rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
@@ -5596,7 +5626,7 @@ int perturb_total_stress_energy(
           rho_plus_p_shear_ncdm *= 2.0/3.0*factor;
           delta_p_ncdm *= factor/3.;
           // printf("a %e  rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e \n",a, rho_delta_ncdm , rho_plus_p_theta_ncdm , rho_plus_p_shear_ncdm , delta_p_ncdm);
-
+          // printf("a %e  rho_delta_ncdm %e Ncdm1 %e %e %e\n",a,rho_delta_ncdm,ppw->N_ncdm_perts[n_ncdm][0],ppw->N_ncdm_perts[n_ncdm][1],ppw->N_ncdm_perts[n_ncdm][2]);
           if ((ppt->has_source_delta_ncdm == _TRUE_) || (ppt->has_source_theta_ncdm == _TRUE_) || (ppt->has_source_delta_m == _TRUE_)) {
             ppw->delta_ncdm[n_ncdm] = 0;
             ppw->theta_ncdm[n_ncdm] = 0;
@@ -6966,7 +6996,7 @@ int perturb_derivs(double tau,
   double s2_squared, ssqrt3;
 
   /* for use with dcdm and dr */
-  double f_dr, fprime_dr, M;
+  double f_dr, fprime_dr, M,a2_M_Gamma;
 
   /** - rename the fields of the input structure (just to avoid heavy notations) */
 
@@ -7371,11 +7401,15 @@ int perturb_derivs(double tau,
         /* contribution due to decaying neutrinos */
         for(n_ncdm = 0; n_ncdm < pba->N_ncdm ; n_ncdm++){
           if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_) {
-            fprime_dr = pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)*pow(a,5)/pow(pba->H0,2);
-            dy[pv->index_pt_F0_dr] +=  fprime_dr*(ppw->delta_ncdm[n_ncdm]+metric_euler/k2);
-            dy[pv->index_pt_F0_dr+1] += fprime_dr/k*ppw->theta_ncdm[n_ncdm];
-            dy[pv->index_pt_F0_dr+2] +=  fprime_dr/k*ppw->shear_ncdm[n_ncdm]/2; //factor 1/2 TBC
-            //more equations to come.
+            a2_M_Gamma =  a*a*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_*pba->Gamma_neutrinos;//*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ converts to eV to Mpc
+            //non relat limit
+            // fprime_dr = pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)*pow(a,5)/pow(pba->H0,2); //the cold dark matter limit
+            // dy[pv->index_pt_F0_dr] +=  fprime_dr*(ppw->delta_ncdm[n_ncdm]+metric_euler/k2);
+            // dy[pv->index_pt_F0_dr+1] += fprime_dr/k*ppw->theta_ncdm[n_ncdm];
+            //relativistic case
+            for (l = 0; l < pv->l_max_ncdm[n_ncdm]; l++) {
+              dy[pv->index_pt_F0_dr+l] +=  a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][l]/pow(pba->H0,2)*pow(a,3); //pow(pba->H0,2)=rho_crit_today in CLASS units.//weird: extra factor of a^3, otherwise does not match the non-relat limit.
+            }
           }
         }
       }
