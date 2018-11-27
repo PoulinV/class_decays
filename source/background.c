@@ -1630,6 +1630,11 @@ int background_ncdm_momenta(
   if (p!=NULL) *p *= factor2;
   if (drho_dM!=NULL) *drho_dM *= factor2;
   if (pseudo_p!=NULL) *pseudo_p *=factor2;
+  // // // //VP: Add securiy to avoid reaching 0
+  if (rho!=NULL) *rho += 1e-25;
+  if (p!=NULL) *p += 1e-25;
+  if (drho_dM!=NULL) *drho_dM += 1e-25;
+  if (pseudo_p!=NULL) *pseudo_p +=1e-25;
   // printf("%e\n", n);
   // printf("z %e rho %e\n",z,*rho);
   return _SUCCESS_;
