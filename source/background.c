@@ -1990,7 +1990,7 @@ int background_solve(
     for(n = 0; n < pba->N_ncdm; n++){
         pba->Omega0_ncdm[n] = pvecback[pba->index_bg_rho_ncdm1+n]/pba->H0/pba->H0;
         pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];
-        printf("pba->Omega0_ncdm[n]  %e\n", pba->Omega0_ncdm[n] );
+        // printf("pba->Omega0_ncdm[n]  %e\n", pba->Omega0_ncdm[n] );
     }
   }
 
