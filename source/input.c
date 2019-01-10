@@ -2810,6 +2810,17 @@ int input_read_parameters(
   class_read_double("ur_fluid_trigger_tau_over_tau_k",ppr->ur_fluid_trigger_tau_over_tau_k);
   class_read_double("ncdm_fluid_trigger_tau_over_tau_k",ppr->ncdm_fluid_trigger_tau_over_tau_k);
 
+
+  /*VP CHECK FOR decaying NCDM */
+  for(n = 0;n<pba->N_ncdm;n++){
+    //if there are decaying warm relics we enforce solving the full set of equation: no streaming/fluid approximation.
+    if(pba->background_ncdm_distribution[n] != _fermi_dirac_){
+      ppr->radiation_streaming_approximation=rsa_none;
+      ppr->ur_fluid_approximation=ufa_none;
+      ppr->ncdm_fluid_approximation=ncdmfa_none;
+    }
+  }
+
   class_test(ppr->ur_fluid_trigger_tau_over_tau_k==ppr->radiation_streaming_trigger_tau_over_tau_k,
              errmsg,
              "please choose different values for precision parameters ur_fluid_trigger_tau_over_tau_k and radiation_streaming_trigger_tau_over_tau_k, in order to avoid switching two approximation schemes at the same time");
@@ -3499,17 +3510,17 @@ int input_default_precision ( struct precision * ppr ) {
   ppr->tol_perturb_integration=1.e-5;
   ppr->perturb_sampling_stepsize=0.10;
 
-  // ppr->radiation_streaming_approximation = rsa_MD_with_reio;
-  ppr->radiation_streaming_approximation = rsa_none;
+  ppr->radiation_streaming_approximation = rsa_MD_with_reio;
+  // ppr->radiation_streaming_approximation = rsa_none;
   ppr->radiation_streaming_trigger_tau_over_tau_k = 45.;
   ppr->radiation_streaming_trigger_tau_c_over_tau = 5.;
 
-  // ppr->ur_fluid_approximation = ufa_CLASS;
-  ppr->ur_fluid_approximation = ufa_none;
+  ppr->ur_fluid_approximation = ufa_CLASS;
+  // ppr->ur_fluid_approximation = ufa_none;
   ppr->ur_fluid_trigger_tau_over_tau_k = 30.;
 
-  // ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
-  ppr->ncdm_fluid_approximation = ncdmfa_none;
+  ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
+  // ppr->ncdm_fluid_approximation = ncdmfa_none;
   ppr->ncdm_fluid_trigger_tau_over_tau_k = 31.;
 
   ppr->neglect_CMB_sources_below_visibility = 1.e-3;

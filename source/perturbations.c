@@ -5782,15 +5782,15 @@ int perturb_total_stress_energy(
 
       /* include any other species non-relativistic today (like ncdm species) */
 
-      // if (pba->has_ncdm == _TRUE_) {
-      //
-      //   for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
-      //
-      //     delta_rho_m += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*ppw->delta_ncdm[n_ncdm];
-      //     rho_m += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
-      //     // printf("a %e ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm] %e\n",a,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]);
-      //   }
-      // }
+      if (pba->has_ncdm == _TRUE_) {
+
+        for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
+
+          delta_rho_m += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*ppw->delta_ncdm[n_ncdm];
+          rho_m += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
+          // printf("a %e ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm] %e\n",a,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]);
+        }
+      }
 
       /* infer delta_m */
 
