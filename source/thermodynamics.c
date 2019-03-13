@@ -3785,7 +3785,7 @@ int loop_over_background(struct background * pba,
   Omega_tot = 0;
 
 
-  while(convergence > pba->convergence_tol_decaying_neutrinos){
+  while(fabs(convergence) > pba->convergence_tol_decaying_neutrinos){
     if(pba->background_verbose>0)printf("Old Omega_lambda = %e\n", pba->Omega0_lambda);
     pba->free_input_parameters = _FALSE_;
 
@@ -3837,6 +3837,7 @@ int loop_over_background(struct background * pba,
       if(pba->has_scf == _TRUE_)  Omega_tot += pba->Omega0_scf;
       if(pba->has_fld == _TRUE_)  Omega_tot += pba->Omega0_fld;
       if(pba->has_ncdm == _TRUE_) Omega_tot += pba->Omega0_ncdm_tot;
+      // printf("Omega0_ncdm_tot %e Omega0_dr %e\n",pba->Omega0_ncdm_tot, pba->Omega0_dr);
       pba->Omega0_lambda = 1. - pba->Omega0_k - Omega_tot;
     }
     if(pba->background_verbose>0)printf("New Omega_lambda = %e, convergence = %e\n", pba->Omega0_lambda, convergence);
