@@ -1037,7 +1037,7 @@ int input_read_parameters(
               pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//ignore for simplicity
             }
             else if(pba->background_ncdm_distribution[n] == _decaying_neutrinos_){
-              // pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
+              pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
               pba->M_ncdm[n] = pba->m_ncdm_in_eV[n]/_k_B_*_eV_/pba->T_ncdm[n]/pba->T_cmb;
               // pba->background_ncdm_distribution[n] = _fermi_dirac_; //the final
               class_call(background_ncdm_momenta(pba,
