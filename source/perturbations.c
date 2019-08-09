@@ -446,7 +446,7 @@ int perturb_init(
   } /* end loop over modes */
 
   free(pppw);
-  if(ppt->dark_radiation_perturbations == _FALSE_ && pba->Gamma_neutrinos > 0 && pba->m_dcdm == 0){
+  if(ppt->dark_radiation_perturbations == _FALSE_ && pba->has_decaying_neutrinos == _TRUE_){
     pba->has_dr = _TRUE_;
   }
   return _SUCCESS_;
@@ -2034,7 +2034,7 @@ int perturb_workspace_init(
       class_alloc(ppw->delta_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->theta_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->shear_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
-      if(pba->Gamma_neutrinos > 0 && pba->has_dr == _TRUE_){
+      if(pba->Gamma_neutrinos[n_ncdm] > 0 && pba->has_dr == _TRUE_){
         class_alloc(ppw->N_ncdm_perts,pba->N_ncdm*sizeof(double),ppt->error_message);
           for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
             class_alloc(ppw->N_ncdm_perts[n_ncdm],(ppr->l_max_ncdm+1)*sizeof(double),ppt->error_message);
@@ -2080,7 +2080,7 @@ int perturb_workspace_free (
       free(ppw->delta_ncdm);
       free(ppw->theta_ncdm);
       free(ppw->shear_ncdm);
-      if(pba->Gamma_neutrinos > 0 && pba->has_dr == _TRUE_){
+      if(pba->Gamma_neutrinos[n_ncdm] > 0 && pba->has_dr == _TRUE_){
           for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
             free(ppw->N_ncdm_perts[n_ncdm]);
           }
@@ -4525,9 +4525,9 @@ int perturb_initial_conditions(struct precision * ppr,
 
         if (pba->has_dr == _TRUE_ && pba->has_dcdm == _TRUE_)
           delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_dcdm*ppw->pvecback[pba->index_bg_rho_dcdm]/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
-        else if(pba->has_dr == _TRUE_ && pba->Gamma_neutrinos > 0){
+        else if(pba->has_dr == _TRUE_ && pba->Gamma_neutrinos[n_ncdm] > 0){
           for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
-            if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_) delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
+            if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_) delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_neutrinos[n_ncdm]*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
           }
         }
 
@@ -4597,10 +4597,10 @@ int perturb_initial_conditions(struct precision * ppr,
             epsilon = sqrt(q*q+a*a*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
             t = ppw->pvecback[pba->index_bg_time];
             if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-              exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
               dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
-              +exp_factor*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
-              // printf("1+z %e t %e pba->Gamma_neutrinos %e exp_factor %e\n",1/a,t/_Gyr_over_Mpc_,pba->Gamma_neutrinos,exp_factor);
+              +exp_factor*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
+              // printf("1+z %e t %e pba->Gamma_neutrinos %e exp_factor %e\n",1/a,t/_Gyr_over_Mpc_,pba->Gamma_neutrinos[n_ncdm],exp_factor);
             }
             else {
               dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
@@ -6769,7 +6769,7 @@ int perturb_print_variables(double tau,
       if (pba->has_dr == _TRUE_) {
         if(pba->has_dcdm == _TRUE_) delta_dr += (-4.*a*H+a*pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]/pvecback[pba->index_bg_rho_dr])*alpha;
         for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm ++){
-          if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_)delta_dr += (-4.*a*H+a*pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/pvecback[pba->index_bg_rho_dr])*alpha;
+          if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_)delta_dr += (-4.*a*H+a*pba->Gamma_neutrinos[n_ncdm]*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/pvecback[pba->index_bg_rho_dr])*alpha;
         }
         theta_dr += k*k*alpha;
 
@@ -7478,11 +7478,11 @@ int perturb_derivs(double tau,
 
 
       }
-      else if(pba->Gamma_neutrinos > 0){
+      else if(pba->has_decaying_neutrinos == _TRUE_){
         /* contribution due to decaying neutrinos */
         for(n_ncdm = 0; n_ncdm < pba->N_ncdm ; n_ncdm++){
           if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_) {
-            a2_M_Gamma =  a*a*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_*pba->Gamma_neutrinos;//*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ converts to eV to Mpc
+            a2_M_Gamma =  a*a*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_*pba->Gamma_neutrinos[n_ncdm];//*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ converts to eV to Mpc
             //non relat limit
             // fprime_dr = pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)*pow(a,5)/pow(pba->H0,2); //the cold dark matter limit
             // dy[pv->index_pt_F0_dr] +=  fprime_dr*(ppw->delta_ncdm[n_ncdm]+metric_euler/k2);
@@ -7736,10 +7736,10 @@ int perturb_derivs(double tau,
             epsilon = sqrt(q*q+a2*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
             qk_div_epsilon = k*q/epsilon;
             if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-              exp_factor = exp(-pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
               dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
-              +exp_factor*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
-              // printf("1+z %e t %e pba->Gamma_neutrinos %e exp_factor %e\n",1/a,t/_Gyr_over_Mpc_,pba->Gamma_neutrinos,exp_factor);
+              +exp_factor*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
+              // printf("1+z %e t %e pba->Gamma_neutrinos %e exp_factor %e\n",1/a,t/_Gyr_over_Mpc_,pba->Gamma_neutrinos[n_ncdm],exp_factor);
             }
             else {
               dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
@@ -7808,19 +7808,19 @@ int perturb_derivs(double tau,
             }
             else if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
               // M = pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;
-              dy[idx] = -qk_div_epsilon*y[idx+1]+metric_continuity*dlnf0_dlnq/3.- a*a*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/epsilon*y[idx];
+              dy[idx] = -qk_div_epsilon*y[idx+1]+metric_continuity*dlnf0_dlnq/3.- a*a*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/epsilon*y[idx];
               /** - -----> ncdm velocity for given momentum bin */
 
               // dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2]) - epsilon*metric_euler/(3*q*k)*dlnf0_dlnq - a*a*pba->Gamma_neutrinos*M/epsilon*y[idx+1];
-              dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2]) - a*a*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/epsilon*y[idx+1];
+              dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2]) - a*a*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/epsilon*y[idx+1];
               /** - -----> ncdm shear for given momentum bin */
 
-              dy[idx+2] = qk_div_epsilon/5.0*(2*s_l[2]*y[idx+1]-3.*s_l[3]*y[idx+3])-s_l[2]*metric_shear*2./15.*dlnf0_dlnq-a*a*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/epsilon*y[idx+2];
+              dy[idx+2] = qk_div_epsilon/5.0*(2*s_l[2]*y[idx+1]-3.*s_l[3]*y[idx+3])-s_l[2]*metric_shear*2./15.*dlnf0_dlnq-a*a*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/epsilon*y[idx+2];
 
               /** - -----> ncdm l>3 for given momentum bin */
 
               for(l=3; l<pv->l_max_ncdm[n_ncdm]; l++){
-                dy[idx+l] = qk_div_epsilon/(2.*l+1.0)*(l*s_l[l]*y[idx+(l-1)]-(l+1.)*s_l[l+1]*y[idx+(l+1)])-a*a*pba->Gamma_neutrinos*pba->M_ncdm[n_ncdm]/epsilon*y[idx+l];
+                dy[idx+l] = qk_div_epsilon/(2.*l+1.0)*(l*s_l[l]*y[idx+(l-1)]-(l+1.)*s_l[l+1]*y[idx+(l+1)])-a*a*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/epsilon*y[idx+l];
               }
 
               dy[idx+l] = qk_div_epsilon*y[idx+l-1]-(1.+l)*k*cotKgen*y[idx+l];

@@ -796,11 +796,6 @@ int input_read_parameters(
     /* Convert to Mpc */
     pba->Gamma_dcdm *= (1.e3 / _c_);
 
-    /** - Read Gamma in same units as H0, i.e. km/(s Mpc)*/
-    class_read_double("Gamma_neutrinos",pba->Gamma_neutrinos);
-    /* Convert to Mpc */
-    pba->Gamma_neutrinos *= (1.e3 / _c_);
-
     /** do we want to include DR pertubations? */
     class_call(parser_read_string(pfc,"dark_radiation_perturbations",&string1,&flag1,errmsg),
                errmsg,
@@ -924,9 +919,13 @@ int input_read_parameters(
     /* Read omega of each ncdm species: (Use pba->M_ncdm temporarily)*/
     class_read_list_of_doubles_or_default("omega_ncdm",pba->M_ncdm,0.0,N_ncdm);
 
+    /* Read omega of each ncdm species: (Use pba->M_ncdm temporarily)*/
+    class_read_list_of_doubles_or_default("Gamma_neutrinos",pba->Gamma_neutrinos,0.0,N_ncdm);
+
     /* Check for duplicate Omega/omega entries, missing mass definition and
        update pba->Omega0_ncdm:*/
     for(n=0; n<N_ncdm; n++){
+      pba->Gamma_neutrinos[n] *= (1.e3 / _c_);
       /* pba->M_ncdm holds value of omega */
       if (pba->M_ncdm[n]!=0.0){
         class_test(pba->Omega0_ncdm[n]!=0,errmsg,
@@ -996,6 +995,7 @@ int input_read_parameters(
                                                  pba->M_ncdm[n],
                                                  pba->factor_ncdm[n],
                                                  pba->background_ncdm_distribution[n],
+                                                 n,
                                                  0.,
                                                  0.,
                                                  NULL,
@@ -1047,6 +1047,7 @@ int input_read_parameters(
                                                  pba->M_ncdm[n],
                                                  pba->factor_ncdm[n],
                                                  pba->background_ncdm_distribution[n],
+                                                 n,
                                                  0.,
                                                  0.,
                                                  NULL,
@@ -3091,7 +3092,7 @@ int input_default_params(
   pba->Omega0_dcdmdr = 0.0;
   pba->Omega0_dcdm = 0.0;
   pba->Gamma_dcdm = 0.0;
-  pba->Gamma_neutrinos = 0.0;
+  pba->Gamma_neutrinos = NULL;
   pba->convergence_tol_decaying_neutrinos = 1e-3;
   pba->loop_over_background = _FALSE_;
   pba->M_dcdm = 0.0;

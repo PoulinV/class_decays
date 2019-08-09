@@ -81,7 +81,7 @@ struct background
   double Omega0_dcdmdr; /**< \f$ \Omega_{0 dcdm}+\Omega_{0 dr} \f$: decaying cold dark matter (dcdm) decaying to dark radiation (dr) */
 
   double Gamma_dcdm; /**< \f$ \Gamma_{dcdm} \f$: decay constant for decaying cold dark matter */
-  double Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: decay constant for decaying neutrinos */
+  double * Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: list of decay constant for decaying neutrinos */
   double M_dcdm; /**< \f$ M_{dcdm} \f$: mass [GeV] of the  decaying cold dark matter */
   double m_dcdm; /**< \f$ m_{dcdm} \f$: mass [GeV] of the  daugher particle */
 
@@ -290,6 +290,7 @@ struct background
   short has_dr;        /**< presence of relativistic decay radiation? */
   short has_scf;       /**< presence of a scalar field? */
   short has_ncdm;      /**< presence of non-cold dark matter? */
+  short has_decaying_neutrinos;  /**< presence of decaying neutrinos? */
   short has_lambda;    /**< presence of cosmological constant? */
   short has_fld;       /**< presence of fluid with constant w and cs2? */
   short has_ur;        /**< presence of ultra-relativistic neutrinos/relics? */
@@ -470,6 +471,7 @@ extern "C" {
                              double M,
                              double factor,
                              int background_ncdm_distribution,
+                             int n_ncdm,
                              double z,
                              double t,
                              double * n,

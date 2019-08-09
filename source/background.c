@@ -378,6 +378,7 @@ int background_functions(
                                            pba->M_ncdm[n_ncdm],
                                            pba->factor_ncdm[n_ncdm],
                                            pba->background_ncdm_distribution[n_ncdm],
+                                           n_ncdm,
                                            1./a_rel-1.,
                                            t,
                                            &num_ncdm,
@@ -619,6 +620,7 @@ int background_init(
                                 0.,
                                 pba->factor_ncdm[n_ncdm],
                                 pba->background_ncdm_distribution[n_ncdm],
+                                n_ncdm,
                                 0.,
                                 0,
                                 NULL,
@@ -865,6 +867,7 @@ int background_indices(
   pba->has_fld = _FALSE_;
   pba->has_ur = _FALSE_;
   pba->has_curvature = _FALSE_;
+  pba->has_decaying_neutrinos = _FALSE_;
 
   if (pba->Omega0_cdm != 0.)
     pba->has_cdm = _TRUE_;
@@ -880,8 +883,13 @@ int background_indices(
       pba->has_ncdm = _TRUE_;
   }
 
-  if(pba->Gamma_neutrinos > 0 &&  pba->m_dcdm == 0.)
-    pba->has_dr = _TRUE_;
+
+  if(pba->N_ncdm > 0){
+    if(pba->Gamma_neutrinos[0] > 0){
+      pba->has_decaying_neutrinos = _TRUE_;
+      pba->has_dr = _TRUE_;
+    }
+  }
 
   if (pba->Omega0_scf != 0.)
     pba->has_scf = _TRUE_;
@@ -1594,6 +1602,7 @@ int background_ncdm_momenta(
                             double M,
                             double factor,
                             int background_ncdm_distribution,
+                            int n_ncdm,
                             double z,
                             double t,
                             double * n,
@@ -1656,7 +1665,7 @@ int background_ncdm_momenta(
 
       /* integrand of the various quantities */
       if(background_ncdm_distribution == _decaying_neutrinos_){
-        exp_factor = exp(-pba->Gamma_neutrinos*M/(epsilon*(1+z))*t);
+        exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
         if (n!=NULL) *n += q2*wvec[index_q]*exp_factor;
         if (rho!=NULL) *rho += q2*epsilon*wvec[index_q]*exp_factor;
         if (p!=NULL) *p += q2*q2/3./epsilon*wvec[index_q]*exp_factor;
@@ -1732,6 +1741,7 @@ int background_ncdm_M_from_Omega(
                           M,
                           pba->factor_ncdm[n_ncdm],
                           pba->background_ncdm_distribution[n_ncdm],
+                          n_ncdm,
                           0.,
                           0.,
                           &n,
@@ -1757,6 +1767,7 @@ int background_ncdm_M_from_Omega(
                             M,
                             pba->factor_ncdm[n_ncdm],
                             pba->background_ncdm_distribution[n_ncdm],
+                            n_ncdm,
                             0.,
                             0.,
                             NULL,
@@ -2050,7 +2061,7 @@ int background_solve(
                -pba->background_table[pba->index_bg_rho_g])
     /(7./8.*pow(4./11.,4./3.)*pba->background_table[pba->index_bg_rho_g]);
 
-  if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
+  if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos[n] > 0){
     pba->Omega0_ncdm_tot = 0;
     for(n = 0; n < pba->N_ncdm; n++){
         pba->Omega0_ncdm[n] = pvecback[pba->index_bg_rho_ncdm1+n]/pba->H0/pba->H0;
@@ -2156,6 +2167,7 @@ int background_initial_conditions(
   					   pba->M_ncdm[n_ncdm],
   					   pba->factor_ncdm[n_ncdm],
   					   pba->background_ncdm_distribution[n_ncdm],
+               n_ncdm,
   					   pba->a_today/a-1.0,
                0,
   					   &number_density_ncdm,
@@ -2594,11 +2606,11 @@ int background_derivs(
     dy[pba->index_bi_rho_dr] = -4.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*y[pba->index_bi_rho_dr];
     if(pba->has_dcdm == _TRUE_)
       dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
-    if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos > 0){
+    if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos[n_ncdm] > 0){
       // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
       for(n_ncdm = 0; n_ncdm<pba->N_ncdm; n_ncdm++){
         if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-          dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;///_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ convert from eV to 1/Mpc. One extra factor of 1/2pi is weird.
+          dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;///_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ convert from eV to 1/Mpc. One extra factor of 1/2pi is weird.
           // printf("pvecback[pba->index_bg_rho_ncdm1] %e pvecback[pba->index_bg_n_ncdm1]*pba->M_ncdm[n_ncdm] %e _eV_/_h_P_/2./_PI_*_c_/_Mpc_over_m_ %e\n",pvecback[pba->index_bg_rho_ncdm1+n_ncdm],pvecback[pba->index_bg_n_ncdm1]*pba->m_ncdm_in_eV[n_ncdm]*1.56e+29,_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
         }
       }
