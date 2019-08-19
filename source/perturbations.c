@@ -2034,7 +2034,7 @@ int perturb_workspace_init(
       class_alloc(ppw->delta_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->theta_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
       class_alloc(ppw->shear_ncdm,pba->N_ncdm*sizeof(double),ppt->error_message);
-      if(pba->Gamma_neutrinos[n_ncdm] > 0 && pba->has_dr == _TRUE_){
+      if(pba->has_decaying_neutrinos == _TRUE_ &&  pba->has_dr == _TRUE_){
         class_alloc(ppw->N_ncdm_perts,pba->N_ncdm*sizeof(double),ppt->error_message);
           for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
             class_alloc(ppw->N_ncdm_perts[n_ncdm],(ppr->l_max_ncdm+1)*sizeof(double),ppt->error_message);
@@ -4525,9 +4525,10 @@ int perturb_initial_conditions(struct precision * ppr,
 
         if (pba->has_dr == _TRUE_ && pba->has_dcdm == _TRUE_)
           delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_dcdm*ppw->pvecback[pba->index_bg_rho_dcdm]/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
-        else if(pba->has_dr == _TRUE_ && pba->Gamma_neutrinos[n_ncdm] > 0){
+
+        if(pba->has_dr == _TRUE_ ){
           for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
-            if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_) delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_neutrinos[n_ncdm]*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
+            if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_ && pba->Gamma_neutrinos[n_ncdm] > 0) delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_neutrinos[n_ncdm]*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
           }
         }
 
@@ -5629,9 +5630,13 @@ int perturb_total_stress_energy(
                 }
                 // printf("init %e \n", ppw->N_ncdm_perts[n_ncdm][l]);
                 //we compute additional variables to be used in the dr Boltzmann hierarchy
-                for(l = 0; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
+                // for(l = 0; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
+                for(l = 0; l < 1; l++){
                   ppw->N_ncdm_perts[n_ncdm][l] += q2*pba->w_ncdm[n_ncdm][index_q]*y[idx+l]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
                   // if(pow(ppw->N_ncdm_perts[n_ncdm][l]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_,2)>pow(rho_delta_ncdm*factor,2))printf("a %e %d %e %e \n",a,l, ppw->N_ncdm_perts[n_ncdm][l]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_,rho_delta_ncdm*factor);
+                }
+                for(l = 1; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
+                  ppw->N_ncdm_perts[n_ncdm][l] = 0;
                 }
               }
 
@@ -7489,6 +7494,7 @@ int perturb_derivs(double tau,
             // dy[pv->index_pt_F0_dr+1] += fprime_dr/k*ppw->theta_ncdm[n_ncdm];
             //relativistic case
             for (l = 0; l < pv->l_max_ncdm[n_ncdm]; l++) {
+            // for (l = 0; l < 1; l++) {
               dy[pv->index_pt_F0_dr+l] +=  a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][l]/pow(pba->H0,2)*pow(a,3); //pow(pba->H0,2)=rho_crit_today in CLASS units.//weird: extra factor of a^3, otherwise does not match the non-relat limit.
             }
           }

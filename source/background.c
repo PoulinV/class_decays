@@ -855,7 +855,7 @@ int background_indices(
   int index_bg;
   /* a running index for the vector of background quantities to be integrated */
   int index_bi;
-
+  int n_ncdm;
   /** - initialize all flags: which species are present? */
 
   pba->has_cdm = _FALSE_;
@@ -885,10 +885,14 @@ int background_indices(
 
 
   if(pba->N_ncdm > 0){
-    if(pba->Gamma_neutrinos[0] > 0){
-      pba->has_decaying_neutrinos = _TRUE_;
-      pba->has_dr = _TRUE_;
+    for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm ++){
+      if(pba->Gamma_neutrinos[n_ncdm] > 0){
+        pba->has_decaying_neutrinos = _TRUE_;
+        pba->has_dr = _TRUE_;
+        break;
+      }
     }
+
   }
 
   if (pba->Omega0_scf != 0.)
