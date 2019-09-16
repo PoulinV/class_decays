@@ -922,10 +922,26 @@ int input_read_parameters(
     /* Read omega of each ncdm species: (Use pba->M_ncdm temporarily)*/
     class_read_list_of_doubles_or_default("Gamma_neutrinos",pba->Gamma_neutrinos,0.0,N_ncdm);
 
+    /** do we want to run the specific decaying neutrino model? */
+    class_call(parser_read_string(pfc,"decaying_neutrino_model",&string1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+
+    if (flag1 == _TRUE_ && N_ncdm == 3){
+      if((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)){
+            pba->Gamma_neutrinos[0] = pow(pba->m_ncdm_in_eV[0]/pba->m_ncdm_in_eV[2],3)*pba->Gamma_neutrinos[2];
+            pba->Gamma_neutrinos[1] = pow(pba->m_ncdm_in_eV[1]/pba->m_ncdm_in_eV[2],3)*pba->Gamma_neutrinos[2];
+      }
+    }
+    else{
+      //do nothing!
+    }
     /* Check for duplicate Omega/omega entries, missing mass definition and
        update pba->Omega0_ncdm:*/
     for(n=0; n<N_ncdm; n++){
+      // printf("pba->Gamma_neutrinos[%d] = %e\n",n,pba->Gamma_neutrinos[n]);
       pba->Gamma_neutrinos[n] *= (1.e3 / _c_);
+
       /* pba->M_ncdm holds value of omega */
       if (pba->M_ncdm[n]!=0.0){
         class_test(pba->Omega0_ncdm[n]!=0,errmsg,
@@ -1038,6 +1054,7 @@ int input_read_parameters(
             }
             else if(pba->background_ncdm_distribution[n] == _decaying_neutrinos_){
               pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
+
               pba->M_ncdm[n] = pba->m_ncdm_in_eV[n]/_k_B_*_eV_/pba->T_ncdm[n]/pba->T_cmb;
               // pba->background_ncdm_distribution[n] = _fermi_dirac_; //the final
               class_call(background_ncdm_momenta(pba,
