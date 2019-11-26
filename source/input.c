@@ -921,16 +921,47 @@ int input_read_parameters(
 
     /* Read omega of each ncdm species: (Use pba->M_ncdm temporarily)*/
     class_read_list_of_doubles_or_default("Gamma_neutrinos",pba->Gamma_neutrinos,0.0,N_ncdm);
+    /** what is the neutrino mass hierarchy? */
+    class_call(parser_read_string(pfc,"neutrino_hierarchy",&string1,&flag1,errmsg),
+                  errmsg,
+                  errmsg);
+    if (flag1 == _TRUE_) {
+
+      flag2=_FALSE_;
+      if (strcmp(string1,"inverted") == 0) {
+        pba->neutrino_hierarchy = inverted;
+        flag2 =_TRUE_;
+      }
+      if (strcmp(string1,"normal") == 0) {
+        pba->neutrino_hierarchy = normal;
+        flag2 =_TRUE_;
+      }
+      if (strcmp(string1,"degenerate") == 0) {
+        pba->neutrino_hierarchy = degenerate;
+        flag2 =_TRUE_;
+      }
+
+    class_test(flag2==_FALSE_,
+                 errmsg,
+                 "could not identify scf_potential value, check that it is one of 'inverted','normal','degenerate'.");
+    }
 
     /** do we want to run the specific decaying neutrino model? */
     class_call(parser_read_string(pfc,"decaying_neutrino_model",&string1,&flag1,errmsg),
                errmsg,
                errmsg);
 
+
     if (flag1 == _TRUE_ && N_ncdm == 3){
       if((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)){
+          if(pba->neutrino_hierarchy == inverted){
+            pba->Gamma_neutrinos[0] = pow(pba->m_ncdm_in_eV[0]/pba->m_ncdm_in_eV[1],3)*pba->Gamma_neutrinos[1];
+            pba->Gamma_neutrinos[2] = pow(pba->m_ncdm_in_eV[2]/pba->m_ncdm_in_eV[1],3)*pba->Gamma_neutrinos[1];
+          }
+          else if(pba->neutrino_hierarchy == normal || pba->neutrino_hierarchy == degenerate){
             pba->Gamma_neutrinos[0] = pow(pba->m_ncdm_in_eV[0]/pba->m_ncdm_in_eV[2],3)*pba->Gamma_neutrinos[2];
             pba->Gamma_neutrinos[1] = pow(pba->m_ncdm_in_eV[1]/pba->m_ncdm_in_eV[2],3)*pba->Gamma_neutrinos[2];
+          }
       }
     }
     else{
@@ -2833,9 +2864,9 @@ int input_read_parameters(
   for(n = 0;n<pba->N_ncdm;n++){
     //if there are decaying warm relics we enforce solving the full set of equation: no streaming/fluid approximation.
     if(pba->background_ncdm_distribution[n] != _fermi_dirac_){
-      ppr->radiation_streaming_approximation=rsa_none;
-      ppr->ur_fluid_approximation=ufa_none;
-      ppr->ncdm_fluid_approximation=ncdmfa_none;
+      // ppr->radiation_streaming_approximation=rsa_none;//streaming approximation checked to be accurate at the 0.04% level.
+      ppr->ur_fluid_approximation=ufa_none;//streaming approx is incorrect
+      ppr->ncdm_fluid_approximation=ncdmfa_none;//streaming approx is incorrect
     }
   }
 
@@ -3110,6 +3141,7 @@ int input_default_params(
   pba->Omega0_dcdm = 0.0;
   pba->Gamma_dcdm = 0.0;
   pba->Gamma_neutrinos = NULL;
+  pba->neutrino_hierarchy = degenerate;
   pba->convergence_tol_decaying_neutrinos = 1e-3;
   pba->loop_over_background = _FALSE_;
   pba->M_dcdm = 0.0;

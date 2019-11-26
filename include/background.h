@@ -13,6 +13,7 @@
 /** list of possible types of spatial curvature */
 
 enum spatial_curvature {flat,open,closed};
+enum neutrino_mass_hierarchy {inverted,normal,degenerate};
 
 /** list of possible parametrisations of the DE equation of state */
 
@@ -58,6 +59,7 @@ struct background
   double Omega0_fld; /**< \f$ \Omega_{0 de} \f$: fluid */
 
   enum equation_of_state fluid_equation_of_state; /**< parametrisation scheme for fluid equation of state */
+  enum neutrino_mass_hierarchy neutrino_hierarchy; /**< neutrino mass hierarchy */
 
   double w0_fld; /**< \f$ w0_{DE} \f$: current fluid equation of state parameter */
   double wa_fld; /**< \f$ wa_{DE} \f$: fluid equation of state parameter derivative */

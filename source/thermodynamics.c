@@ -261,8 +261,8 @@ int thermodynamics_init(
   /** if decaying_neutrinos, we will loop over the background module to make sure that Omega_Lambda satisfies the closure relation Omega_Lambda = 1- Omega_tot*/
   if(pba->Gamma_neutrinos > 0 && pba->loop_over_background == _TRUE_){
     class_call(loop_over_background(pba,ppr),pth->error_message,pth->error_message);
+    pba->free_input_parameters = _TRUE_;//we make sure that parameters will be freed.
   }
-
   /** Summary: */
 
   /** - define local variables */
