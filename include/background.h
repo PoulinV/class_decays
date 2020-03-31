@@ -86,7 +86,8 @@ struct background
   double * Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: list of decay constant for decaying neutrinos */
   double M_dcdm; /**< \f$ M_{dcdm} \f$: mass [GeV] of the  decaying cold dark matter */
   double m_dcdm; /**< \f$ m_{dcdm} \f$: mass [GeV] of the  daugher particle */
-
+  double epsilon_dcdm; /**< \f$ epsilon_{dcdm} \f$: fraction of mass energy converted to the daughter radiation */
+  double PDmax_dcdm; /**< Max impulsion given to the daugher particles */
   double Omega_ini_dcdm;    /**< \f$ \Omega_{ini,dcdm} \f$: rescaled initial value for dcdm density (see 1407.2418 for definitions) */
 
   double Omega0_scf;        /**< \f$ \Omega_{0 scf} \f$: scalar field */
@@ -160,7 +161,6 @@ struct background
   double H_eq;      /**< Hubble rate at radiation/matter equality [Mpc^-1] */
   double z_eq;      /**< redshift at radiation/matter equality */
   double tau_eq;    /**< conformal time at radiation/matter equality [Mpc] */
-
   //@}
 
   /** @name - other background parameters */
@@ -318,6 +318,8 @@ struct background
   int * q_size_ncdm_bg; /**< Size of the q_ncdm_bg arrays */
   int * q_size_ncdm;    /**< Size of the q_ncdm arrays */
   double * factor_ncdm; /**< List of normalization factors for calculating energy density etc.*/
+  double ** tq_table;  /**< Pointers to vectors of time at mom q */
+  double ** Hq_table;  /**< Pointers to vectors of hubble rate at mom q */
 
   //@}
 
@@ -476,6 +478,7 @@ extern "C" {
                              int n_ncdm,
                              double z,
                              double t,
+                             double H,
                              double * n,
 		                         double * rho,
                              double * p,
@@ -569,7 +572,7 @@ extern "C" {
 
 /* parameters entering in Stefan-Boltzmann constant sigma_B */
 #define _k_B_ 1.3806504e-23 // in J/K
-#define _h_P_ 6.62606896e-34
+#define _h_P_ 6.62606896e-34 //in Js
 /* remark: sigma_B = 2 pi^5 k_B^4 / (15h^3c^2) = 5.670400e-8
                    = Stefan-Boltzmann constant in W/m^2/K^4 = Kg/K^4/s^3 */
 

@@ -816,6 +816,17 @@ extern "C" {
   int perturb_prepare_output(struct background * pba,
                              struct perturbs * ppt);
 
+
+  int compute_dfdlnq_ncdm(  struct precision *ppr,
+                            struct background *pba,
+                            int n_ncdm);
+
+  int background_ncdm_distribution_perts(
+                                   struct background *pba,
+                                   double q,
+                                   int n_ncdm,
+                                   double * f0
+                                 ) ;
 #ifdef __cplusplus
 }
 #endif

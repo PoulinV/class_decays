@@ -795,7 +795,7 @@ int input_read_parameters(
     class_read_double("Gamma_dcdm",pba->Gamma_dcdm);
     /* Convert to Mpc */
     pba->Gamma_dcdm *= (1.e3 / _c_);
-
+    pba->epsilon_dcdm = 1; //default to avoid bug: will be updated a few lines below if necessary
     /** do we want to include DR pertubations? */
     class_call(parser_read_string(pfc,"dark_radiation_perturbations",&string1,&flag1,errmsg),
                errmsg,
@@ -835,7 +835,11 @@ int input_read_parameters(
 
     class_read_double("M_dcdm",pba->M_dcdm); //mass [GeV] of the  decaying cold dark matter
     class_read_double("m_dcdm",pba->m_dcdm); //mass [GeV] of the  daugher particle
-
+    if(pba->Gamma_dcdm > 0 && pba->M_dcdm > 0. && pba->m_dcdm > 0.){
+      pba->epsilon_dcdm = 0.5*(1 - pow(pba->m_dcdm/pba->M_dcdm,2));
+    }else{
+      pba->epsilon_dcdm = 1;
+    }
 
     /* background ncdm distribution, 0 is fermi_dirac. */
     class_read_list_of_integers_or_default("background_ncdm_distribution",pba->background_ncdm_distribution,0,N_ncdm);
@@ -890,11 +894,13 @@ int input_read_parameters(
     /* qmax, if relevant */
     class_read_list_of_doubles_or_default("Maximum q",pba->ncdm_qmax,15,N_ncdm);
     if(pba->Gamma_dcdm >0 && pba->M_dcdm > 0 && pba->m_dcdm > 0){
-      //eventually implement a loop over n_ncdm.
-      pba->ncdm_qmax[0]=5*pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2/(pba->T_cmb*8.617343e-05*1e-9);//5 has been optimized to capture enough of the distribution around the maximum.
+      //to do: eventually implement a loop over n_ncdm.
+      // pba->ncdm_qmax[0]=100*pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2/(pba->T_cmb*8.617343e-05*1e-9);//5 has been optimized to capture enough of the distribution around the maximum.
+      pba->PDmax_dcdm = pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2; // in GeV
+      pba->ncdm_qmax[0]=5*pba->PDmax_dcdm;//5 has been optimized to capture enough of the distribution around the maximum.
       /* is q bin initialised in perts? set here to "no" (0) */
       class_alloc(pba->is_q_initialized_dcdm,pba->ncdm_input_q_size[0]*sizeof(int),errmsg);
-      // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
+      printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
 
       for(i = 0; i<pba->ncdm_input_q_size[0]; i++){
         pba->is_q_initialized_dcdm[i]=0;
@@ -1045,6 +1051,7 @@ int input_read_parameters(
                                                  n,
                                                  0.,
                                                  0.,
+                                                 pba->H0,
                                                  NULL,
                                                  &rho_ncdm,
                                                  NULL,
@@ -1078,10 +1085,29 @@ int input_read_parameters(
           }
           else if(pba->background_ncdm_distribution[n] == _massive_daughter_){
             /* Case of only mass or mass and Omega/omega: */
+              // pba->loop_over_background = _TRUE_; //TO DO IN THE FUTURE: enforce loop_over_background = TRUE later on
 
-              pba->M_ncdm[n] = pba->m_dcdm/(pba->T_ncdm[n]*pba->T_cmb*8.617e-5*1e-9);//M_ncdm in unit of T
-              pba->Omega0_ncdm[n] = 1e-10; //placeholder
-              pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//ignore for simplicity
+              pba->M_ncdm[n] = pba->m_dcdm;
+              class_call(background_ncdm_momenta(pba,
+                                                 pba->q_ncdm_bg[n],
+                                                 pba->w_ncdm_bg[n],
+                                                 pba->q_size_ncdm_bg[n],
+                                                 pba->M_ncdm[n],
+                                                 pba->factor_ncdm[n],
+                                                 pba->background_ncdm_distribution[n],
+                                                 n,
+                                                 0.,
+                                                 0.,
+                                                 pba->H0,
+                                                 NULL,
+                                                 &rho_ncdm,
+                                                 NULL,
+                                                 NULL,
+                                                 NULL),
+                         pba->error_message,
+                         errmsg);
+               pba->Omega0_ncdm[n] = rho_ncdm/pba->H0/pba->H0; //placeholder
+               // pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//ignore ncdm for simplicity
             }
             else if(pba->background_ncdm_distribution[n] == _decaying_neutrinos_){
               pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
@@ -1098,6 +1124,7 @@ int input_read_parameters(
                                                  n,
                                                  0.,
                                                  0.,
+                                                 pba->H0,
                                                  NULL,
                                                  &rho_ncdm,
                                                  NULL,
@@ -1106,7 +1133,7 @@ int input_read_parameters(
                          pba->error_message,
                          errmsg);
                pba->Omega0_ncdm[n] = rho_ncdm/pba->H0/pba->H0; //placeholder
-               pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//ignore decay for simplicity
+               // pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//ignore ncdm for simplicity
               // printf("pba->M_ncdm[n] %e \n", pba->M_ncdm[n]);
               // printf("IM HERE %e \n",pba->Omega0_ncdm[n]);
 //
