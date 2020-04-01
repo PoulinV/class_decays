@@ -56,7 +56,9 @@ int get_qsampling_manual(double *x,
       (*function)(params_for_function,x[i],&y);
       w[i] = y*h/t/t;
     }
+		return _SUCCESS_;
   case (qm_simpson_log) :
+
     /** Simpson rule on a log interval. */
 	qmin = qmax*1e-14;
 	// qmin = 0.1;
@@ -72,7 +74,7 @@ int get_qsampling_manual(double *x,
 			w[i] *= 4;
 		}
 		j++;
-		// printf("%e\n", 	w[i]);
+		// printf("q[i] %e w %e\n", 	x[i],w[i]);
 		// if (i==N-1)
 		// w[i] *=0.5;
 	}

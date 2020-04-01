@@ -381,6 +381,7 @@ struct perturbs
 
   /** do we want to include DR pertubations? */
   short dark_radiation_perturbations;
+  short massive_daughter_perturbations;
   //@}
 
 };
@@ -823,6 +824,7 @@ extern "C" {
 
   int background_ncdm_distribution_perts(
                                    struct background *pba,
+                                   struct precision *ppr,
                                    double q,
                                    int n_ncdm,
                                    double * f0

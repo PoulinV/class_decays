@@ -307,6 +307,7 @@ struct background
 
   //@{
   int * ncdm_quadrature_strategy; /**< Vector of integers according to quadrature strategy. */
+  int * ncdm_input_q_size_bg; /**< Vector of numbers of q bins */
   int * ncdm_input_q_size; /**< Vector of numbers of q bins */
   double * ncdm_qmax;   /**< Vector of maximum value of q */
   double ** q_ncdm_bg;  /**< Pointers to vectors of background sampling in q */
