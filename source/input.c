@@ -981,7 +981,7 @@ int input_read_parameters(
       pba->PDmax_dcdm = pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2; // in GeV
       pba->ncdm_qmax[0]=pba->PDmax_dcdm;//5 has been optimized to capture enough of the distribution around the maximum.
       /* is q bin initialised in perts? set here to "no" (0) */
-<<<<<<< HEAD
+
       class_alloc(pba->is_q_initialized_dcdm,pba->ncdm_input_q_size[0]*sizeof(int),errmsg);
     //  printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
 
@@ -989,9 +989,9 @@ int input_read_parameters(
         pba->is_q_initialized_dcdm[i]=0;
         // printf("%d\n", pba->is_q_initialized_dcdm[i]);
       }
-=======
+
       // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
->>>>>>> f4421beff170599713e6f047ce4871e81cb48670
+
     }
     /* Read temperatures: */
     class_read_list_of_doubles_or_default("T_ncdm",pba->T_ncdm,pba->T_ncdm_default,N_ncdm);
