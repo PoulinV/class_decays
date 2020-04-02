@@ -627,6 +627,8 @@ int background_init(
                                   NULL,
                                   NULL,
                                   NULL);
+        }else{
+          rho_ncdm_rel = 0; //we assume the daughter is negligible at early time
         }
 
 
@@ -807,6 +809,7 @@ int background_free_input(
 
     free(pba->ncdm_quadrature_strategy);
     free(pba->background_ncdm_distribution);
+    free(pba->ncdm_input_q_size_bg);
     free(pba->ncdm_input_q_size);
     free(pba->ncdm_qmax);
     free(pba->q_ncdm);
@@ -1452,7 +1455,7 @@ int background_ncdm_init(
     }
     else{
       /** Manual q-sampling for this species. Same sampling used for both perturbation and background sampling, since this will usually be a high precision setting anyway */
-      pba->q_size_ncdm_bg[k] = pba->ncdm_input_q_size[k];
+      pba->q_size_ncdm_bg[k] = pba->ncdm_input_q_size_bg[k];
       pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
       // pba->q_size_ncdm[k] = 10;
       class_alloc(pba->q_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
@@ -1475,6 +1478,7 @@ int background_ncdm_init(
 				      pba->error_message),
 		 pba->error_message,
 		 pba->error_message);
+     // printf("pba->ncdm_quadrature_strategy[k] %d\n",pba->ncdm_quadrature_strategy[k]);
       class_call(get_qsampling_manual(pba->q_ncdm[k],
 				      pba->w_ncdm[k],
 				      pba->q_size_ncdm[k],
@@ -1499,12 +1503,13 @@ int background_ncdm_init(
                                      &f0);
         // printf("pba->q_ncdm[k][index_q] %e\n", pba->q_ncdm[k][index_q]);
         // printf("before pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e\n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
-        if(f0!=0)pba->w_ncdm[k][index_q] /= f0 ;
-        else pba->w_ncdm[k][index_q] =0;
+        // if(f0!=0)pba->w_ncdm[k][index_q] /= f0 ;
+        // else pba->w_ncdm[k][index_q] =0;
         pba->Hq_table[k][index_q] = 0;
         pba->tq_table[k][index_q] = 0;
         // pba->w_ncdm_bg[k][index_q] *= f0;
-        // printf("after pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e  \n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
+        // printf("after pba->q_ncdm[k][index_q] %e pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
+        // printf("after q %e w %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q]);
       }
     }
     /** - in verbose mode, inform user of number of sampled momenta

@@ -878,6 +878,18 @@ int input_read_parameters(
         ppt->dark_radiation_perturbations = _FALSE_;
       }
     }
+    class_call(parser_read_string(pfc,"massive_daughter_perturbations",&string1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+
+    if (flag1 == _TRUE_){
+      if((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)){
+        ppt->massive_daughter_perturbations = _TRUE_;
+      }
+      else {
+        ppt->massive_daughter_perturbations = _FALSE_;
+      }
+    }
   /** - non-cold relics (ncdm) */
   class_read_int("N_ncdm",N_ncdm);
   // if(pba->Gamma_dcdm > 0  && (pba->m_dcdm > 0)){
@@ -955,7 +967,8 @@ int input_read_parameters(
     /* Quadrature modes, 0 is qm_auto. */
     class_read_list_of_integers_or_default("Quadrature strategy",pba->ncdm_quadrature_strategy,0,N_ncdm);
     /* Number of momentum bins */
-    class_read_list_of_integers_or_default("Number of momentum bins",pba->ncdm_input_q_size,-1,N_ncdm);
+    class_read_list_of_integers_or_default("Number of momentum bins background",pba->ncdm_input_q_size_bg,-1,N_ncdm);
+    class_read_list_of_integers_or_default("Number of momentum bins perturbs",pba->ncdm_input_q_size,-1,N_ncdm);
 
 
 
@@ -966,8 +979,9 @@ int input_read_parameters(
       //to do: eventually implement a loop over n_ncdm.
       // pba->ncdm_qmax[0]=100*pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2/(pba->T_cmb*8.617343e-05*1e-9);//5 has been optimized to capture enough of the distribution around the maximum.
       pba->PDmax_dcdm = pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2; // in GeV
-      pba->ncdm_qmax[0]=5*pba->PDmax_dcdm;//5 has been optimized to capture enough of the distribution around the maximum.
+      pba->ncdm_qmax[0]=pba->PDmax_dcdm;//5 has been optimized to capture enough of the distribution around the maximum.
       /* is q bin initialised in perts? set here to "no" (0) */
+<<<<<<< HEAD
       class_alloc(pba->is_q_initialized_dcdm,pba->ncdm_input_q_size[0]*sizeof(int),errmsg);
     //  printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
 
@@ -975,6 +989,9 @@ int input_read_parameters(
         pba->is_q_initialized_dcdm[i]=0;
         // printf("%d\n", pba->is_q_initialized_dcdm[i]);
       }
+=======
+      // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
+>>>>>>> f4421beff170599713e6f047ce4871e81cb48670
     }
     /* Read temperatures: */
     class_read_list_of_doubles_or_default("T_ncdm",pba->T_ncdm,pba->T_ncdm_default,N_ncdm);
@@ -2959,11 +2976,11 @@ int input_read_parameters(
   /*VP CHECK FOR decaying NCDM */
   for(n = 0;n<pba->N_ncdm;n++){
     //if there are decaying warm relics we enforce solving the full set of equation: no streaming/fluid approximation.
-    if(pba->background_ncdm_distribution[n] != _fermi_dirac_){
-      // ppr->radiation_streaming_approximation=rsa_none;//streaming approximation checked to be accurate at the 0.04% level.
+    // if(pba->background_ncdm_distribution[n] != _fermi_dirac_){
+      ppr->radiation_streaming_approximation=rsa_none;//streaming approximation checked to be accurate at the 0.04% level.
       ppr->ur_fluid_approximation=ufa_none;//streaming approx is incorrect
       ppr->ncdm_fluid_approximation=ncdmfa_none;//streaming approx is incorrect
-    }
+    // }
   }
 
   class_test(ppr->ur_fluid_trigger_tau_over_tau_k==ppr->radiation_streaming_trigger_tau_over_tau_k,
@@ -3386,6 +3403,7 @@ int input_default_params(
   ppt->selection_width[0]=0.1;
 
   ppt->dark_radiation_perturbations = _TRUE_;
+  ppt->massive_daughter_perturbations = _TRUE_;
   /** - primordial structure */
 
   ppm->primordial_spec_type = analytic_Pk;
@@ -3657,17 +3675,17 @@ int input_default_precision ( struct precision * ppr ) {
   ppr->tol_perturb_integration=1.e-5;
   ppr->perturb_sampling_stepsize=0.10;
 
-  ppr->radiation_streaming_approximation = rsa_MD_with_reio;
-  // ppr->radiation_streaming_approximation = rsa_none;
+  // ppr->radiation_streaming_approximation = rsa_MD_with_reio;
+  ppr->radiation_streaming_approximation = rsa_none;
   ppr->radiation_streaming_trigger_tau_over_tau_k = 45.;
   ppr->radiation_streaming_trigger_tau_c_over_tau = 5.;
 
-  ppr->ur_fluid_approximation = ufa_CLASS;
-  // ppr->ur_fluid_approximation = ufa_none;
+  // ppr->ur_fluid_approximation = ufa_CLASS;
+  ppr->ur_fluid_approximation = ufa_none;
   ppr->ur_fluid_trigger_tau_over_tau_k = 30.;
 
-  ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
-  // ppr->ncdm_fluid_approximation = ncdmfa_none;
+  // ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
+  ppr->ncdm_fluid_approximation = ncdmfa_none;
   ppr->ncdm_fluid_trigger_tau_over_tau_k = 31.;
 
   ppr->neglect_CMB_sources_below_visibility = 1.e-3;
