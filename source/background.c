@@ -352,10 +352,6 @@ int background_functions(
 
     /* Loop over species: */
     for(n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++){
-
-      // if(pba->m_dcdm > 0){
-      //   pba->M_ncdm[n_ncdm] = pba->m_dcdm * (_c_ * _c_)/_k_B_;
-      // }
       /* function returning background ncdm[n_ncdm] quantities (only
          those for which non-NULL pointers are passed) */
      if(a ==  1e-14){
@@ -395,7 +391,6 @@ int background_functions(
         pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
         pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
         pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm] = pseudo_p_ncdm;
-        // printf("a %e rho tot %e rho ncdm %e\n",a,rho_tot,rho_ncdm );
 
         rho_tot += rho_ncdm;
         p_tot += p_ncdm;
@@ -799,8 +794,8 @@ int background_free_input(
                           ) {
 
   int k;
-  if (pba->Omega0_ncdm_tot != 0.){
-      // printf("here!!!\n");
+  if (pba->N_ncdm != 0.){ /* GFA */
+
     for(k=0; k<pba->N_ncdm; k++){
       free(pba->q_ncdm[k]);
       free(pba->w_ncdm[k]);
@@ -886,7 +881,15 @@ int background_indices(
   if (pba->N_ncdm != 0.)
     pba->has_ncdm = _TRUE_;
 
-  if (pba->Omega0_dcdmdr != 0.){
+
+if (pba->Omega0_dcdmdr != 0.){ /* GFA */
+    pba->has_dcdm = _TRUE_;
+     if (pba->Gamma_dcdm != 0.) {
+      pba->has_dr = _TRUE_;
+      }
+     }
+
+  if (pba->Omega0_dcdmdrwdm  != 0.){ /* GFA */
     pba->has_dcdm = _TRUE_;
     if (pba->Gamma_dcdm != 0. && pba->m_dcdm == 0.)
       pba->has_dr = _TRUE_;
@@ -905,8 +908,6 @@ int background_indices(
       else if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_)
         pba->has_dr = _TRUE_;
     }
-
-
   }
 
   if (pba->Omega0_scf != 0.)
@@ -1242,7 +1243,8 @@ int background_ncdm_distribution(
           /*********************************************************/
 
       aq = q/pba->PDmax_dcdm; //convert Tcmb to GeV using k_b*1e-9
-      rho_dcdm = pba->Omega_ini_dcdm*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
+      /* GFA */
+      rho_dcdm = pba->Omega_ini_dcdm2*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
       n_dcdm = rho_dcdm/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg => n_ncdm in Mpc^-3
       qcube=pow(q*1e9*_eV_/(_h_P_/2/_PI_)/_c_*_Mpc_over_m_,3); //GeV^3 to Mpc^-3
 
@@ -1732,30 +1734,14 @@ int background_ncdm_momenta(
 
   if(background_ncdm_distribution == _massive_daughter_){
     factor2 *= 2*_PI_; //Not clear where it comes from;
-    // factor2 *= 4; //Not clear where it comes from;
-    // factor2 *= 2; //if m1=m2; but now we assume m2=0.
-    // factor2 *= 5;//Where does this come from?!
   }
 
   if (n!=NULL) *n *= factor2/(1.+z);
-  // if (n!=NULL) *n *= factor2/(1.+z)/(pba->T_cmb*0.71*_k_B_/_eV_);
-  // if (n!=NULL) *n *= factor2/(1.+z)/(pba->T_cmb*0.71*_k_B_/_eV_)/1.56e+29/2/_PI_;
-  // if (n!=NULL) *n *= factor2/(1.+z)/(pba->T_cmb*0.716*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)*1.515; //one extra factor of 2pi is weird...
-  // if (n!=NULL) *n *= factor2/(1.+z)/(pba->T_cmb*0.716*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_); //one extra factor of 2pi is weird...
-  // pba->factor_ncdm[k]=pba->deg_ncdm[k]*4*_PI_*pow(pba->T_cmb*pba->T_ncdm[k]*_k_B_,4)*8*_PI_*_G_
-  //   /3./pow(_h_P_/2./_PI_,3)/pow(_c_,7)*_Mpc_over_m_*_Mpc_over_m_; //(Js4/m7 = (kg*m2/s2)*s4/m7 = kg*s2/m5)* m^3/Kg/s^2 = 1/m2
-  // printf("%e %e\n",1/(_k_B_/_h_P_/2./_PI_*_c_/_Mpc_over_m_),1.56e29/2/_PI_);
   if (rho!=NULL) *rho *= factor2;
   if (p!=NULL) *p *= factor2;
   if (drho_dM!=NULL) *drho_dM *= factor2;
   if (pseudo_p!=NULL) *pseudo_p *=factor2;
-  // // // // //VP: Add securiy to avoid reaching 0
-  // if (rho!=NULL) *rho += 1e-25/pba->N_ncdm;
-  // if (p!=NULL) *p += 1e-25/pba->N_ncdm;
-  // if (drho_dM!=NULL) *drho_dM += 1e-25/pba->N_ncdm;
-  // if (pseudo_p!=NULL) *pseudo_p +=1e-25/pba->N_ncdm;
-  // printf("%e\n", n);
-  // printf("z %e rho %e\n",z,*rho);
+
   return _SUCCESS_;
 }
 
@@ -1960,6 +1946,8 @@ int background_solve(
     /* -> store value of tau */
     pvecback_integration[pba->index_bi_tau]=tau_end;
 
+  //  printf("rho_wdm = %e\n",pvecback[pba->index_bg_rho_ncdm1] );
+
   }
 
   /** - save last data in growTable with gt_add() */
@@ -2113,8 +2101,13 @@ int background_solve(
     for(n = 0; n < pba->N_ncdm; n++){
       if(pba->background_ncdm_distribution[n] != _fermi_dirac_){
         pba->Omega0_ncdm[n] = pvecback[pba->index_bg_rho_ncdm1+n]/pba->H0/pba->H0;
-        pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];
-        // printf("in back pba->Omega0_ncdm_tot %e\n", pba->Omega0_ncdm_tot);
+        if (pba->background_ncdm_distribution[n] == _massive_daughter_) {
+         pba->Omega0_ncdm_tot += 0.; /* GFA: Don't add contribution of massive daughter to Omega0_ncdm_tot, */
+                                    /* since its contribution to the energy budget has already been taken into account in Omega_0_dcdmdrwdm */
+        } else {
+         pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];
+        }
+
       }
       // printf("pba->Omega0_ncdm[n]  %e\n", pba->Omega0_ncdm[n] );
     }
@@ -2260,8 +2253,12 @@ int background_initial_conditions(
   }
   if (pba->has_dcdm == _TRUE_){
     /* Remember that the critical density today in CLASS conventions is H0^2 */
-    pvecback_integration[pba->index_bi_rho_dcdm] =
-      pba->Omega_ini_dcdm*pba->H0*pba->H0*pow(pba->a_today/a,3);
+    if (pba->Omega0_dcdmdrwdm != 0.) {  /* GFA */
+     pvecback_integration[pba->index_bi_rho_dcdm] =pba->Omega_ini_dcdm2*pba->H0*pba->H0*pow(pba->a_today/a,3);
+   } else {
+     pvecback_integration[pba->index_bi_rho_dcdm] =pba->Omega_ini_dcdm*pba->H0*pba->H0*pow(pba->a_today/a,3);
+   }
+
     if (pba->background_verbose > 3)
       printf("Density is %g. a_today=%g. Omega_ini=%g\n",pvecback_integration[pba->index_bi_rho_dcdm],pba->a_today,pba->Omega_ini_dcdm);
   }
@@ -2279,9 +2276,10 @@ int background_initial_conditions(
       f = 1./3.*pow(a/pba->a_today,6)*pvecback_integration[pba->index_bi_rho_dcdm]*pba->Gamma_dcdm/pow(pba->H0,3)/sqrt(Omega_rad)*pba->epsilon_dcdm;
       pvecback_integration[pba->index_bi_rho_dr] = f*pba->H0*pba->H0/pow(a/pba->a_today,4);
     }
-    else if(pba->has_ncdm == _TRUE_){
-      pvecback_integration[pba->index_bi_rho_dr] = 0; /*currently ignore the small amount of decay from a=0 to a=a_ini_class.*/
-    }
+    /* GFA */
+  //  else if(pba->has_ncdm == _TRUE_){
+  //    pvecback_integration[pba->index_bi_rho_dr] = 0; /*currently ignore the small amount of decay from a=0 to a=a_ini_class.*/
+  //  }
     else{
       /** There is also a space reserved for a future case where dr is not sourced by dcdm */
       pvecback_integration[pba->index_bi_rho_dr] = 0.0;

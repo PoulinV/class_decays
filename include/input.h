@@ -133,11 +133,12 @@
 /**
  * temporary parameters for background fzero function
  */
-
-enum target_names {theta_s, Omega_dcdmdr, omega_dcdmdr, Omega_scf, Omega_ini_dcdm, omega_ini_dcdm, sigma8};
+/* GFA */
 enum computation_stage {cs_background, cs_thermodynamics, cs_perturbations,
                         cs_primordial, cs_nonlinear, cs_transfer, cs_spectra};
-#define _NUM_TARGETS_ 7 //Keep this number as number of target_names
+enum target_names {theta_s, Omega_dcdmdr, omega_dcdmdr, Omega_dcdmdrwdm, omega_dcdmdrwdm, Omega_scf, Omega_ini_dcdm, omega_ini_dcdm, Omega_ini_dcdm2, omega_ini_dcdm2, sigma8};
+
+#define _NUM_TARGETS_ 11 //Keep this number as number of target_names
 
 struct input_pprpba {
   struct precision * ppr;

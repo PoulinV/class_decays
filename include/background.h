@@ -81,6 +81,7 @@ struct background
   double Omega0_ur; /**< \f$ \Omega_{0 \nu r} \f$: ultra-relativistic neutrinos */
 
   double Omega0_dcdmdr; /**< \f$ \Omega_{0 dcdm}+\Omega_{0 dr} \f$: decaying cold dark matter (dcdm) decaying to dark radiation (dr) */
+  double Omega0_dcdmdrwdm; /**< \f$ GFA: \Omega_{0 dcdm}+\Omega_{0 dr}+\Omega_{0 wdm} \f$: decaying cold dark matter (dcdm) decaying to dark radiation (dr) and warm dark matter (wdm) */
 
   double Gamma_dcdm; /**< \f$ \Gamma_{dcdm} \f$: decay constant for decaying cold dark matter */
   double * Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: list of decay constant for decaying neutrinos */
@@ -89,7 +90,8 @@ struct background
   double epsilon_dcdm; /**< \f$ epsilon_{dcdm} \f$: fraction of mass energy converted to the daughter radiation */
   double PDmax_dcdm; /**< Max impulsion given to the daugher particles */
   double Omega_ini_dcdm;    /**< \f$ \Omega_{ini,dcdm} \f$: rescaled initial value for dcdm density (see 1407.2418 for definitions) */
-
+  double Omega_ini_dcdm2;    /**< GFA: \f$ \Omega_{ini,dcdm2} \f$: rescaled initial value for dcdm density (two-body decay) */
+  
   double Omega0_scf;        /**< \f$ \Omega_{0 scf} \f$: scalar field */
   short attractor_ic_scf;   /**< whether the scalar field has attractor initial conditions */
   double phi_ini_scf;       /**< \f$ \phi(t_0) \f$: scalar field initial value */

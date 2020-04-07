@@ -227,12 +227,12 @@ int input_init(
    *
    * These two arrays must contain the strings of names to be searched
    *  for and the corresponding new parameter */
-  char * const target_namestrings[] = {"100*theta_s","Omega_dcdmdr","omega_dcdmdr",
-                                       "Omega_scf","Omega_ini_dcdm","omega_ini_dcdm","sigma8"};
-  char * const unknown_namestrings[] = {"h","Omega_ini_dcdm","Omega_ini_dcdm",
-                                        "scf_shooting_parameter","Omega_dcdmdr","omega_dcdmdr","A_s"};
-  enum computation_stage target_cs[] = {cs_thermodynamics, cs_background, cs_background,
-                                        cs_background, cs_background, cs_background, cs_spectra};
+  char * const target_namestrings[] = {"100*theta_s","Omega_dcdmdr","omega_dcdmdr","Omega_dcdmdrwdm", "omega_dcdmdrwdm",
+                                       "Omega_scf","Omega_ini_dcdm","omega_ini_dcdm","Omega_ini_dcdm2","omega_ini_dcdm2","sigma8"};
+  char * const unknown_namestrings[] = {"h","Omega_ini_dcdm","Omega_ini_dcdm","Omega_ini_dcdm2","Omega_ini_dcdm2",
+                                        "scf_shooting_parameter","Omega_dcdmdr","omega_dcdmdr","Omega_dcdmdrwdm","omega_dcdmdrwdm","A_s"};
+  enum computation_stage target_cs[] = {cs_thermodynamics, cs_background, cs_background, cs_background, cs_background,
+                                        cs_background, cs_background, cs_background, cs_background, cs_background, cs_spectra};
 
   int input_verbose = 0, int1, aux_flag, shooting_failed=_FALSE_;
 
@@ -319,6 +319,15 @@ int input_init(
     }
 
     if (unknown_parameters_size == 1){
+
+      if (input_verbose > 0) {
+         fprintf(
+          stdout,
+          "Computing unknown input parameter '%s' using input parameter '%s'\n",
+          fzw.fc.name[fzw.unknown_parameters_index[0]],
+          target_namestrings[fzw.target_name[0]]
+         );
+       }
       /* We can do 1 dimensional root finding */
       /* If shooting fails, postpone error to background module to play nice with MontePython. */
       class_call_try(input_find_root(&xzero,
@@ -774,6 +783,8 @@ int input_read_parameters(
   if (flag2 == _TRUE_)
     pba->Omega0_dcdmdr = param2/pba->h/pba->h;
 
+    if (pba->Omega0_dcdmdr > 0) {
+
     Omega_tot += pba->Omega0_dcdmdr;
 
     /** - Read Omega_ini_dcdm or omega_ini_dcdm */
@@ -795,7 +806,65 @@ int input_read_parameters(
     class_read_double("Gamma_dcdm",pba->Gamma_dcdm);
     /* Convert to Mpc */
     pba->Gamma_dcdm *= (1.e3 / _c_);
+
+    }
+
+  /** - GFA: Omega_0_dcdmdrwdm (DCDM) */
+/* for shooting method */
+ class_call(parser_read_double(pfc,"Omega_dcdmdrwdm",&param1,&flag1,errmsg),
+            errmsg,
+            errmsg);
+ class_call(parser_read_double(pfc,"omega_dcdmdrwdm",&param2,&flag2,errmsg),
+            errmsg,
+            errmsg);
+ class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+            errmsg,
+            "In input file, you can only enter one of Omega_dcdmdrwdm or omega_dcdmdrwdm, choose one");
+ if (flag1 == _TRUE_)
+   pba->Omega0_dcdmdrwdm = param1;
+ if (flag2 == _TRUE_)
+   pba->Omega0_dcdmdrwdm = param2/pba->h/pba->h;
+
+   if (pba->Omega0_dcdmdrwdm >0)   {
+    Omega_tot += pba->Omega0_dcdmdrwdm;
+    /** - Read Omega_ini_dcdm2 or omega_ini_dcdm2 */
+    class_call(parser_read_double(pfc,"Omega_ini_dcdm2",&param1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+    class_call(parser_read_double(pfc,"omega_ini_dcdm2",&param2,&flag2,errmsg),
+               errmsg,
+               errmsg);
+    class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+               errmsg,
+               "In input file, you can only enter one of Omega_ini_dcdm2 or omega_ini_dcdm2, choose one");
+
+    if (flag1 == _TRUE_)
+      pba->Omega_ini_dcdm2 = param1;
+    if (flag2 == _TRUE_)
+      pba->Omega_ini_dcdm2 = param2/pba->h/pba->h;
+
+   /** GFA: - Read Gamma2 (two-body decay) in same units as H0, i.e. km/(s Mpc)*/
+     class_call(parser_read_double(pfc,"Gamma_dcdm",&param1,&flag1,errmsg),
+                errmsg,
+                errmsg);
+     class_call(parser_read_double(pfc,"Log10_Gamma_dcdm",&param2,&flag2,errmsg),
+                errmsg,
+                errmsg);
+     class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+                errmsg,
+                "In input file, you can only enter one of Gamma_dcdm or Log10_Gamma_dcdm, choose one");
+
+     /* GFA: Convert Gamma to Mpc */
+     if (flag1 == _TRUE_)
+       pba->Gamma_dcdm = param1*(1.e3 / _c_);
+     if (flag2 == _TRUE_)
+       pba->Gamma_dcdm = pow(10.,param2)*(1.e3 / _c_);
+
     pba->epsilon_dcdm = 1; //default to avoid bug: will be updated a few lines below if necessary
+   }
+
+
+
     /** do we want to include DR pertubations? */
     class_call(parser_read_string(pfc,"dark_radiation_perturbations",&string1,&flag1,errmsg),
                errmsg,
@@ -912,7 +981,17 @@ int input_read_parameters(
       pba->PDmax_dcdm = pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2; // in GeV
       pba->ncdm_qmax[0]=pba->PDmax_dcdm;//5 has been optimized to capture enough of the distribution around the maximum.
       /* is q bin initialised in perts? set here to "no" (0) */
+
+      class_alloc(pba->is_q_initialized_dcdm,pba->ncdm_input_q_size[0]*sizeof(int),errmsg);
+    //  printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
+
+      for(i = 0; i<pba->ncdm_input_q_size[0]; i++){
+        pba->is_q_initialized_dcdm[i]=0;
+        // printf("%d\n", pba->is_q_initialized_dcdm[i]);
+      }
+
       // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
+
     }
     /* Read temperatures: */
     class_read_list_of_doubles_or_default("T_ncdm",pba->T_ncdm,pba->T_ncdm_default,N_ncdm);
@@ -3188,6 +3267,7 @@ int input_default_params(
   pba->Omega0_b = 0.022032/pow(pba->h,2);
   pba->Omega0_cdm = 0.12038/pow(pba->h,2);
   pba->Omega0_dcdmdr = 0.0;
+  pba->Omega0_dcdmdrwdm=0.0; /* GFA, for shooting method */
   pba->Omega0_dcdm = 0.0;
   pba->Gamma_dcdm = 0.0;
   pba->Gamma_neutrinos = NULL;
@@ -3494,7 +3574,7 @@ int input_default_precision ( struct precision * ppr ) {
    * - parameters related to the background
    */
 
-  ppr->a_ini_over_a_today_default = 1.e-9;
+  ppr->a_ini_over_a_today_default = 1.e-9; /*VP: testing: change the initial time, seems to bug when changing from the ini file*/
   ppr->back_integration_stepsize = 7.e-3;
   ppr->tol_background_integration = 1.e-2;
 
@@ -3901,8 +3981,11 @@ int input_try_unknown_parameters(double * unknown_parameter,
   struct nonlinear nl;        /* for non-linear spectra */
   struct lensing le;          /* for lensed spectra */
   struct output op;           /* for output files */
+
   int i;
+  int n; /* GFA */
   double rho_dcdm_today, rho_dr_today;
+  double rho_wdm_today; /* GFA */
   struct fzerofun_workspace * pfzw;
   int input_verbose;
   int flag;
@@ -4038,6 +4121,31 @@ int input_try_unknown_parameters(double * unknown_parameter,
         rho_dr_today = 0.;
       output[i] = (rho_dcdm_today+rho_dr_today)/(ba.H0*ba.H0)-pfzw->target_value[i]/ba.h/ba.h;
       break;
+    case Omega_dcdmdrwdm:  /* GFA*/
+      rho_dcdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_dcdm];
+      rho_dr_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_dr];
+      if (ba.has_ncdm == _TRUE_) {
+        for (n=0; n<ba.N_ncdm; n++) {
+
+         if (ba.background_ncdm_distribution[n] == _massive_daughter_) {
+           rho_wdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_ncdm1+n];
+         }
+        }
+      }
+      output[i] = (rho_dcdm_today+rho_dr_today+rho_wdm_today)/(ba.H0*ba.H0)-pfzw->target_value[i];
+      break;
+    case omega_dcdmdrwdm:  /* GFA*/
+      rho_dcdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_dcdm];
+      rho_dr_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_dr];
+      if (ba.has_ncdm == _TRUE_) {
+        for (n=0; n<ba.N_ncdm; n++) {
+          if (ba.background_ncdm_distribution[n] == _massive_daughter_) {
+            rho_wdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_ncdm1+n];
+          }
+        }
+      }
+      output[i] = (rho_dcdm_today+rho_dr_today+rho_wdm_today)/(ba.H0*ba.H0)-pfzw->target_value[i]/ba.h/ba.h;
+      break;
     case Omega_scf:
       /** - In case scalar field is used to fill, pba->Omega0_scf is not equal to pfzw->target_value[i].*/
       output[i] = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_scf]/(ba.H0*ba.H0)
@@ -4051,6 +4159,24 @@ int input_try_unknown_parameters(double * unknown_parameter,
       else
         rho_dr_today = 0.;
       output[i] = -(rho_dcdm_today+rho_dr_today)/(ba.H0*ba.H0)+ba.Omega0_dcdmdr;
+      break;
+
+    case Omega_ini_dcdm2: /*GFA */
+    case omega_ini_dcdm2:
+      rho_dcdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_dcdm];
+      rho_dr_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_dr];
+      if (ba.has_ncdm == _TRUE_) {
+        for (n=0; n<ba.N_ncdm; n++) {
+          if (ba.background_ncdm_distribution[n] == _massive_daughter_) {
+            rho_wdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_ncdm1+n];
+        //     printf("Omega_dcdm_today = %e\n",rho_dcdm_today/(ba.H0*ba.H0));
+        //     printf("Omega_dr_today = %e\n",rho_dr_today/(ba.H0*ba.H0));
+        //     printf("Omega_wdm_today = %e\n",rho_wdm_today/(ba.H0*ba.H0));
+          }
+        }
+      }
+
+      output[i]=-(rho_dcdm_today+rho_dr_today+rho_wdm_today)/(ba.H0*ba.H0)+ba.Omega0_dcdmdrwdm;
       break;
     case sigma8:
       output[i] = sp.sigma8-pfzw->target_value[i];
@@ -4108,6 +4234,7 @@ int input_get_guess(double *xguess,
   int i;
 
   double Omega_M, a_decay, gamma, Omega0_dcdmdr=1.0;
+  double Omega0_dcdmdrwdm=1.0; /* GFA */
   int index_guess;
 
   /* Cheat to read only known parameters: */
@@ -4156,6 +4283,8 @@ int input_get_guess(double *xguess,
         a_decay = 1.0;
       else
         a_decay = pow(1+(gamma*gamma-1.)/Omega_M,-1./3.);
+        /* GFA: This a_decay is obtained from the Friedmann equation for an universe just with Omega_M and Omega_Lambda=1-Omega_M, imposing H(a_decay)=Gamma_dcdm */
+       /* Then time at a_decay is approximately given by t(a_decay)=(1/Gamma_dcdm)*log(a_decay), so exp(-Gamma_dcdm*t(a_decay))=1/a_decay */
       xguess[index_guess] = pfzw->target_value[index_guess]/a_decay;
       dxdy[index_guess] = 1./a_decay;
       //printf("x = Omega_ini_guess = %g, dxdy = %g\n",*xguess,*dxdy);
@@ -4179,7 +4308,30 @@ int input_get_guess(double *xguess,
       dxdy[index_guess] = 1./a_decay/ba.h/ba.h;
         //printf("x = Omega_ini_guess = %g, dxdy = %g\n",*xguess,*dxdy);
       break;
-    case Omega_scf:
+
+    case Omega_dcdmdrwdm: /* GFA */
+     Omega_M =ba.Omega0_dcdmdrwdm+ba.Omega0_b+ba.Omega0_cdm; /* GFA  */
+     gamma = ba.Gamma_dcdm/ba.H0;
+    if (gamma < 1)
+      a_decay = 1.0;
+    else
+      a_decay = pow(1+(gamma*gamma-1.)/Omega_M,-1./3.);
+    xguess[index_guess] = pfzw->target_value[index_guess]/a_decay;
+    dxdy[index_guess] = 1./a_decay;
+    break;
+
+   case omega_dcdmdrwdm: /* GFA */
+     Omega_M =ba.Omega0_dcdmdrwdm+ba.Omega0_b+ba.Omega0_cdm; /* GFA  */
+     gamma = ba.Gamma_dcdm/ba.H0;
+   if (gamma < 1)
+      a_decay = 1.0;
+   else
+      a_decay = pow(1+(gamma*gamma-1.)/Omega_M,-1./3.);
+   xguess[index_guess] = pfzw->target_value[index_guess]/ba.h/ba.h/a_decay;
+   dxdy[index_guess] = 1./a_decay/ba.h/ba.h;
+   break;
+
+  case Omega_scf:
 
  /** - This guess is arbitrary, something nice using WKB should be implemented.
   *
@@ -4215,11 +4367,27 @@ int input_get_guess(double *xguess,
       dxdy[index_guess] = a_decay;
       if (gamma > 100)
         dxdy[index_guess] *= gamma/100;
-
-      //printf("x = Omega_ini_guess = %g, dxdy = %g\n",*xguess,*dxdy);
       break;
+    case omega_ini_dcdm2:
+      Omega0_dcdmdrwdm = 1./(ba.h*ba.h);
+    case Omega_ini_dcdm2:
+        /** - This works since correspondence is
+            Omega_ini_dcdm2 -> Omega_dcdmdrwdm and
+            omega_ini_dcdm2 -> omega_dcdmdrwdm */
+    Omega0_dcdmdrwdm*=pfzw->target_value[index_guess];
+    Omega_M = Omega0_dcdmdrwdm+ba.Omega0_b;  /* GFA: I imposed that we cannot have both cdm and dcdm components  */
+    gamma = ba.Gamma_dcdm/ba.H0;
+    if (gamma < 1)
+        a_decay = 1.0;
+    else
+       a_decay = pow(1+(gamma*gamma-1.)/Omega_M,-1./3.);
+    xguess[index_guess] = pfzw->target_value[index_guess]*a_decay;
+    dxdy[index_guess] = a_decay;
+    if (gamma > 100)
+      dxdy[index_guess] *= gamma/100;
+    break;
 
-    case sigma8:
+  case sigma8:
       /* Assume linear relationship between A_s and sigma8 and fix coefficient
          according to vanilla LambdaCDM. Should be good enough... */
       xguess[index_guess] = 2.43e-9/0.87659*pfzw->target_value[index_guess];
@@ -4263,7 +4431,7 @@ int input_find_root(double *xzero,
   dx = 1.5*f1*dxdy;
 
   /** - Do linear hunt for boundaries */
-  for (iter=1; iter<=15; iter++){
+  for (iter=1; iter<=30; iter++){ /* GFA */
     //x2 = x1 + search_dir*dx;
     x2 = x1 - dx;
 
@@ -4338,9 +4506,13 @@ int input_auxillary_target_conditions(struct file_content * pfc,
   switch (target_name){
   case Omega_dcdmdr:
   case omega_dcdmdr:
+  case Omega_dcdmdrwdm: /* GFA */
+  case omega_dcdmdrwdm: /* GFA */
   case Omega_scf:
   case Omega_ini_dcdm:
   case omega_ini_dcdm:
+  case Omega_ini_dcdm2: /* GFA */
+  case omega_ini_dcdm2: /* GFA */
     /* Check that Omega's or omega's are nonzero: */
     if (target_value == 0.)
       *aux_flag = _FALSE_;
