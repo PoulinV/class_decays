@@ -2230,70 +2230,11 @@ int perturb_solve(
       wavenumber is integrated */
 
   /* will be at least the first time in the background table */
-  tau_lower = pba->tau_table[0];
-
-  class_call(background_at_tau(pba,
-                               tau_lower,
-                               pba->normal_info,
-                               pba->inter_normal,
-                               &(ppw->last_index_back),
-                               ppw->pvecback),
-             pba->error_message,
-             ppt->error_message);
-
-  class_call(thermodynamics_at_z(pba,
-                                 pth,
-                                 1./ppw->pvecback[pba->index_bg_a]-1.,
-                                 pth->inter_normal,
-                                 &(ppw->last_index_thermo),
-                                 ppw->pvecback,
-                                 ppw->pvecthermo),
-             pth->error_message,
-             ppt->error_message);
-
-  /* check that this initial time is indeed OK given imposed
-     conditions on kappa' and on k/aH */
-
-  class_test(ppw->pvecback[pba->index_bg_a]*
-             ppw->pvecback[pba->index_bg_H]/
-             ppw->pvecthermo[pth->index_th_dkappa] >
-             ppr->start_small_k_at_tau_c_over_tau_h, ppt->error_message, "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time before that at which the background has been integrated. You should increase 'start_small_k_at_tau_c_over_tau_h' up to at least %g, or decrease 'a_ini_over_a_today_default'\n",
-             ppw->pvecback[pba->index_bg_a]*
-             ppw->pvecback[pba->index_bg_H]/
-             ppw->pvecthermo[pth->index_th_dkappa]);
-
-  class_test(k/ppw->pvecback[pba->index_bg_a]/ppw->pvecback[pba->index_bg_H] >
-             ppr->start_large_k_at_tau_h_over_tau_k,
-             ppt->error_message,
-             "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time before that at which the background has been integrated. You should increase 'start_large_k_at_tau_h_over_tau_k' up to at least %g, or decrease 'a_ini_over_a_today_default'\n",
-             ppt->k[index_md][ppt->k_size[index_md]-1]/ppw->pvecback[pba->index_bg_a]/ ppw->pvecback[pba->index_bg_H]);
-
-  if (pba->has_ncdm == _TRUE_) {
-    for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
-      if(pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_){
-        class_test(fabs(ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]-1./3.)>ppr->tol_ncdm_initial_w,
-                   ppt->error_message,
-                   "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time at which the ncdm species number %d is not ultra-relativistic anymore, with w=%g, p=%g and rho=%g\n",
-                   n_ncdm,
-                   ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm],
-                   ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm],
-                   ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]);
-      }
-    }
-  }
-
-  /* is at most the time at which sources must be sampled */
-  tau_upper = ppt->tau_sampling[0];
-
-  /* start bisection */
-  tau_mid = 0.5*(tau_lower + tau_upper);
-
-  while ((tau_upper - tau_lower)/tau_lower > ppr->tol_tau_approx) {
-
-    is_early_enough = _TRUE_;
+  if(ppt->tau_table_like_background == _TRUE_){
+    tau = pba->tau_table[0];
 
     class_call(background_at_tau(pba,
-                                 tau_mid,
+                                 tau,
                                  pba->normal_info,
                                  pba->inter_normal,
                                  &(ppw->last_index_back),
@@ -2301,49 +2242,166 @@ int perturb_solve(
                pba->error_message,
                ppt->error_message);
 
-    /* if there are non-cold relics, check that they are relativistic enough */
+    class_call(thermodynamics_at_z(pba,
+                                   pth,
+                                   1./ppw->pvecback[pba->index_bg_a]-1.,
+                                   pth->inter_normal,
+                                   &(ppw->last_index_thermo),
+                                   ppw->pvecback,
+                                   ppw->pvecthermo),
+               pth->error_message,
+               ppt->error_message);
+
+    /* check that this initial time is indeed OK given imposed
+       conditions on kappa' and on k/aH */
+
+    class_test(ppw->pvecback[pba->index_bg_a]*
+               ppw->pvecback[pba->index_bg_H]/
+               ppw->pvecthermo[pth->index_th_dkappa] >
+               ppr->start_small_k_at_tau_c_over_tau_h, ppt->error_message, "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time before that at which the background has been integrated. You should increase 'start_small_k_at_tau_c_over_tau_h' up to at least %g, or decrease 'a_ini_over_a_today_default'\n",
+               ppw->pvecback[pba->index_bg_a]*
+               ppw->pvecback[pba->index_bg_H]/
+               ppw->pvecthermo[pth->index_th_dkappa]);
+
+    class_test(k/ppw->pvecback[pba->index_bg_a]/ppw->pvecback[pba->index_bg_H] >
+               ppr->start_large_k_at_tau_h_over_tau_k,
+               ppt->error_message,
+               "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time before that at which the background has been integrated. You should increase 'start_large_k_at_tau_h_over_tau_k' up to at least %g, or decrease 'a_ini_over_a_today_default'\n",
+               ppt->k[index_md][ppt->k_size[index_md]-1]/ppw->pvecback[pba->index_bg_a]/ ppw->pvecback[pba->index_bg_H]);
+
     if (pba->has_ncdm == _TRUE_) {
       for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
         if(pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_){
-          if (fabs(ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]-1./3.) > ppr->tol_ncdm_initial_w)
-            is_early_enough = _FALSE_;
+          class_test(fabs(ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]-1./3.)>ppr->tol_ncdm_initial_w,
+                     ppt->error_message,
+                     "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time at which the ncdm species number %d is not ultra-relativistic anymore, with w=%g, p=%g and rho=%g\n",
+                     n_ncdm,
+                     ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm],
+                     ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm],
+                     ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]);
         }
       }
     }
 
-    /* also check that the two conditions on (aH/kappa') and (aH/k) are fulfilled */
-    if (is_early_enough == _TRUE_) {
+  }
+  else{
+    tau_lower = pba->tau_table[0];
 
-      class_call(thermodynamics_at_z(pba,
-                                     pth,
-                                     1./ppw->pvecback[pba->index_bg_a]-1.,  /* redshift z=1/a-1 */
-                                     pth->inter_normal,
-                                     &(ppw->last_index_thermo),
-                                     ppw->pvecback,
-                                     ppw->pvecthermo),
-                 pth->error_message,
-                 ppt->error_message);
+    class_call(background_at_tau(pba,
+                                 tau_lower,
+                                 pba->normal_info,
+                                 pba->inter_normal,
+                                 &(ppw->last_index_back),
+                                 ppw->pvecback),
+               pba->error_message,
+               ppt->error_message);
 
-      if ((ppw->pvecback[pba->index_bg_a]*
-           ppw->pvecback[pba->index_bg_H]/
-           ppw->pvecthermo[pth->index_th_dkappa] >
-           ppr->start_small_k_at_tau_c_over_tau_h) ||
-          (k/ppw->pvecback[pba->index_bg_a]/ppw->pvecback[pba->index_bg_H] >
-           ppr->start_large_k_at_tau_h_over_tau_k))
+    class_call(thermodynamics_at_z(pba,
+                                   pth,
+                                   1./ppw->pvecback[pba->index_bg_a]-1.,
+                                   pth->inter_normal,
+                                   &(ppw->last_index_thermo),
+                                   ppw->pvecback,
+                                   ppw->pvecthermo),
+               pth->error_message,
+               ppt->error_message);
 
-        is_early_enough = _FALSE_;
+    /* check that this initial time is indeed OK given imposed
+       conditions on kappa' and on k/aH */
+
+    class_test(ppw->pvecback[pba->index_bg_a]*
+               ppw->pvecback[pba->index_bg_H]/
+               ppw->pvecthermo[pth->index_th_dkappa] >
+               ppr->start_small_k_at_tau_c_over_tau_h, ppt->error_message, "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time before that at which the background has been integrated. You should increase 'start_small_k_at_tau_c_over_tau_h' up to at least %g, or decrease 'a_ini_over_a_today_default'\n",
+               ppw->pvecback[pba->index_bg_a]*
+               ppw->pvecback[pba->index_bg_H]/
+               ppw->pvecthermo[pth->index_th_dkappa]);
+
+    class_test(k/ppw->pvecback[pba->index_bg_a]/ppw->pvecback[pba->index_bg_H] >
+               ppr->start_large_k_at_tau_h_over_tau_k,
+               ppt->error_message,
+               "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time before that at which the background has been integrated. You should increase 'start_large_k_at_tau_h_over_tau_k' up to at least %g, or decrease 'a_ini_over_a_today_default'\n",
+               ppt->k[index_md][ppt->k_size[index_md]-1]/ppw->pvecback[pba->index_bg_a]/ ppw->pvecback[pba->index_bg_H]);
+
+    if (pba->has_ncdm == _TRUE_) {
+      for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
+        if(pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_){
+          class_test(fabs(ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]-1./3.)>ppr->tol_ncdm_initial_w,
+                     ppt->error_message,
+                     "your choice of initial time for integrating wavenumbers is inappropriate: it corresponds to a time at which the ncdm species number %d is not ultra-relativistic anymore, with w=%g, p=%g and rho=%g\n",
+                     n_ncdm,
+                     ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm],
+                     ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm],
+                     ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]);
+        }
+      }
     }
 
-    if (is_early_enough == _TRUE_)
-      tau_lower = tau_mid;
-    else
-      tau_upper = tau_mid;
+    /* is at most the time at which sources must be sampled */
+    tau_upper = ppt->tau_sampling[0];
 
+    /* start bisection */
     tau_mid = 0.5*(tau_lower + tau_upper);
 
+    while ((tau_upper - tau_lower)/tau_lower > ppr->tol_tau_approx) {
+
+      is_early_enough = _TRUE_;
+
+      class_call(background_at_tau(pba,
+                                   tau_mid,
+                                   pba->normal_info,
+                                   pba->inter_normal,
+                                   &(ppw->last_index_back),
+                                   ppw->pvecback),
+                 pba->error_message,
+                 ppt->error_message);
+
+      /* if there are non-cold relics, check that they are relativistic enough */
+      if (pba->has_ncdm == _TRUE_) {
+        for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
+          if(pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_){
+            if (fabs(ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]-1./3.) > ppr->tol_ncdm_initial_w)
+              is_early_enough = _FALSE_;
+          }
+        }
+      }
+
+      /* also check that the two conditions on (aH/kappa') and (aH/k) are fulfilled */
+      if (is_early_enough == _TRUE_) {
+
+        class_call(thermodynamics_at_z(pba,
+                                       pth,
+                                       1./ppw->pvecback[pba->index_bg_a]-1.,  /* redshift z=1/a-1 */
+                                       pth->inter_normal,
+                                       &(ppw->last_index_thermo),
+                                       ppw->pvecback,
+                                       ppw->pvecthermo),
+                   pth->error_message,
+                   ppt->error_message);
+
+        if ((ppw->pvecback[pba->index_bg_a]*
+             ppw->pvecback[pba->index_bg_H]/
+             ppw->pvecthermo[pth->index_th_dkappa] >
+             ppr->start_small_k_at_tau_c_over_tau_h) ||
+            (k/ppw->pvecback[pba->index_bg_a]/ppw->pvecback[pba->index_bg_H] >
+             ppr->start_large_k_at_tau_h_over_tau_k))
+
+          is_early_enough = _FALSE_;
+      }
+
+      if (is_early_enough == _TRUE_)
+        tau_lower = tau_mid;
+      else
+        tau_upper = tau_mid;
+
+      tau_mid = 0.5*(tau_lower + tau_upper);
+
+    }
+
+    tau = tau_mid;
   }
 
-  tau = tau_mid;
+
 
   /** - find the number of intervals over which approximation scheme is constant */
 
@@ -2492,6 +2550,8 @@ int perturb_solve(
                                ppt->error_message),
                ppt->error_message,
                ppt->error_message);
+
+    // printf("ppw->pv->y %e %e %e\n",ppw->pv->y[ppw->pv->index_pt_psi0_ncdm1],ppw->pv->y[ppw->pv->index_pt_psi0_ncdm1+1],ppw->pv->y[ppw->pv->index_pt_psi0_ncdm1+2]);
 
   }
 
@@ -3179,6 +3239,7 @@ int perturb_vector_init(
 
     /* non-cold dark matter */
     if (pba->has_ncdm == _TRUE_) {
+      // printf("here define index %d\n", index_pt);
       ppv->index_pt_psi0_ncdm1 = index_pt; /* density of ultra-relativistic neutrinos/relics */
       ppv->N_ncdm = pba->N_ncdm;
       class_alloc(ppv->l_max_ncdm,ppv->N_ncdm*sizeof(double),ppt->error_message);
@@ -3782,7 +3843,11 @@ int perturb_vector_init(
 
       if (pba->has_ncdm == _TRUE_) {
 
+
         if ((pa_old[ppw->index_ap_ncdmfa] == (int)ncdmfa_off) && (ppw->approx[ppw->index_ap_ncdmfa] == (int)ncdmfa_on)) {
+
+          printf("WE SHOULD NOT BE HERE\n");
+
 
           if (ppt->perturbations_verbose>2)
             fprintf(stdout,"Mode k=%e: switch on ncdm fluid approximation at tau=%e\n",k,tau);
@@ -3891,7 +3956,6 @@ int perturb_vector_init(
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm] *=factor/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+1] *=k*factor/rho_plus_p_ncdm;
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+2] *=2.0/3.0*factor/rho_plus_p_ncdm;
-            printf("THIS SHOULD NEVER HAPPEN\n");
           }
         }
       }
@@ -4550,7 +4614,7 @@ int perturb_initial_conditions(struct precision * ppr,
         /* shear and l3 are gauge invariant */
 
         if (pba->has_dr == _TRUE_ && pba->has_dcdm == _TRUE_)
-          delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_dcdm*ppw->pvecback[pba->index_bg_rho_dcdm]/ppw->pvecback[pba->index_bg_rho_dr])*alpha;
+          delta_dr += (-4.*a_prime_over_a + a*pba->Gamma_dcdm*ppw->pvecback[pba->index_bg_rho_dcdm]/ppw->pvecback[pba->index_bg_rho_dr]*pba->epsilon_dcdm)*alpha;
 
         if(pba->has_dr == _TRUE_ ){
           for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
@@ -5642,12 +5706,18 @@ int perturb_total_stress_energy(
           factor = pba->factor_ncdm[n_ncdm]*pow(pba->a_today/a,4);
 
           for (index_q=0; index_q < ppw->pv->q_size_ncdm[n_ncdm]; index_q ++) {
+            // printf("index_k %e  a %e idx %d index_q %d\n",k,a,idx,index_q);
             q = pba->q_ncdm[n_ncdm][index_q];
             q2 = q*q;
             epsilon = sqrt(q2+pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]*a2);
             // exp_factor = exp(-pba->Gamma_dcdm*pba->tq_table[n_ncdm][index_q])/pba->Hq_table[n_ncdm][index_q];
             if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-              aq = q/pba->PDmax_dcdm;
+              // if(q>pba->PDmax_dcdm){
+              //   aq = 0.99999999;
+              // }
+              // else{
+                aq = MAX(q/pba->PDmax_dcdm,ppr->a_ini_over_a_today_default*pba->a_today); //convert Tcmb to GeV using k_b*1e-9
+              // }
 
               // y[idx] = 0;
               // y[idx+1] = 0;
@@ -5663,8 +5733,11 @@ int perturb_total_stress_energy(
                 if(y[idx]!=0) delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
               }
 
-              // if(y[idx] !=0 || y[idx+1] !=0 || y[idx+2] !=0)printf("einstein aq %e idx %d y[idx] %e y[idx+1] %e y[idx+2] %e \n", aq, idx, y[idx],y[idx+1],y[idx+2]);
-              // printf("aq %e q2 %e  epsilon %e pba->w_ncdm[n_ncdm][index_q] %e y[idx] %e \n", aq, q2 ,  epsilon , pba->w_ncdm[n_ncdm][index_q] , y[idx]);
+
+
+              // if(y[idx] !=0 || y[idx+1] !=0 || y[idx+2] !=0)printf("in einstein: a %e aq %e q %e w %e idx %d idx_q %d  y[idx] %e y[idx+1] %e y[idx+2] %e \n", a,aq, q,pba->w_ncdm[n_ncdm][index_q], idx, index_q, y[idx],y[idx+1],y[idx+2]);
+              // printf("a %e aq %e q %e w %e idx %d idx_q %d  y[idx] %e y[idx+1] %e y[idx+2] %e \n",a, aq, q,pba->w_ncdm[n_ncdm][index_q], idx, index_q, y[idx],y[idx+1],y[idx+2]);
+              // printf("index_q %d a %e aq %e q2 %e  epsilon %e pba->w_ncdm[n_ncdm][index_q] %e y[idx] %e rho_delta_ncdm %e \n", index_q, a, aq, q2 ,  epsilon , pba->w_ncdm[n_ncdm][index_q] , y[idx],rho_delta_ncdm);
             }
             else if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
 
@@ -5696,7 +5769,6 @@ int perturb_total_stress_energy(
 
             }
             else{
-              y[idx] = 0;
               rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
               rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
               rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
@@ -5724,13 +5796,24 @@ int perturb_total_stress_energy(
             if(rho_plus_p_shear_ncdm!= 0 && ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm] != 0)ppw->shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm/
               (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           }
-          // printf("a %e delta_rho %e rho_plus_p_theta %e rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm] %e\n",a,ppw->delta_rho,ppw->rho_plus_p_theta,rho_delta_ncdm,rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
+          // if(a==1e-9){
 
+
+
+          // printf("a %e delta_rho %e rho_plus_p_theta %e ppw->rho_plus_p_shear %e delta_p %e rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e rho %e p %e\n",a,ppw->delta_rho,ppw->rho_plus_p_theta,ppw->rho_plus_p_shear,ppw->delta_p,rho_delta_ncdm,rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm],ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
+          // printf("rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e \n",rho_delta_ncdm, rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm);
+          // if(rho_delta_ncdm==0 && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+            // rho_delta_ncdm = ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_delta_dcdm];
+            // rho_plus_p_theta_ncdm = ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_theta_dcdm];
+
+
+          // }
             ppw->delta_rho += rho_delta_ncdm;
             ppw->rho_plus_p_theta += rho_plus_p_theta_ncdm;
             ppw->rho_plus_p_shear += rho_plus_p_shear_ncdm;
             ppw->delta_p += delta_p_ncdm;
             rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
+          // }
 
         }
       }
@@ -6754,6 +6837,8 @@ int perturb_print_variables(double tau,
                 if(y[idx+2]!=0) rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
                 if(y[idx]!=0) delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
               }
+              // if(y[idx] !=0 || y[idx+1] !=0 || y[idx+2] !=0)printf("in print: a %e aq %e q %e w %e idx %d idx_q %d  y[idx] %e y[idx+1] %e y[idx+2] %e \n", a,aq, q,pba->w_ncdm[n_ncdm][index_q], idx, index_q, y[idx],y[idx+1],y[idx+2]);
+
             }
             else{
               rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
@@ -6840,7 +6925,7 @@ int perturb_print_variables(double tau,
       }
 
       if (pba->has_dr == _TRUE_) {
-        if(pba->has_dcdm == _TRUE_) delta_dr += (-4.*a*H+a*pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]/pvecback[pba->index_bg_rho_dr])*alpha;
+        if(pba->has_dcdm == _TRUE_) delta_dr += (-4.*a*H+a*pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]/pvecback[pba->index_bg_rho_dr]*pba->epsilon_dcdm)*alpha;
         for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm ++){
           if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_)delta_dr += (-4.*a*H+a*pba->Gamma_neutrinos[n_ncdm]*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)/pvecback[pba->index_bg_rho_dr])*alpha;
         }
@@ -6889,8 +6974,8 @@ int perturb_print_variables(double tau,
       ppt->size_scalar_perturbation_data[ppw->index_ikout];
     ppt->size_scalar_perturbation_data[ppw->index_ikout] += ppt->number_of_scalar_titles;
 
-    class_store_double(dataptr, tau, _TRUE_, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_a], _TRUE_, storeidx);
+    class_store_double(dataptr, tau, _TRUE_, storeidx);
     class_store_double(dataptr, delta_g, _TRUE_, storeidx);
     class_store_double(dataptr, theta_g, _TRUE_, storeidx);
     class_store_double(dataptr, shear_g, _TRUE_, storeidx);
@@ -7552,7 +7637,7 @@ int perturb_derivs(double tau,
 
       if(pba->has_dcdm == _TRUE_){
         /* contribution due to dcdm */
-        fprime_dr = pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]*pow(a,5)/pow(pba->H0,2);
+        fprime_dr = pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]*pow(a,5)/pow(pba->H0,2)*pba->epsilon_dcdm;
         dy[pv->index_pt_F0_dr] +=  fprime_dr*(y[pv->index_pt_delta_dcdm]+metric_euler/k2);
         dy[pv->index_pt_F0_dr+1] += fprime_dr/k*y[pv->index_pt_theta_dcdm];
 
@@ -7729,7 +7814,6 @@ int perturb_derivs(double tau,
       /** - ----> first case: use a fluid approximation (ncdmfa) */
       //TBC: curvature
       if(ppw->approx[ppw->index_ap_ncdmfa] == (int)ncdmfa_on) {
-        printf("THIS SHOULD NEVER HAPPEN\n");
         /** - -----> loop over species */
 
         for (n_ncdm=0; n_ncdm<pv->N_ncdm; n_ncdm++) {
@@ -7843,7 +7927,7 @@ int perturb_derivs(double tau,
               aq = q/pba->PDmax_dcdm;
 
               //
-              if(a<aq){
+              if(a<=aq){
                 //we initialise.
                 rho_dcdm = pba->Omega_ini_dcdm*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
                 // n_dcdm = rho_dcdm*exp(-pba->Gamma_dcdm*pba->tq_table[n_ncdm][index_q])/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg
@@ -7851,16 +7935,15 @@ int perturb_derivs(double tau,
                 qcube=pow(q*1e9*_eV_/(_h_P_/2/_PI_)/_c_*_Mpc_over_m_,3);
                 FD_ncdm = pba->Gamma_dcdm * n_dcdm /(4*_PI_*qcube*pvecback[pba->index_bg_H]); //nb: \cal{H} = aH.
                 // printf("q [%e] pvecback[pba->index_bg_H] %e pba->tq_table[n_ncdm][index_q] %e \n",q,pvecback[pba->index_bg_H],pba->tq_table[n_ncdm][index_q]);
-                // printf("FD_ncdm %e pba->Gamma_dcdm  %e n_dcdm %e qcube %e  \n",FD_ncdm,pba->Gamma_dcdm,n_dcdm,qcube);
+                // printf("FD_ncdm %e pba->Gamma_dcdm  %e n_dcdm %e qcube %e H %e  \n",FD_ncdm,pba->Gamma_dcdm,n_dcdm,qcube,pvecback[pba->index_bg_H]);
                 // dy[idx] =*pvecback[pba->index_bg_rho_dcdm]*3/8./_PI_/(_G_)*_c_*_c_/_Mpc_over_m_/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_))*(y[pv->index_pt_delta_dcdm]+metric_euler/k2)/(4*_PI_*pow(q*pba->T_cmb*8.617e-5*_eV_to_invMpc_,3)*pvecback[pba->index_bg_H]);
                 // y[idx] =0;
                 y[idx] =(y[pv->index_pt_delta_dcdm]-metric_continuity/3/aq/pvecback[pba->index_bg_H]) * FD_ncdm;
                 // printf("%e %e %e\n",y[pv->index_pt_delta_dcdm],metric_continuity/3/aq/pba->Hq_table[n_ncdm][index_q],FD_ncdm);
                 y[idx+1] = 0;
-                y[idx+2] = 2/5*(y[pv->index_pt_delta_dcdm]+metric_euler/k2)/(pvecback[pba->index_bg_H])* FD_ncdm;
-                // y[idx+2] = 2/15*(metric_shear)/(aq*pba->Hq_table[n_ncdm][index_q])* FD_ncdm;
+                y[idx+2] = 2/15*(metric_shear)/(aq*pvecback[pba->index_bg_H])* FD_ncdm;
                 // y[idx+2] =0;
-                y[idx+3] = 0;
+                // y[idx+3] = 0;
                 for(l=3; l<pv->l_max_ncdm[n_ncdm]; l++){
                   y[idx+l] = 0;
                 }
@@ -7880,28 +7963,23 @@ int perturb_derivs(double tau,
               //
               }
               else{
-
-
-              // else{
                 dy[idx] = -qk_div_epsilon*y[idx+1]+metric_continuity*dlnf0_dlnq/3.;
                 // printf("index %d a %e qk_div_epsilon %e y[idx+1] %e metric_continuity %e dlnf0_dlnq/3 %e\n",index_q, a, qk_div_epsilon,y[idx+1],metric_continuity,dlnf0_dlnq/3);
 
                 // printf("index %d a %e aq %e A %e B %e y %e A+B %Ge\n", index_q, a,aq,-qk_div_epsilon*y[idx+1],metric_continuity*dlnf0_dlnq/3.,y[idx],dy[idx]);
 
                 // dy[idx] = -qk_div_epsilon*y[idx+1];
-                // dy[idx] = 0;
+
                 /** - -----> ncdm velocity for given momentum bin */
 
                 dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2]) - epsilon*metric_euler/(3*q*k)*dlnf0_dlnq;
                 // dy[idx+1] = qk_div_epsilon/3.0*(y[idx] - 2*s_l[2]*y[idx+2]);//the last term is not present in the formalism of 1402.2972. TBC.
-                // dy[idx+1] = 0;
+
                 // printf("a %e dy[idx] %e dy[idx+1] %e\n",a,dy[idx],dy[idx+1]);
                 /** - -----> ncdm shear for given momentum bin */
 
                 dy[idx+2] = qk_div_epsilon/5.0*(2*s_l[2]*y[idx+1]-3.*s_l[3]*y[idx+3])-s_l[2]*metric_shear*2./15.*dlnf0_dlnq;
                 // dy[idx+2] = qk_div_epsilon/5.0*(2*s_l[2]*y[idx+1]-3.*s_l[3]*y[idx+3]);
-
-                /** - -----> ncdm l>3 for given momentum bin */
 
                 for(l=3; l<pv->l_max_ncdm[n_ncdm]; l++){
                   dy[idx+l] = qk_div_epsilon/(2.*l+1.0)*(l*s_l[l]*y[idx+(l-1)]-(l+1.)*s_l[l+1]*y[idx+(l+1)]);
@@ -7909,16 +7987,25 @@ int perturb_derivs(double tau,
 
                 dy[idx+l] = qk_div_epsilon*y[idx+l-1]-(1.+l)*k*cotKgen*y[idx+l];
               }
+              // else{
+                // dy[idx] = 0;
+                // y[idx] = 0;
+                // dy[idx+1] = 0;
+                // y[idx+1] = 0;
+                // dy[idx+2] = 0;
+                // y[idx+2] = 0;
+                /** - -----> ncdm l>3 for given momentum bin */
+
+                // for(l=3; l<pv->l_max_ncdm[n_ncdm]; l++){
+                //   dy[idx+l] = 0;
+                //   y[idx+l] = 0;
+                // }
+                // dy[idx+l] = 0;
+                // y[idx+l] = 0;
               // }
-              // printf("index %d a %e aq %e\n", index_q, a,aq);
-              //
-              // dy[idx] = 0;
-              // dy[idx+1] = 0;
-              // dy[idx+2] = 0;
-              // for(l=3; l<pv->l_max_ncdm[n_ncdm]; l++){
-              //   dy[idx+l] = 0;
+
               // }
-              // dy[idx+l] = 0;
+
 
 
             }
@@ -8722,8 +8809,8 @@ int background_ncdm_distribution_perts(
   double H,t,aq,Omega_m,Omega_r,rho_dcdm,n_dcdm,qcube;
   int first_index_back;
   double * pvecback;
-  double tau_q;
-  class_alloc(pvecback,pba->bg_size_short*sizeof(double),pba->error_message);
+  double tau_q, expterm;
+  class_alloc(pvecback,pba->bg_size_normal*sizeof(double),pba->error_message);
 
   /** - extract from the input structure pbadist all the relevant information */
 
@@ -8735,7 +8822,14 @@ int background_ncdm_distribution_perts(
 
       // pba->PDmax_dcdm = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // in GeV
       // aq = q/pba->PDmax_dcdm*pba->T_cmb*8.617343e-05*1e-9; //convert Tcmb to GeV using k_b*1e-9
-      aq = MIN(q/pba->PDmax_dcdm,1); //convert Tcmb to GeV using k_b*1e-9
+      if(q>pba->PDmax_dcdm){
+        aq = 0.99999999;
+      }
+      else{
+        aq = MAX(q/pba->PDmax_dcdm,ppr->a_ini_over_a_today_default*pba->a_today); //convert Tcmb to GeV using k_b*1e-9
+      }
+
+      *f0 = 0;//initialize
       class_call(background_tau_of_z(pba,
                                      1/aq-1,
                                      &tau_q),
@@ -8744,7 +8838,7 @@ int background_ncdm_distribution_perts(
       /* set values of first_index_back/thermo */
       class_call(background_at_tau(pba,
                                    tau_q,
-                                   pba->short_info,
+                                   pba->normal_info,
                                    pba->inter_normal,
                                    &first_index_back,
                                    pvecback),
@@ -8756,7 +8850,26 @@ int background_ncdm_distribution_perts(
       n_dcdm = rho_dcdm/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg => n_ncdm in Mpc^-3
       // printf("q %e aq %e t %e H %e Gamma %e M_dcdm %e rho_dcdm %e n_dcdm %e\n",q,aq,t,pba->H0,pba->Gamma_dcdm,pba->M_dcdm,rho_dcdm,n_dcdm);
       qcube=pow(q*1e9*_eV_/(_h_P_/2/_PI_)/_c_*_Mpc_over_m_,3); //GeV^3 to Mpc^-3
-      *f0 = pba->Gamma_dcdm*n_dcdm*exp(-pba->Gamma_dcdm*pvecback[pba->index_bg_time])/qcube/4/_PI_/pvecback[pba->index_bg_H];
+      // printf("zq %e tau_q %e\n",1/aq-1,tau_q);
+      t = pvecback[pba->index_bg_time];
+      H = pvecback[pba->index_bg_H];
+      // printf("t %e H %e\n",t,H);
+      if(q < pba->q_ncdm[n_ncdm][0] || q > pba->q_ncdm[n_ncdm][pba->q_size_ncdm[n_ncdm]-1]){
+        expterm = 0;
+        *f0 = 0;
+      }
+      else if(t<0 || H<0 || pba->Gamma_dcdm*t > 100){
+        expterm = 0;
+        *f0 = 0;
+      }
+      else{
+        expterm = exp(-pba->Gamma_dcdm*t);
+        *f0 = pba->Gamma_dcdm*n_dcdm*expterm/qcube/4/_PI_/H;
+
+      }
+      // printf("q %e aq %e f0 %e pvecback[pba->index_bg_time] %e pvecback[pba->index_bg_H] %e exp(-pba->Gamma_dcdm*pvecback[pba->index_bg_time]) %e\n",q,aq,*f0,pvecback[pba->index_bg_time],pvecback[pba->index_bg_H],exp(-pba->Gamma_dcdm*pvecback[pba->index_bg_time]));
+
+
       // *f0 = 1.0/pow(2*_PI_,3)*(1./(exp(q)+1.) +1./(exp(q)+1.));
       if(pba->print_ncdm_distribution == _TRUE_){
         printf("%e %e %e %e\n",q,aq,*f0*q*q,n_dcdm*exp(-pba->Gamma_dcdm*pvecback[pba->index_bg_time]));
@@ -8764,7 +8877,6 @@ int background_ncdm_distribution_perts(
       }
 
   free(pvecback);
-
   return _SUCCESS_;
 }
 
@@ -8776,10 +8888,12 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
   // int min_tol = -30;
   for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm]; index_q++) {
     q = pba->q_ncdm[n_ncdm][index_q];
+    // printf("index_q %d\n", index_q);
     class_call(background_ncdm_distribution_perts(pba,ppr,q,n_ncdm,&f0),
                pba->error_message,ppr->error_message);
 
     // Loop to find appropriate dq:
+
     for(tolexp=_PSD_DERIVATIVE_EXP_MIN_; tolexp<_PSD_DERIVATIVE_EXP_MAX_; tolexp++){
 
       if (index_q == 0){
@@ -8791,14 +8905,12 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
       else{
         dq = exp(tolexp)*(pba->q_ncdm[n_ncdm][index_q+1]-pba->q_ncdm[n_ncdm][index_q-1]);
       }
-
       class_call(background_ncdm_distribution_perts(pba,ppr,q-2*dq,n_ncdm,&f0m2),
                  pba->error_message,pba->error_message);
       class_call(background_ncdm_distribution_perts(pba,ppr,q+2*dq,n_ncdm,&f0p2),
                  pba->error_message,pba->error_message);
 
       if (fabs((f0p2-f0m2)/f0)>sqrt(ppr->smallest_allowed_variation) && f0!= 0) {
-        // printf("found dq %e",dq);
         break;
       }
     }
@@ -8807,15 +8919,21 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
     class_call(background_ncdm_distribution_perts(pba,ppr,q+dq,n_ncdm,&f0p1),
                pba->error_message,pba->error_message);
     //5 point estimate of the derivative:
-    df0dq = (+f0m2-8*f0m1+8*f0p1-f0p2)/12.0/dq;
+    if (index_q == 0 || index_q == pba->q_size_ncdm[n_ncdm]-1){
+      df0dq=0;
+    }
+    else{
+      df0dq = (+f0m2-8*f0m1+8*f0p1-f0p2)/12.0/dq;
+    }
     // printf("pba->q_size_ncdm[n_ncdm]q %e df0dq = %g. dlf=%g f0 =%g.\n",pba->q_size_ncdm[n_ncdm],q,df0dq,q/f0*df0dq,f0);
+    // printf("index_q %d",index_q);
     //Avoid underflow in extreme tail:
     if (fabs(f0)==0.)
       // pba->dlnf0_dlnq_ncdm[n_ncdm][index_q] = -q; /* valid for whatever f0 with exponential tail in exp(-q) */
       pba->dlnf0_dlnq_ncdm[n_ncdm][index_q] = 0; /* valid for whatever f0 with exponential tail in exp(-q) */
     else{
       // if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ || pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-        pba->dlnf0_dlnq_ncdm[n_ncdm][index_q] = q*df0dq; //Instead of evolving psi, we directly evolve f0*psi. Hence, the f0 at the denominator cancels out.
+      pba->dlnf0_dlnq_ncdm[n_ncdm][index_q] = q*df0dq; //Instead of evolving psi, we directly evolve f0*psi. Hence, the f0 at the denominator cancels out.
       //   // pba->dlnf0_dlnq_ncdm[n_ncdm][index_q] = 0; //Instead of evolving psi, we directly evolve f0*psi. Hence, the f0 at the denominator cancels out.
       //   // printf("q %e pba->dlnf0_dlnq_ncdm %e 1/f0 %e\n",q, pba->dlnf0_dlnq_ncdm[n_ncdm][index_q] , 1/f0);
       // }
@@ -8826,7 +8944,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
       // }
       pba->f0[n_ncdm][index_q] = f0; //We also store f0, only useful in the decaying neutrino case;
     }
-    // printf("q*df0dq %e q %e dq %e %d\n", q*df0dq, q, dq,index_q);
+    // printf("index_q %d f0 %e q*df0dq %e q %e dq %e %d\n",index_q,f0, q*df0dq, q, dq,index_q);
 
   }
   // for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm]; index_q++){

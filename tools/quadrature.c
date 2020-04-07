@@ -8,6 +8,7 @@
 int get_qsampling_manual(double *x,
 			 double *w,
 			 int N,
+			 double qmin_tmp,
 			 double qmax,
 			 enum ncdm_quadrature_method method,
 			 double *qvec,
@@ -60,8 +61,8 @@ int get_qsampling_manual(double *x,
   case (qm_simpson_log) :
 
     /** Simpson rule on a log interval. */
-	qmin = qmax*1e-14;
 	// qmin = 0.1;
+	qmin=qmin_tmp;
 	h = (log10(qmax)-log10(qmin))/(N-1)/2;
 	j=0;
 	for (i=0; i<N; i++){

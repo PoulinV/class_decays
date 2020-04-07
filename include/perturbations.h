@@ -118,6 +118,10 @@ struct perturbs
   /* perturbed recombination */
   /** Do we want to consider perturbed temperature and ionization fraction? */
   short has_perturbed_recombination;
+
+  /** Do we want the time table to be identical to background? */
+  /** default = FALSE */
+  short tau_table_like_background;
   /** Neutrino contribution to tensors */
   enum tensor_methods tensor_method;  /**< way to treat neutrinos in tensor perturbations(neglect, approximate as massless, take exact equations) */
 

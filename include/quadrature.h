@@ -44,6 +44,7 @@ typedef struct adaptive_integration_tree_node{
        int get_qsampling_manual(double *x,
 				double *w,
 				int N,
+				double qmin_tmp,
 				double qmax,
 				enum ncdm_quadrature_method method,
 				double *qvec,

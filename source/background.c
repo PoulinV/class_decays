@@ -762,7 +762,8 @@ int background_free(
   free(pba->background_table);
   free(pba->d2background_dtau2_table);
 
-  if(pba->free_input_parameters == _TRUE_) err = background_free_input(pba);
+  // if(pba->free_input_parameters == _TRUE_)
+  err = background_free_input(pba);
 
   return err;
 }
@@ -799,15 +800,12 @@ int background_free_input(
 
   int k;
   if (pba->Omega0_ncdm_tot != 0.){
-
+      // printf("here!!!\n");
     for(k=0; k<pba->N_ncdm; k++){
       free(pba->q_ncdm[k]);
-
       free(pba->w_ncdm[k]);
       free(pba->Hq_table[k]);
-
       free(pba->tq_table[k]);
-
       free(pba->dlnf0_dlnq_ncdm[k]);
       free(pba->f0[k]);
     }
@@ -1315,9 +1313,9 @@ int background_ncdm_init(
   double f0m2,f0m1,f0,f0p1,f0p2,dq,q,df0dq,tmp1,tmp2;
   struct background_parameters_for_distributions pbadist;
   FILE *psdfile;
-
+  double qmin_tmp = ppr->a_ini_over_a_today_default * pba->a_today;
+  // printf("qmin_tmp %e\n", qmin_tmp);
   pbadist.pba = pba;
-
   /* Allocate pointer arrays: */
   class_alloc(pba->q_ncdm, sizeof(double*)*pba->N_ncdm,pba->error_message);
   class_alloc(pba->w_ncdm, sizeof(double*)*pba->N_ncdm,pba->error_message);
@@ -1463,10 +1461,12 @@ int background_ncdm_init(
       class_alloc(pba->q_ncdm[k],pba->q_size_ncdm[k]*sizeof(double),pba->error_message);
       class_alloc(pba->w_ncdm[k],pba->q_size_ncdm[k]*sizeof(double),pba->error_message);
       // class_alloc(pba->is_q_initialized_dcdm,pba->q_size_ncdm[k]*sizeof(double),pba->error_message);
+      // printf("pba->ncdm_qmax[k]*ppr->a_ini_over_a_today_default %e\n", ppr->a_ini_over_a_today_default);
 
       class_call(get_qsampling_manual(pba->q_ncdm_bg[k],
 				      pba->w_ncdm_bg[k],
 				      pba->q_size_ncdm_bg[k],
+              qmin_tmp*pba->ncdm_qmax[k],
 				      pba->ncdm_qmax[k],
 				      pba->ncdm_quadrature_strategy[k],
 				      pbadist.q,
@@ -1480,6 +1480,7 @@ int background_ncdm_init(
       class_call(get_qsampling_manual(pba->q_ncdm[k],
 				      pba->w_ncdm[k],
 				      pba->q_size_ncdm[k],
+              qmin_tmp*pba->ncdm_qmax[k],
 				      pba->ncdm_qmax[k],
 				      pba->ncdm_quadrature_strategy[k],
 				      pbadist.q,
@@ -1500,14 +1501,17 @@ int background_ncdm_init(
                                      pba->q_ncdm[k][index_q],
                                      &f0);
         // printf("pba->q_ncdm[k][index_q] %e\n", pba->q_ncdm[k][index_q]);
-        // printf("before pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e\n", pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
+        // printf("before pba->w_ncdm[k][index_q] %e\n", pba->w_ncdm[k][index_q]);
         // if(f0!=0)pba->w_ncdm[k][index_q] /= f0 ;
         // else pba->w_ncdm[k][index_q] =0;
+        pba->w_ncdm[k][index_q] /= f0;
+        // pba->w_ncdm_bg[k][index_q] *= f0;
+        // printf("after pba->q_ncdm[k][index_q] %e pba->w_ncdm[k][index_q] %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q]);
+        // printf("after q %e w %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q]);
+      }
+      for(index_q=0; index_q<pba->q_size_ncdm_bg[k];index_q++){
         pba->Hq_table[k][index_q] = 0;
         pba->tq_table[k][index_q] = 0;
-        // pba->w_ncdm_bg[k][index_q] *= f0;
-        // printf("after pba->q_ncdm[k][index_q] %e pba->w_ncdm[k][index_q] %e pba->w_ncdm_bg[k][index_q] %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q],pba->w_ncdm_bg[k][index_q]);
-        // printf("after q %e w %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q]);
       }
     }
     /** - in verbose mode, inform user of number of sampled momenta
@@ -1644,7 +1648,7 @@ int background_ncdm_momenta(
   double factor2;
   double zq = 1e100;
   int last_index;
-  double exp_factor;
+  double exp_factor = 0;
   double * pvecback;
   // double Omega_m, Omega_r, t, H;
   /** Summary: */
@@ -1699,7 +1703,10 @@ int background_ncdm_momenta(
         if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q]*exp_factor;
       }
       else if(background_ncdm_distribution == _massive_daughter_){
-        exp_factor = exp(-pba->Gamma_dcdm*pba->tq_table[n_ncdm][index_q]);
+        if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<100){
+          exp_factor = exp(-pba->Gamma_dcdm*pba->tq_table[n_ncdm][index_q]);
+        }
+        // printf("exp_factor %e G %e t %e\n",exp_factor,pba->Gamma_dcdm,pba->tq_table[n_ncdm][index_q]);
         if(pba->Hq_table[n_ncdm][index_q] != 0.0){
           if (n!=NULL) *n += q2*wvec[index_q]/pba->Hq_table[n_ncdm][index_q]*exp_factor;
           if (rho!=NULL) *rho += q2*epsilon*wvec[index_q]/pba->Hq_table[n_ncdm][index_q]*exp_factor;
@@ -2107,6 +2114,7 @@ int background_solve(
       if(pba->background_ncdm_distribution[n] != _fermi_dirac_){
         pba->Omega0_ncdm[n] = pvecback[pba->index_bg_rho_ncdm1+n]/pba->H0/pba->H0;
         pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];
+        // printf("in back pba->Omega0_ncdm_tot %e\n", pba->Omega0_ncdm_tot);
       }
       // printf("pba->Omega0_ncdm[n]  %e\n", pba->Omega0_ncdm[n] );
     }
@@ -2185,7 +2193,6 @@ int background_initial_conditions(
   double number_density_ncdm,rho_dcdm,pseudo_p_ncdm;
   /** - fix initial value of \f$ a \f$ */
   a = ppr->a_ini_over_a_today_default * pba->a_today;
-
   /**  If we have ncdm species, perhaps we need to start earlier
       than the standard value for the species to be relativistic.
       This could happen for some WDM models.

@@ -1114,7 +1114,7 @@ int input_read_parameters(
                          pba->error_message,
                          errmsg);
                pba->Omega0_ncdm[n] = rho_ncdm/pba->H0/pba->H0; //placeholder
-               // pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//ignore ncdm for simplicity
+               pba->Omega0_ncdm_tot += 1e-15;//ignore ncdm for simplicity
             }
             else if(pba->background_ncdm_distribution[n] == _decaying_neutrinos_){
               pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
@@ -1666,6 +1666,21 @@ int input_read_parameters(
     if ((flag1 == _TRUE_) && ((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL))) {
       ppt->has_perturbed_recombination = _TRUE_;
     }
+
+
+    /* perturbed recombination */
+    class_call(parser_read_string(pfc,
+                                  "tau_table_like_background",
+                                  &(string1),
+                                  &(flag1),
+                                  errmsg),
+               errmsg,
+               errmsg);
+
+    if ((flag1 == _TRUE_) && ((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL))) {
+      ppt->tau_table_like_background = _TRUE_;
+    }
+
 
     /* modes */
     class_call(parser_read_string(pfc,"modes",&string1,&flag1,errmsg),
@@ -2753,11 +2768,12 @@ int input_read_parameters(
   class_read_int("output_verbose",
                  pop->output_verbose);
 
+ class_read_double("a_ini_over_a_today_default",ppr->a_ini_over_a_today_default);
+
   /** (h) all precision parameters */
 
   /** - (h.1.) parameters related to the background */
 
-  class_read_double("a_ini_over_a_today_default",ppr->a_ini_over_a_today_default);
   class_read_double("back_integration_stepsize",ppr->back_integration_stepsize);
   class_read_double("tol_background_integration",ppr->tol_background_integration);
   class_read_double("tol_initial_Omega_r",ppr->tol_initial_Omega_r);
@@ -2895,14 +2911,14 @@ int input_read_parameters(
 
 
   /*VP CHECK FOR decaying NCDM */
-  for(n = 0;n<pba->N_ncdm;n++){
+  // for(n = 0;n<pba->N_ncdm;n++){
     //if there are decaying warm relics we enforce solving the full set of equation: no streaming/fluid approximation.
     // if(pba->background_ncdm_distribution[n] != _fermi_dirac_){
       ppr->radiation_streaming_approximation=rsa_none;//streaming approximation checked to be accurate at the 0.04% level.
       ppr->ur_fluid_approximation=ufa_none;//streaming approx is incorrect
       ppr->ncdm_fluid_approximation=ncdmfa_none;//streaming approx is incorrect
     // }
-  }
+  // }
 
   class_test(ppr->ur_fluid_trigger_tau_over_tau_k==ppr->radiation_streaming_trigger_tau_over_tau_k,
              errmsg,
@@ -3284,6 +3300,7 @@ int input_default_params(
   ppt->has_niv=_FALSE_;
 
   ppt->has_perturbed_recombination=_FALSE_;
+  ppt->tau_table_like_background=_FALSE_;
   ppt->tensor_method = tm_massless_approximation;
   ppt->evolve_tensor_ur = _FALSE_;
   ppt->evolve_tensor_ncdm = _FALSE_;
@@ -3477,7 +3494,7 @@ int input_default_precision ( struct precision * ppr ) {
    * - parameters related to the background
    */
 
-  ppr->a_ini_over_a_today_default = 1.e-14;
+  ppr->a_ini_over_a_today_default = 1.e-9;
   ppr->back_integration_stepsize = 7.e-3;
   ppr->tol_background_integration = 1.e-2;
 
