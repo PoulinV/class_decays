@@ -5716,7 +5716,7 @@ int perturb_total_stress_energy(
               //   aq = 0.99999999;
               // }
               // else{
-                aq = MAX(q/pba->PDmax_dcdm[n_ncdm],ppr->a_ini_over_a_today_default*pba->a_today); //convert Tcmb to GeV using k_b*1e-9
+                aq = q/pba->PDmax_dcdm[n_ncdm]; //convert Tcmb to GeV using k_b*1e-9
               // }
 
               // y[idx] = 0;
@@ -5802,12 +5802,10 @@ int perturb_total_stress_energy(
 
           // printf("a %e delta_rho %e rho_plus_p_theta %e ppw->rho_plus_p_shear %e delta_p %e rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e rho %e p %e\n",a,ppw->delta_rho,ppw->rho_plus_p_theta,ppw->rho_plus_p_shear,ppw->delta_p,rho_delta_ncdm,rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm],ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           // printf("rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e \n",rho_delta_ncdm, rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm);
-          // if(rho_delta_ncdm==0 && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-            // rho_delta_ncdm = ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_delta_dcdm];
-            // rho_plus_p_theta_ncdm = ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_theta_dcdm];
-
-
-          // }
+          if(rho_delta_ncdm==0 && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+            rho_delta_ncdm = ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*y[ppw->pv->index_pt_delta_dcdm];
+            rho_plus_p_theta_ncdm = ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*y[ppw->pv->index_pt_theta_dcdm];
+          }
             ppw->delta_rho += rho_delta_ncdm;
             ppw->rho_plus_p_theta += rho_plus_p_theta_ncdm;
             ppw->rho_plus_p_shear += rho_plus_p_shear_ncdm;
@@ -6858,12 +6856,14 @@ int perturb_print_variables(double tau,
           rho_plus_p_shear_ncdm *= 2.0/3.0*factor;
           delta_p_ncdm *= factor/3.;
 
+
           delta_ncdm[n_ncdm] = rho_delta_ncdm/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
           theta_ncdm[n_ncdm] = rho_plus_p_theta_ncdm/
             (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm/
             (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           delta_p_over_delta_rho_ncdm[n_ncdm] = delta_p_ncdm/rho_delta_ncdm;
+
           // delta_ncdm[n_ncdm] = rho_delta_ncdm;
           // theta_ncdm[n_ncdm] = rho_plus_p_theta_ncdm;
           // shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm;
@@ -6938,15 +6938,24 @@ int perturb_print_variables(double tau,
         theta_cdm += k*k*alpha;
       }
 
-      if (pba->has_ncdm == _TRUE_) {
-        for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
-          /** - --> Do gauge transformation of delta, deltaP/rho (?) and theta using -= 3aH(1+w_ncdm) alpha for delta. */
-        }
-      }
+
 
       if (pba->has_dcdm == _TRUE_) {
         delta_dcdm += alpha*(-a*pba->Gamma_dcdm-3.*a*H);
         theta_dcdm += k*k*alpha;
+      }
+
+      if (pba->has_ncdm == _TRUE_) {
+        for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
+          /** - --> Do gauge transformation of delta, deltaP/rho (?) and theta using -= 3aH(1+w_ncdm) alpha for delta. */
+          if(delta_ncdm[n_ncdm]==0 && pba->has_dcdm == _TRUE_ && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+            delta_ncdm[n_ncdm] = delta_dcdm;
+            theta_ncdm[n_ncdm] = theta_dcdm;
+            shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm/
+              (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
+            delta_p_over_delta_rho_ncdm[n_ncdm] = delta_p_ncdm/rho_delta_ncdm;
+          }
+        }
       }
 
       if (pba->has_scf == _TRUE_) {

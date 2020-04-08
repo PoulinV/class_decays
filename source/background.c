@@ -1251,10 +1251,10 @@ int background_ncdm_distribution(
 
       *f0 = pba->Gamma_dcdm*n_dcdm/qcube/4/_PI_; //nb: we will divide by Hq and multiply by exp(-Gamma*tq) in background_ncdm_momenta.
 
-      if(pba->print_ncdm_distribution == _TRUE_){
-        printf("%e %e %e %e\n",q,aq,*f0*q*q,n_dcdm*exp(-pba->Gamma_dcdm*t));
-        if(q==pba->ncdm_qmax[n_ncdm])pba->print_ncdm_distribution = _FALSE_;
-      }
+      // if(pba->print_ncdm_distribution == _TRUE_){
+      //   printf("%e %e %e %e\n",q,aq,*f0*q*q,n_dcdm);
+      //   if(q==pba->ncdm_qmax[n_ncdm])pba->print_ncdm_distribution = _FALSE_;
+      // }
     }
     else if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
           /*********************************************************/
@@ -1316,7 +1316,7 @@ int background_ncdm_init(
   double f0m2,f0m1,f0,f0p1,f0p2,dq,q,df0dq,tmp1,tmp2;
   struct background_parameters_for_distributions pbadist;
   FILE *psdfile;
-  double qmin_tmp = ppr->a_ini_over_a_today_default * pba->a_today;
+  double qmin_tmp = 0;
   // printf("qmin_tmp %e\n", qmin_tmp);
   pbadist.pba = pba;
   /* Allocate pointer arrays: */
@@ -1338,6 +1338,9 @@ int background_ncdm_init(
     pbadist.n_ncdm = k;
     pbadist.q = NULL;
     pbadist.tablesize = 0;
+    if(pba->background_ncdm_distribution[k]==_massive_daughter_){
+      qmin_tmp = ppr->a_ini_over_a_today_default * pba->a_today;
+    }
     /*Do we need to read in a file to interpolate the distribution function? */
     if ((pba->got_files!=NULL)&&(pba->got_files[k]==_TRUE_)){
       psdfile = fopen(pba->ncdm_psd_files+filenum*_ARGUMENT_LENGTH_MAX_,"r");
@@ -1385,6 +1388,7 @@ int background_ncdm_init(
 			       &(pba->q_size_ncdm[k]),
 			       _QUADRATURE_MAX_,
 			       ppr->tol_ncdm,
+             qmin_tmp,
 			       pbadist.q,
 			       pbadist.tablesize,
 			       background_ncdm_test_function,
@@ -1414,6 +1418,7 @@ int background_ncdm_init(
 			       &(pba->q_size_ncdm_bg[k]),
 			       _QUADRATURE_MAX_BG_,
 			       ppr->tol_ncdm_bg,
+             qmin_tmp,
 			       pbadist.q,
 			       pbadist.tablesize,
 			       background_ncdm_test_function,
@@ -1707,8 +1712,13 @@ int background_ncdm_momenta(
         if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q]*exp_factor;
       }
       else if(background_ncdm_distribution == _massive_daughter_){
-        if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<100){
+        if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<1e-3){
+          exp_factor =1;
+        }
+        else if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<10 &&  pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm>=1e-3){
           exp_factor = exp(-pba->Gamma_dcdm*pba->tq_table[n_ncdm][index_q]);
+        }else{
+          exp_factor = 0;
         }
         // printf("exp_factor %e G %e t %e\n",exp_factor,pba->Gamma_dcdm,pba->tq_table[n_ncdm][index_q]);
         if(pba->Hq_table[n_ncdm][index_q] != 0.0){
@@ -1735,7 +1745,7 @@ int background_ncdm_momenta(
   /** - adjust normalization */
 
   if(background_ncdm_distribution == _massive_daughter_){
-    factor2 *= 2*_PI_; //Not clear where it comes from;
+    // factor2 *= 2*_PI_; //Not clear where it comes from;
   }
 
   if (n!=NULL) *n *= factor2/(1.+z);

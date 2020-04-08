@@ -806,6 +806,7 @@ int input_read_parameters(
     class_read_double("Gamma_dcdm",pba->Gamma_dcdm);
     /* Convert to Mpc */
     pba->Gamma_dcdm *= (1.e3 / _c_);
+    pba->epsilon_dcdm = 1;
 
   }
 
@@ -861,10 +862,11 @@ int input_read_parameters(
        pba->Gamma_dcdm = pow(10.,param2)*(1.e3 / _c_);
 
     pba->epsilon_dcdm = 1; //default to avoid bug: will be updated a few lines below if necessary
-   }else{
-     pba->Omega_ini_dcdm2 = 0;
-     pba->Gamma_dcdm = 0;
    }
+   // else{
+   //   pba->Omega_ini_dcdm2 = 0;
+   //   pba->Gamma_dcdm = 0;
+   // }
 
 
 
