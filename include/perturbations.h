@@ -831,6 +831,7 @@ extern "C" {
                                    struct precision *ppr,
                                    double q,
                                    int n_ncdm,
+                                   double * pvecback,
                                    double * f0
                                  ) ;
 #ifdef __cplusplus

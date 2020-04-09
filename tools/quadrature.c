@@ -63,21 +63,52 @@ int get_qsampling_manual(double *x,
     /** Simpson rule on a log interval. */
 	// qmin = 0.1;
 	qmin=qmin_tmp;
-	h = (log10(qmax)-log10(qmin))/(N-1)/2;
+	h = (log10(qmax)-log10(qmin))/(N-1);
+	j=0;
+	for (i=0; i<N; i++){
+		// if(j==2)j=0;
+		x[i] = qmin*pow(10,i*h);
+		(*function)(params_for_function,x[i],&y);
+		w[i] = y*h*x[i]*log(10);
+		if (i==N-1 || i == 0)
+		w[i] *=0.5;
+		// if(j==0){
+		// 	w[i] = y*2*h/3*x[i];
+		// }
+		// if(j == 1 ){
+		// 	w[i] = y*4*h/3*x[i];
+		// }
+		// j++;
+		// // printf("i %d x[i] %e w %e f %e qmin %e qmax %e h %e\n",i,x[i],w[i],y,qmin,qmax,h);
+		// // printf("q[i] %e w %e\n", 	x[i],w[i]);
+		// if (i==N-1 || i == 0)
+		// w[i] = y*h/3*x[i];
+	}
+    return _SUCCESS_;
+  case (qm_simpson_lin) :
+
+    /** Simpson rule on a lin interval. */
+	// qmin = 0.1;
+	qmin=qmin_tmp;
+	h = (qmax-qmin)/(N-1);
 	j=0;
 	for (i=0; i<N; i++){
 		if(j==2)j=0;
-		x[i] = qmin*pow(10,2*i*h);
+		x[i] = qmin+i*h;
 		// printf("%d %e %e\n",i,x[i],qmax);
 		(*function)(params_for_function,x[i],&y);
-		w[i] = y*h/3*x[i];
+		if(j==0){
+			w[i] = y*2*h/3;
+		}
 		if(j == 1 ){
-			w[i] *= 4;
+			w[i] = y*4*h/3;
 		}
 		j++;
 		// printf("q[i] %e w %e\n", 	x[i],w[i]);
-		// if (i==N-1)
-		// w[i] *=0.5;
+		if (i==N-1 || i == 0){
+				w[i] = y*h/3;
+		}
+
 	}
     return _SUCCESS_;
   }
@@ -88,6 +119,7 @@ int get_qsampling(double *x,
 		  int *N,
 		  int N_max,
 		  double rtol,
+			double qmin_tmp,
 		  double *qvec,
 		  int qsiz,
 		  int (*test)(void * params_for_function, double q, double *psi),
@@ -113,7 +145,7 @@ int get_qsampling(double *x,
   double q_leg[4],w_leg[4];
   double q_lag[N_comb_lag],w_lag[N_comb_lag];
   char method_chosen[40];
-  double qmin=0., qmax=0., qmaxm1=0.;
+  double qmin, qmax=0., qmaxm1=0.;
   double *wcomb2=NULL,delq;
   double Itot=0.0;
   int zeroskip=0;
@@ -138,6 +170,7 @@ int get_qsampling(double *x,
     qmaxm1 = qvec[qsiz-2];
   }
   else{
+		qmin = qmin_tmp;
     qvec = NULL;
   }
 

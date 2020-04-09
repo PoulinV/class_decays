@@ -806,8 +806,9 @@ int input_read_parameters(
     class_read_double("Gamma_dcdm",pba->Gamma_dcdm);
     /* Convert to Mpc */
     pba->Gamma_dcdm *= (1.e3 / _c_);
+    pba->epsilon_dcdm = 1;
 
-    }
+  }
 
   /** - GFA: Omega_0_dcdmdrwdm (DCDM) */
 /* for shooting method */
@@ -862,6 +863,10 @@ int input_read_parameters(
 
     pba->epsilon_dcdm = 1; //default to avoid bug: will be updated a few lines below if necessary
    }
+   // else{
+   //   pba->Omega_ini_dcdm2 = 0;
+   //   pba->Gamma_dcdm = 0;
+   // }
 
 
 
@@ -916,11 +921,7 @@ int input_read_parameters(
 
     class_read_double("M_dcdm",pba->M_dcdm); //mass [GeV] of the  decaying cold dark matter
     class_read_double("m_dcdm",pba->m_dcdm); //mass [GeV] of the  daugher particle
-    if(pba->Gamma_dcdm > 0 && pba->M_dcdm > 0. && pba->m_dcdm > 0.){
-      pba->epsilon_dcdm = 0.5*(1 - pow(pba->m_dcdm/pba->M_dcdm,2));
-    }else{
-      pba->epsilon_dcdm = 1;
-    }
+
 
     /* background ncdm distribution, 0 is fermi_dirac. */
     class_read_list_of_integers_or_default("background_ncdm_distribution",pba->background_ncdm_distribution,0,N_ncdm);
@@ -975,24 +976,21 @@ int input_read_parameters(
 
     /* qmax, if relevant */
     class_read_list_of_doubles_or_default("Maximum q",pba->ncdm_qmax,15,N_ncdm);
-    if(pba->Gamma_dcdm >0 && pba->M_dcdm > 0 && pba->m_dcdm > 0){
-      //to do: eventually implement a loop over n_ncdm.
+    // printf("pba->Gamma_dcdm %e pba->M_dcdm %e pba->m_dcdm %e \n", pba->Gamma_dcdm , pba->M_dcdm ,pba->m_dcdm);
+    for(n=0; n<N_ncdm; n++){
+      class_alloc(pba->PDmax_dcdm,pba->N_ncdm*sizeof(double),pba->error_message);
+    if(pba->background_ncdm_distribution[n] == _massive_daughter_){
       // pba->ncdm_qmax[0]=100*pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2/(pba->T_cmb*8.617343e-05*1e-9);//5 has been optimized to capture enough of the distribution around the maximum.
-      pba->PDmax_dcdm = pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2; // in GeV
-      pba->ncdm_qmax[0]=pba->PDmax_dcdm;//5 has been optimized to capture enough of the distribution around the maximum.
-      /* is q bin initialised in perts? set here to "no" (0) */
-
-      class_alloc(pba->is_q_initialized_dcdm,pba->ncdm_input_q_size[0]*sizeof(int),errmsg);
-    //  printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
-
-      for(i = 0; i<pba->ncdm_input_q_size[0]; i++){
-        pba->is_q_initialized_dcdm[i]=0;
-        // printf("%d\n", pba->is_q_initialized_dcdm[i]);
-      }
+      pba->PDmax_dcdm[n] = pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2; // in GeV
+      pba->ncdm_qmax[n] = pba->PDmax_dcdm[n];
+      pba->epsilon_dcdm = 0.5*(1 - pow(pba->m_dcdm/pba->M_dcdm,2));
 
       // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
-
+    }else{
+      pba->PDmax_dcdm[n] = 0;
+      pba->epsilon_dcdm = 1;
     }
+  }
     /* Read temperatures: */
     class_read_list_of_doubles_or_default("T_ncdm",pba->T_ncdm,pba->T_ncdm_default,N_ncdm);
 
@@ -1135,8 +1133,8 @@ int input_read_parameters(
                                                  pba->factor_ncdm[n],
                                                  pba->background_ncdm_distribution[n],
                                                  n,
-                                                 0.,
-                                                 0.,
+                                                 0,
+                                                 0,
                                                  pba->H0,
                                                  NULL,
                                                  &rho_ncdm,
@@ -1182,8 +1180,8 @@ int input_read_parameters(
                                                  pba->factor_ncdm[n],
                                                  pba->background_ncdm_distribution[n],
                                                  n,
-                                                 0.,
-                                                 0.,
+                                                 1e100,
+                                                 1e100,
                                                  pba->H0,
                                                  NULL,
                                                  &rho_ncdm,

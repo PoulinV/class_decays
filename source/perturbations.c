@@ -5716,7 +5716,7 @@ int perturb_total_stress_energy(
               //   aq = 0.99999999;
               // }
               // else{
-                aq = MAX(q/pba->PDmax_dcdm,ppr->a_ini_over_a_today_default*pba->a_today); //convert Tcmb to GeV using k_b*1e-9
+                aq = q/pba->PDmax_dcdm[n_ncdm]; //convert Tcmb to GeV using k_b*1e-9
               // }
 
               // y[idx] = 0;
@@ -5802,12 +5802,10 @@ int perturb_total_stress_energy(
 
           // printf("a %e delta_rho %e rho_plus_p_theta %e ppw->rho_plus_p_shear %e delta_p %e rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e rho %e p %e\n",a,ppw->delta_rho,ppw->rho_plus_p_theta,ppw->rho_plus_p_shear,ppw->delta_p,rho_delta_ncdm,rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm],ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           // printf("rho_delta_ncdm %e rho_plus_p_theta_ncdm %e rho_plus_p_shear_ncdm %e delta_p_ncdm %e \n",rho_delta_ncdm, rho_plus_p_theta_ncdm,rho_plus_p_shear_ncdm,delta_p_ncdm);
-          // if(rho_delta_ncdm==0 && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-            // rho_delta_ncdm = ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_delta_dcdm];
-            // rho_plus_p_theta_ncdm = ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_theta_dcdm];
-
-
-          // }
+          if(rho_delta_ncdm==0 && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+            rho_delta_ncdm = ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*y[ppw->pv->index_pt_delta_dcdm];
+            rho_plus_p_theta_ncdm = ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*y[ppw->pv->index_pt_theta_dcdm];
+          }
             ppw->delta_rho += rho_delta_ncdm;
             ppw->rho_plus_p_theta += rho_plus_p_theta_ncdm;
             ppw->rho_plus_p_shear += rho_plus_p_shear_ncdm;
@@ -6829,7 +6827,7 @@ int perturb_print_variables(double tau,
             epsilon = sqrt(q2+pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]*a2);
 
             if(pba->background_ncdm_distribution[n_ncdm]==_massive_daughter_){
-              aq = q/pba->PDmax_dcdm;
+              aq = q/pba->PDmax_dcdm[n_ncdm];
 
               if(a>=aq){
                 if(y[idx]!=0) rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
@@ -6858,12 +6856,14 @@ int perturb_print_variables(double tau,
           rho_plus_p_shear_ncdm *= 2.0/3.0*factor;
           delta_p_ncdm *= factor/3.;
 
+
           delta_ncdm[n_ncdm] = rho_delta_ncdm/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
           theta_ncdm[n_ncdm] = rho_plus_p_theta_ncdm/
             (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm/
             (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           delta_p_over_delta_rho_ncdm[n_ncdm] = delta_p_ncdm/rho_delta_ncdm;
+
           // delta_ncdm[n_ncdm] = rho_delta_ncdm;
           // theta_ncdm[n_ncdm] = rho_plus_p_theta_ncdm;
           // shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm;
@@ -6938,15 +6938,24 @@ int perturb_print_variables(double tau,
         theta_cdm += k*k*alpha;
       }
 
-      if (pba->has_ncdm == _TRUE_) {
-        for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
-          /** - --> Do gauge transformation of delta, deltaP/rho (?) and theta using -= 3aH(1+w_ncdm) alpha for delta. */
-        }
-      }
+
 
       if (pba->has_dcdm == _TRUE_) {
         delta_dcdm += alpha*(-a*pba->Gamma_dcdm-3.*a*H);
         theta_dcdm += k*k*alpha;
+      }
+
+      if (pba->has_ncdm == _TRUE_) {
+        for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
+          /** - --> Do gauge transformation of delta, deltaP/rho (?) and theta using -= 3aH(1+w_ncdm) alpha for delta. */
+          if(delta_ncdm[n_ncdm]==0 && pba->has_dcdm == _TRUE_ && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+            delta_ncdm[n_ncdm] = delta_dcdm;
+            theta_ncdm[n_ncdm] = theta_dcdm;
+            shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm/
+              (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
+            delta_p_over_delta_rho_ncdm[n_ncdm] = delta_p_ncdm/rho_delta_ncdm;
+          }
+        }
       }
 
       if (pba->has_scf == _TRUE_) {
@@ -7924,12 +7933,12 @@ int perturb_derivs(double tau,
 
             // // /** - -----> ncdm density for given momentum bin */
             if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-              aq = q/pba->PDmax_dcdm;
+              aq = q/pba->PDmax_dcdm[n_ncdm];
 
               //
               if(a<=aq){
                 //we initialise.
-                rho_dcdm = pba->Omega_ini_dcdm*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
+                rho_dcdm = pba->Omega_ini_dcdm2*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
                 // n_dcdm = rho_dcdm*exp(-pba->Gamma_dcdm*pba->tq_table[n_ncdm][index_q])/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg
                 n_dcdm = rho_dcdm/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg
                 qcube=pow(q*1e9*_eV_/(_h_P_/2/_PI_)/_c_*_Mpc_over_m_,3);
@@ -8801,6 +8810,7 @@ int background_ncdm_distribution_perts(
                                  struct precision *ppr,
                                  double q,
                                  int n_ncdm,
+                                 double * pvecback,
                                  double * f0
                                  ) {
   struct background_parameters_for_distributions * pbadist_local;
@@ -8808,9 +8818,7 @@ int background_ncdm_distribution_perts(
   double *param;
   double H,t,aq,Omega_m,Omega_r,rho_dcdm,n_dcdm,qcube;
   int first_index_back;
-  double * pvecback;
   double tau_q, expterm;
-  class_alloc(pvecback,pba->bg_size_normal*sizeof(double),pba->error_message);
 
   /** - extract from the input structure pbadist all the relevant information */
 
@@ -8822,11 +8830,11 @@ int background_ncdm_distribution_perts(
 
       // pba->PDmax_dcdm = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // in GeV
       // aq = q/pba->PDmax_dcdm*pba->T_cmb*8.617343e-05*1e-9; //convert Tcmb to GeV using k_b*1e-9
-      if(q>pba->PDmax_dcdm){
+      if(q>pba->PDmax_dcdm[n_ncdm]){
         aq = 0.99999999;
       }
       else{
-        aq = MAX(q/pba->PDmax_dcdm,ppr->a_ini_over_a_today_default*pba->a_today); //convert Tcmb to GeV using k_b*1e-9
+        aq = MAX(q/pba->PDmax_dcdm[n_ncdm],ppr->a_ini_over_a_today_default*pba->a_today); //convert Tcmb to GeV using k_b*1e-9
       }
 
       *f0 = 0;//initialize
@@ -8846,7 +8854,7 @@ int background_ncdm_distribution_perts(
                  ppr->error_message);
 
       // printf("aq %e  pba->PDmax_dcdm %e q %e qmax %e\n", aq,pba->PDmax_dcdm,q,pba->ncdm_qmax[0]);
-      rho_dcdm = pba->Omega_ini_dcdm*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no G factors.
+      rho_dcdm = pba->Omega_ini_dcdm2*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no G factors.
       n_dcdm = rho_dcdm/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg => n_ncdm in Mpc^-3
       // printf("q %e aq %e t %e H %e Gamma %e M_dcdm %e rho_dcdm %e n_dcdm %e\n",q,aq,t,pba->H0,pba->Gamma_dcdm,pba->M_dcdm,rho_dcdm,n_dcdm);
       qcube=pow(q*1e9*_eV_/(_h_P_/2/_PI_)/_c_*_Mpc_over_m_,3); //GeV^3 to Mpc^-3
@@ -8876,7 +8884,6 @@ int background_ncdm_distribution_perts(
         if(q==pba->ncdm_qmax[n_ncdm])pba->print_ncdm_distribution = _FALSE_;
       }
 
-  free(pvecback);
   return _SUCCESS_;
 }
 
@@ -8885,13 +8892,81 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
                           int n_ncdm){
   int index_q, k,tolexp,row,status,filenum;
   double f0m2,f0m1,f0,f0p1,f0p2,dq,q,df0dq,tmp1,tmp2;
+  double * pvecback;
+  int i, i_step_max = 10000;
+  int first_index_back;
+  double h, a_step, a_D = 1.0;
+  double tau;
+  double qmin_tmp;
+  struct background_parameters_for_distributions pbadist;
+
+  pbadist.pba = pba;
+  pbadist.n_ncdm = n_ncdm;
+  pbadist.q = NULL;
+  pbadist.tablesize = 0;
+
+  class_alloc(pvecback,pba->bg_size_normal*sizeof(double),pba->error_message);
+
+  /** loop to find a_decay **/
+  h =  (log10(pba->a_today)-log10(pba->a_today*ppr->a_ini_over_a_today_default))/(i_step_max-1);
+  for(i = 0; i < i_step_max; i++){
+
+    a_step = ppr->a_ini_over_a_today_default*pba->a_today*pow(10,i*h);
+    class_call(background_tau_of_z(pba,
+                                   1/a_step-1,
+                                   &tau),
+               pba->error_message,
+               ppr->error_message);
+    /* set values of first_index_back/thermo */
+    class_call(background_at_tau(pba,
+                                 tau,
+                                 pba->normal_info,
+                                 pba->inter_normal,
+                                 &first_index_back,
+                                 pvecback),
+               pba->error_message,
+               ppr->error_message);
+    // printf("pvecback[pba->index_bg_time] %e (1.0/pba->Gamma_dcdm) %e\n",pvecback[pba->index_bg_time],(1.0/pba->Gamma_dcdm));
+    if(pvecback[pba->index_bg_time]<(1.0/pba->Gamma_dcdm)){
+      a_D = a_step;
+    }else{
+      break;
+    }
+  }
+
+
+
+
+
+    /** Manual q-sampling for this species. Same sampling used for both perturbation and background sampling, since this will usually be a high precision setting anyway */
+    pba->ncdm_qmax[n_ncdm] = MIN(pba->PDmax_dcdm[n_ncdm],5*a_D * pba->PDmax_dcdm[n_ncdm]);
+    qmin_tmp = 1e-4 * a_D * pba->PDmax_dcdm[n_ncdm];
+    if(pba->background_verbose>0)printf("found a_D %e qmin %e qmax %e\n", a_D,qmin_tmp,pba->ncdm_qmax[n_ncdm]);
+
+    class_call(get_qsampling_manual(pba->q_ncdm[n_ncdm],
+            pba->w_ncdm[n_ncdm],
+            pba->q_size_ncdm[n_ncdm],
+            qmin_tmp,
+            pba->ncdm_qmax[n_ncdm],
+            pba->ncdm_quadrature_strategy[n_ncdm],
+            pbadist.q,
+            pbadist.tablesize,
+            background_ncdm_distribution,
+            &pbadist,
+            pba->error_message),
+   pba->error_message,
+   pba->error_message);
+
+
   // int min_tol = -30;
   for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm]; index_q++) {
     q = pba->q_ncdm[n_ncdm][index_q];
     // printf("index_q %d\n", index_q);
-    class_call(background_ncdm_distribution_perts(pba,ppr,q,n_ncdm,&f0),
+    class_call(background_ncdm_distribution_perts(pba,ppr,q,n_ncdm,pvecback,&f0),
                pba->error_message,ppr->error_message);
 
+     //we need to correct w_ncdm because we use a slightly different definition for the description of dcdm perturbations
+     pba->w_ncdm[n_ncdm][index_q] /= f0;
     // Loop to find appropriate dq:
 
     for(tolexp=_PSD_DERIVATIVE_EXP_MIN_; tolexp<_PSD_DERIVATIVE_EXP_MAX_; tolexp++){
@@ -8905,18 +8980,18 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
       else{
         dq = exp(tolexp)*(pba->q_ncdm[n_ncdm][index_q+1]-pba->q_ncdm[n_ncdm][index_q-1]);
       }
-      class_call(background_ncdm_distribution_perts(pba,ppr,q-2*dq,n_ncdm,&f0m2),
+      class_call(background_ncdm_distribution_perts(pba,ppr,q-2*dq,n_ncdm,pvecback,&f0m2),
                  pba->error_message,pba->error_message);
-      class_call(background_ncdm_distribution_perts(pba,ppr,q+2*dq,n_ncdm,&f0p2),
+      class_call(background_ncdm_distribution_perts(pba,ppr,q+2*dq,n_ncdm,pvecback,&f0p2),
                  pba->error_message,pba->error_message);
 
       if (fabs((f0p2-f0m2)/f0)>sqrt(ppr->smallest_allowed_variation) && f0!= 0) {
         break;
       }
     }
-    class_call(background_ncdm_distribution_perts(pba,ppr,q-dq,n_ncdm,&f0m1),
+    class_call(background_ncdm_distribution_perts(pba,ppr,q-dq,n_ncdm,pvecback,&f0m1),
                pba->error_message,pba->error_message);
-    class_call(background_ncdm_distribution_perts(pba,ppr,q+dq,n_ncdm,&f0p1),
+    class_call(background_ncdm_distribution_perts(pba,ppr,q+dq,n_ncdm,pvecback,&f0p1),
                pba->error_message,pba->error_message);
     //5 point estimate of the derivative:
     if (index_q == 0 || index_q == pba->q_size_ncdm[n_ncdm]-1){
@@ -8944,7 +9019,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
       // }
       pba->f0[n_ncdm][index_q] = f0; //We also store f0, only useful in the decaying neutrino case;
     }
-    // printf("index_q %d f0 %e q*df0dq %e q %e dq %e %d\n",index_q,f0, q*df0dq, q, dq,index_q);
+    // printf("index_q %d f0*q*q %e q*df0dq %e q %e dq %e w %e\n",index_q,f0*q*q, q*df0dq, q, dq,pba->w_ncdm[n_ncdm][index_q]);
 
   }
   // for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm]; index_q++){
@@ -8952,6 +9027,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
   //     printf(" %d\n", index_q);
   //
   // }
+  free(pvecback);
 
   return _SUCCESS_;
 }

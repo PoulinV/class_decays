@@ -810,6 +810,7 @@ int background_free_input(
     free(pba->ncdm_input_q_size_bg);
     free(pba->ncdm_input_q_size);
     free(pba->ncdm_qmax);
+    free(pba->PDmax_dcdm);
     free(pba->q_ncdm);
     free(pba->w_ncdm);
     free(pba->Hq_table);
@@ -1242,7 +1243,7 @@ int background_ncdm_distribution(
           /*   We will correct for it in background_ncdm_momenta   */
           /*********************************************************/
 
-      aq = q/pba->PDmax_dcdm; //convert Tcmb to GeV using k_b*1e-9
+      aq = q/pba->PDmax_dcdm[n_ncdm]; //convert Tcmb to GeV using k_b*1e-9
       /* GFA */
       rho_dcdm = pba->Omega_ini_dcdm2*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
       n_dcdm = rho_dcdm/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg => n_ncdm in Mpc^-3
@@ -1250,10 +1251,10 @@ int background_ncdm_distribution(
 
       *f0 = pba->Gamma_dcdm*n_dcdm/qcube/4/_PI_; //nb: we will divide by Hq and multiply by exp(-Gamma*tq) in background_ncdm_momenta.
 
-      if(pba->print_ncdm_distribution == _TRUE_){
-        printf("%e %e %e %e\n",q,aq,*f0*q*q,n_dcdm*exp(-pba->Gamma_dcdm*t));
-        if(q==pba->ncdm_qmax[n_ncdm])pba->print_ncdm_distribution = _FALSE_;
-      }
+      // if(pba->print_ncdm_distribution == _TRUE_){
+      //   printf("%e %e %e %e\n",q,aq,*f0*q*q,n_dcdm);
+      //   if(q==pba->ncdm_qmax[n_ncdm])pba->print_ncdm_distribution = _FALSE_;
+      // }
     }
     else if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
           /*********************************************************/
@@ -1315,7 +1316,7 @@ int background_ncdm_init(
   double f0m2,f0m1,f0,f0p1,f0p2,dq,q,df0dq,tmp1,tmp2;
   struct background_parameters_for_distributions pbadist;
   FILE *psdfile;
-  double qmin_tmp = ppr->a_ini_over_a_today_default * pba->a_today;
+  double qmin_tmp = 0;
   // printf("qmin_tmp %e\n", qmin_tmp);
   pbadist.pba = pba;
   /* Allocate pointer arrays: */
@@ -1337,6 +1338,9 @@ int background_ncdm_init(
     pbadist.n_ncdm = k;
     pbadist.q = NULL;
     pbadist.tablesize = 0;
+    if(pba->background_ncdm_distribution[k]==_massive_daughter_){
+      qmin_tmp = ppr->a_ini_over_a_today_default * pba->a_today;
+    }
     /*Do we need to read in a file to interpolate the distribution function? */
     if ((pba->got_files!=NULL)&&(pba->got_files[k]==_TRUE_)){
       psdfile = fopen(pba->ncdm_psd_files+filenum*_ARGUMENT_LENGTH_MAX_,"r");
@@ -1373,6 +1377,7 @@ int background_ncdm_init(
     }
 
     /* Handle perturbation qsampling: */
+    f0 = 0;
     if (pba->ncdm_quadrature_strategy[k]==qm_auto){
       /** Automatic q-sampling for this species */
       class_alloc(pba->q_ncdm[k],_QUADRATURE_MAX_*sizeof(double),pba->error_message);
@@ -1383,6 +1388,7 @@ int background_ncdm_init(
 			       &(pba->q_size_ncdm[k]),
 			       _QUADRATURE_MAX_,
 			       ppr->tol_ncdm,
+             qmin_tmp,
 			       pbadist.q,
 			       pbadist.tablesize,
 			       background_ncdm_test_function,
@@ -1412,6 +1418,7 @@ int background_ncdm_init(
 			       &(pba->q_size_ncdm_bg[k]),
 			       _QUADRATURE_MAX_BG_,
 			       ppr->tol_ncdm_bg,
+             qmin_tmp,
 			       pbadist.q,
 			       pbadist.tablesize,
 			       background_ncdm_test_function,
@@ -1537,7 +1544,7 @@ int background_ncdm_init(
       q = pba->q_ncdm[k][index_q];
       class_call(background_ncdm_distribution(&pbadist,q,&f0),
                  pba->error_message,pba->error_message);
-
+      // printf("f0 %e q %e\n",f0,q);
       //Loop to find appropriate dq:
       for(tolexp=_PSD_DERIVATIVE_EXP_MIN_; tolexp<_PSD_DERIVATIVE_EXP_MAX_; tolexp++){
 
@@ -1670,13 +1677,13 @@ int background_ncdm_momenta(
 
     if(background_ncdm_distribution == _massive_daughter_){
       // pba->PDmax_dcdm = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // convert to GeV
-      zq = 1/(qvec[index_q]/pba->PDmax_dcdm)-1; // in CLASS, q is defined as p/T0. We therefore multiply by T0*8.617e-5*1e-9 to get a result in GeV.
-      // printf("%e %e zq %e\n",pba->PDmax_dcdm,qvec[index_q],zq);
+      zq = 1/(qvec[index_q]/pba->PDmax_dcdm[n_ncdm])-1; // in CLASS, q is defined as p/T0. We therefore multiply by T0*8.617e-5*1e-9 to get a result in GeV.
+      // printf("%e %e zq %e\n",pba->PDmax_dcdm[n_ncdm],qvec[index_q],zq);
       // printf("z %e zq %e \n",z,zq);
 
     }
-
-    if(z>zq){
+    // printf("z %e zq %e\n",z,zq);
+    if(z>zq && background_ncdm_distribution == _massive_daughter_){
         /** a heavyside function kills the integral; this condition is never satisfied if
         pba->background_ncdm_distribution is different from _massive_daughter_ */
          if (n!=NULL) *n += 0;
@@ -1705,8 +1712,13 @@ int background_ncdm_momenta(
         if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q]*exp_factor;
       }
       else if(background_ncdm_distribution == _massive_daughter_){
-        if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<100){
+        if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<1e-3){
+          exp_factor =1;
+        }
+        else if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<10 &&  pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm>=1e-3){
           exp_factor = exp(-pba->Gamma_dcdm*pba->tq_table[n_ncdm][index_q]);
+        }else{
+          exp_factor = 0;
         }
         // printf("exp_factor %e G %e t %e\n",exp_factor,pba->Gamma_dcdm,pba->tq_table[n_ncdm][index_q]);
         if(pba->Hq_table[n_ncdm][index_q] != 0.0){
@@ -1733,7 +1745,7 @@ int background_ncdm_momenta(
   /** - adjust normalization */
 
   if(background_ncdm_distribution == _massive_daughter_){
-    factor2 *= 2*_PI_; //Not clear where it comes from;
+    // factor2 *= 2*_PI_; //Not clear where it comes from;
   }
 
   if (n!=NULL) *n *= factor2/(1.+z);
@@ -2343,6 +2355,9 @@ int background_initial_conditions(
 
 
   /* Infer pvecback from pvecback_integration */
+  /**give dummy time to avoid bug: will be updated later*/
+  pvecback_integration[pba->index_bi_time] = 1./(2.* (sqrt(rho_rad)));
+
   class_call(background_functions(pba, pvecback_integration, pba->normal_info, pvecback),
 	     pba->error_message,
 	     pba->error_message);
