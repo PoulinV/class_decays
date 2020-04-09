@@ -66,20 +66,23 @@ int get_qsampling_manual(double *x,
 	h = (log10(qmax)-log10(qmin))/(N-1);
 	j=0;
 	for (i=0; i<N; i++){
-		if(j==2)j=0;
+		// if(j==2)j=0;
 		x[i] = qmin*pow(10,i*h);
-		// printf("%d %e %e\n",i,x[i],qmax);
 		(*function)(params_for_function,x[i],&y);
-		if(j==0){
-			w[i] = y*2*h/3*x[i];
-		}
-		if(j == 1 ){
-			w[i] = y*4*h/3*x[i];
-		}
-		j++;
-		// printf("q[i] %e w %e\n", 	x[i],w[i]);
+		w[i] = y*h*x[i]*log(10);
 		if (i==N-1 || i == 0)
-		w[i] = y*h/3*x[i];
+		w[i] *=0.5;
+		// if(j==0){
+		// 	w[i] = y*2*h/3*x[i];
+		// }
+		// if(j == 1 ){
+		// 	w[i] = y*4*h/3*x[i];
+		// }
+		// j++;
+		// // printf("i %d x[i] %e w %e f %e qmin %e qmax %e h %e\n",i,x[i],w[i],y,qmin,qmax,h);
+		// // printf("q[i] %e w %e\n", 	x[i],w[i]);
+		// if (i==N-1 || i == 0)
+		// w[i] = y*h/3*x[i];
 	}
     return _SUCCESS_;
   case (qm_simpson_lin) :
