@@ -1486,19 +1486,19 @@ int background_ncdm_init(
 		 pba->error_message,
 		 pba->error_message);
      // printf("pba->ncdm_quadrature_strategy[k] %d\n",pba->ncdm_quadrature_strategy[k]);
-      class_call(get_qsampling_manual(pba->q_ncdm[k],
-				      pba->w_ncdm[k],
-				      pba->q_size_ncdm[k],
-              qmin_tmp*pba->ncdm_qmax[k],
-				      pba->ncdm_qmax[k],
-				      pba->ncdm_quadrature_strategy[k],
-				      pbadist.q,
-				      pbadist.tablesize,
-				      background_ncdm_distribution,
-				      &pbadist,
-				      pba->error_message),
-		 pba->error_message,
-		 pba->error_message);
+//      class_call(get_qsampling_manual(pba->q_ncdm[k],
+//				      pba->w_ncdm[k],
+//				      pba->q_size_ncdm[k],
+//              qmin_tmp*pba->ncdm_qmax[k],
+//				      pba->ncdm_qmax[k],
+//				      pba->ncdm_quadrature_strategy[k],
+//				      pbadist.q,
+//				      pbadist.tablesize,
+//				      background_ncdm_distribution,
+//				      &pbadist,
+//				      pba->error_message),
+//		 pba->error_message,
+//		 pba->error_message);
      // for (index_q=0; index_q<pba->q_size_ncdm[k]; index_q++) {
     	// pba->q_ncdm_bg[k][index_q] = pba->q_ncdm[k][index_q];
     	// pba->w_ncdm_bg[k][index_q] = pba->w_ncdm[k][index_q];

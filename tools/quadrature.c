@@ -111,6 +111,18 @@ int get_qsampling_manual(double *x,
 
 	}
     return _SUCCESS_;
+
+	case (left_rectangle):
+	for (i=0; i<(N-1); i++){
+		/** Note that we count q=0 as an extra point with weight 0 */
+		qmin=qmin_tmp;
+		h = (log10(qmax)-log10(qmin))/(N-2);
+		x[i] = qmin*pow(10,i*h);
+		(*function)(params_for_function,x[i],&y);
+		w[i] = y*h*x[i]*log(10);
+	}
+
+	 return _SUCCESS_;
   }
   return _SUCCESS_;
 }

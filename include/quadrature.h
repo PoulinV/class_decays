@@ -10,7 +10,7 @@
 /******************************************/
 #include "common.h"
 
-enum ncdm_quadrature_method {qm_auto, qm_Laguerre, qm_trapz, qm_trapz_indefinite, qm_simpson_log,qm_simpson_lin};
+enum ncdm_quadrature_method {qm_auto, qm_Laguerre, qm_trapz, qm_trapz_indefinite, qm_simpson_log,qm_simpson_lin, left_rectangle};
 
 /* Structures for QSS */
 
