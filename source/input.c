@@ -895,6 +895,9 @@ int input_read_parameters(
         ppt->massive_daughter_perturbations = _FALSE_;
       }
     }
+
+  /* GFA: back_integration_stepsize needs to be read here, before background_ncdm_init is called */
+  class_read_double("back_integration_stepsize",ppr->back_integration_stepsize);
   /** - non-cold relics (ncdm) */
   class_read_int("N_ncdm",N_ncdm);
   // if(pba->Gamma_dcdm > 0  && (pba->m_dcdm > 0)){
@@ -2851,7 +2854,7 @@ int input_read_parameters(
 
   /** - (h.1.) parameters related to the background */
 
-  class_read_double("back_integration_stepsize",ppr->back_integration_stepsize);
+//  class_read_double("back_integration_stepsize",ppr->back_integration_stepsize); /* GFA */
   class_read_double("tol_background_integration",ppr->tol_background_integration);
   class_read_double("tol_initial_Omega_r",ppr->tol_initial_Omega_r);
   class_read_double("tol_ncdm_initial_w",ppr->tol_ncdm_initial_w);
@@ -3572,7 +3575,7 @@ int input_default_precision ( struct precision * ppr ) {
    * - parameters related to the background
    */
 
-  ppr->a_ini_over_a_today_default = 1.e-9; /*VP: testing: change the initial time, seems to bug when changing from the ini file*/
+  ppr->a_ini_over_a_today_default = 1.e-14; /*VP: testing: change the initial time, seems to bug when changing from the ini file*/
   ppr->back_integration_stepsize = 7.e-3;
   ppr->tol_background_integration = 1.e-2;
 

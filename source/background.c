@@ -1460,7 +1460,11 @@ int background_ncdm_init(
     }
     else{
       /** Manual q-sampling for this species. Same sampling used for both perturbation and background sampling, since this will usually be a high precision setting anyway */
-      pba->q_size_ncdm_bg[k] = pba->ncdm_input_q_size_bg[k];
+    //  pba->q_size_ncdm_bg[k] = pba->ncdm_input_q_size_bg[k];
+    /* GFA:  q_size_ncdm_bg for the massive daughter should be equal to the number of time steps */
+    if(pba->background_ncdm_distribution[k] == _massive_daughter_){
+      pba->q_size_ncdm_bg[k] =20/ppr->back_integration_stepsize;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
+    }
       pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
       // pba->q_size_ncdm[k] = 10;
       class_alloc(pba->q_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
