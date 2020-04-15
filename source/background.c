@@ -355,7 +355,8 @@ int background_functions(
       /* function returning background ncdm[n_ncdm] quantities (only
          those for which non-NULL pointers are passed) */
      if(a ==  1e-14){
-       t = 0;
+      // t = 0;
+      t = pvecback_B[pba->index_bi_time];
      }
      else{
        if(isnan(pvecback_B[pba->index_bi_time]) || pvecback_B[pba->index_bi_time] < 0 ){
@@ -596,65 +597,6 @@ int background_init(
     printf("Running CLASS version %s\n",_VERSION_);
     printf("Computing background\n");
 
-    /* below we want to inform the user about ncdm species*/
-    if (pba->N_ncdm > 0) {
-
-      Neff = pba->Omega0_ur/7.*8./pow(4./11.,4./3.)/pba->Omega0_g;
-
-      /* loop over ncdm species */
-      for (n_ncdm=0;n_ncdm<pba->N_ncdm; n_ncdm++) {
-
-        /* inform if p-s-d read in files */
-        if (pba->got_files[n_ncdm] == _TRUE_) {
-          printf(" -> ncdm species i=%d read from file %s\n",n_ncdm+1,pba->ncdm_psd_files+filenum*_ARGUMENT_LENGTH_MAX_);
-          filenum++;
-        }
-        /* call this function to get rho_ncdm */
-        if(pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_){
-          background_ncdm_momenta(pba,
-                                  pba->q_ncdm_bg[n_ncdm],
-                                  pba->w_ncdm_bg[n_ncdm],
-                                  pba->q_size_ncdm_bg[n_ncdm],
-                                  0.,
-                                  pba->factor_ncdm[n_ncdm],
-                                  pba->background_ncdm_distribution[n_ncdm],
-                                  n_ncdm,
-                                  0.,
-                                  0,
-                                  pba->H0,
-                                  NULL,
-                                  &rho_ncdm_rel,
-                                  NULL,
-                                  NULL,
-                                  NULL);
-        }else{
-          rho_ncdm_rel = 0; //we assume the daughter is negligible at early time
-        }
-
-
-        /* inform user of the contribution of each species to
-           radiation density (in relativistic limit): should be
-           between 1.01 and 1.02 for each active neutrino species;
-           evaluated as rho_ncdm/rho_nu_rel where rho_nu_rel is the
-           density of one neutrino in the instantaneous decoupling
-           limit, i.e. assuming T_nu=(4/11)^1/3 T_gamma (this comes
-           from the definition of N_eff) */
-        rho_nu_rel = 56.0/45.0*pow(_PI_,6)*pow(4.0/11.0,4.0/3.0)*_G_/pow(_h_P_,3)/pow(_c_,7)*
-          pow(_Mpc_over_m_,2)*pow(pba->T_cmb*_k_B_,4);
-
-        printf(" -> ncdm species i=%d sampled with %d (resp. %d) points for purpose of background (resp. perturbation) integration. In the relativistic limit it gives Delta N_eff = %g\n",
-               n_ncdm+1,
-               pba->q_size_ncdm_bg[n_ncdm],
-               pba->q_size_ncdm[n_ncdm],
-               rho_ncdm_rel/rho_nu_rel);
-
-        Neff += rho_ncdm_rel/rho_nu_rel;
-
-      }
-
-      printf(" -> total N_eff = %g (sumed over ultra-relativistic and ncdm species)\n",Neff);
-
-    }
   }
 
   /** - if shooting failed during input, catch the error here */
@@ -708,10 +650,14 @@ int background_init(
      93 point something)*/
   if ((pba->background_verbose > 0) && (pba->has_ncdm == _TRUE_)) {
     for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
-      printf(" -> non-cold dark matter species with i=%d has m_i = %e eV (so m_i / omega_i =%e eV)\n",
-             n_ncdm+1,
-             pba->m_ncdm_in_eV[n_ncdm],
-             pba->m_ncdm_in_eV[n_ncdm]*pba->deg_ncdm[n_ncdm]/pba->Omega0_ncdm[n_ncdm]/pba->h/pba->h);
+      /* GFA */
+      if (pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_ ) {
+        printf(" -> non-cold dark matter species with i=%d has m_i = %e eV (so m_i / omega_i =%e eV)\n",
+               n_ncdm+1,
+               pba->m_ncdm_in_eV[n_ncdm],
+               pba->m_ncdm_in_eV[n_ncdm]*pba->deg_ncdm[n_ncdm]/pba->Omega0_ncdm[n_ncdm]/pba->h/pba->h);
+      }
+
     }
   }
 
@@ -734,6 +680,63 @@ int background_init(
   class_call(background_find_equality(ppr,pba),
              pba->error_message,
              pba->error_message);
+
+
+if (pba->background_verbose > 0) { /* GFA: now this has to be called at the end of background_init*/
+  /* because we can not compute the present density of the massive daughter until background_solve is finished */
+  /* below we want to inform the user about ncdm species*/
+    if (pba->N_ncdm > 0) {
+      Neff = pba->Omega0_ur/7.*8./pow(4./11.,4./3.)/pba->Omega0_g;
+      /* loop over ncdm species */
+      for (n_ncdm=0;n_ncdm<pba->N_ncdm; n_ncdm++) {
+        /* inform if p-s-d read in files */
+        if (pba->got_files[n_ncdm] == _TRUE_) {
+          printf(" -> ncdm species i=%d read from file %s\n",n_ncdm+1,pba->ncdm_psd_files+filenum*_ARGUMENT_LENGTH_MAX_);
+          filenum++;
+        }
+        /* call this function to get rho_ncdm */
+          background_ncdm_momenta(pba,
+                                  pba->q_ncdm_bg[n_ncdm],
+                                  pba->w_ncdm_bg[n_ncdm],
+                                  pba->q_size_ncdm_bg[n_ncdm],
+                                  0.,
+                                  pba->factor_ncdm[n_ncdm],
+                                  pba->background_ncdm_distribution[n_ncdm],
+                                  n_ncdm,
+                                  0.,
+                                  pba->t_today,
+                                  pba->H0,
+                                  NULL,
+                                  &rho_ncdm_rel,
+                                  NULL,
+                                  NULL,
+                                  NULL);
+
+        /* inform user of the contribution of each species to
+           radiation density (in relativistic limit): should be
+           between 1.01 and 1.02 for each active neutrino species;
+           evaluated as rho_ncdm/rho_nu_rel where rho_nu_rel is the
+           density of one neutrino in the instantaneous decoupling
+           limit, i.e. assuming T_nu=(4/11)^1/3 T_gamma (this comes
+           from the definition of N_eff) */
+        rho_nu_rel = 56.0/45.0*pow(_PI_,6)*pow(4.0/11.0,4.0/3.0)*_G_/pow(_h_P_,3)/pow(_c_,7)*
+          pow(_Mpc_over_m_,2)*pow(pba->T_cmb*_k_B_,4);
+
+        printf(" -> ncdm species i=%d sampled with %d (resp. %d) points for purpose of background (resp. perturbation) integration. In the relativistic limit it gives Delta N_eff = %g\n",
+               n_ncdm+1,
+               pba->q_size_ncdm_bg[n_ncdm],
+               pba->q_size_ncdm[n_ncdm],
+               rho_ncdm_rel/rho_nu_rel);
+
+        Neff += rho_ncdm_rel/rho_nu_rel;
+
+      }
+
+      printf(" -> total N_eff = %g (sumed over ultra-relativistic and ncdm species)\n",Neff);
+    }
+
+  }
+
   return _SUCCESS_;
 
 }
@@ -1464,8 +1467,9 @@ int background_ncdm_init(
     /* GFA:  q_size_ncdm_bg for the massive daughter should be equal to the number of time steps */
     if(pba->background_ncdm_distribution[k] == _massive_daughter_){
       pba->q_size_ncdm_bg[k] =20/ppr->back_integration_stepsize;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
+      pba->q_size_ncdm[k] = pba->q_size_ncdm_bg[k];
     }
-      pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
+
       // pba->q_size_ncdm[k] = 10;
       class_alloc(pba->q_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
       class_alloc(pba->w_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
@@ -1687,7 +1691,7 @@ int background_ncdm_momenta(
 
     }
     // printf("z %e zq %e\n",z,zq);
-    if(z>zq && background_ncdm_distribution == _massive_daughter_){
+    if(z> zq && background_ncdm_distribution == _massive_daughter_){
         /** a heavyside function kills the integral; this condition is never satisfied if
         pba->background_ncdm_distribution is different from _massive_daughter_ */
          if (n!=NULL) *n += 0;
@@ -1965,7 +1969,8 @@ int background_solve(
   //  printf("rho_wdm = %e\n",pvecback[pba->index_bg_rho_ncdm1] );
 
   }
-
+  /* GFA */
+  pba->t_today=pvecback_integration[pba->index_bi_time];
   /** - save last data in growTable with gt_add() */
   class_call(gt_add(&gTable,_GT_END_,(void *) pvecback_integration,sizeof(double)*pba->bi_size),
              gTable.error_message,

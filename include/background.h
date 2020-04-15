@@ -323,6 +323,7 @@ struct background
   double * factor_ncdm; /**< List of normalization factors for calculating energy density etc.*/
   double ** tq_table;  /**< Pointers to vectors of time at mom q */
   double ** Hq_table;  /**< Pointers to vectors of hubble rate at mom q */
+  double t_today; /* GFA */
 
   //@}
 
