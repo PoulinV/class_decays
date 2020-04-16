@@ -966,6 +966,9 @@ cdef class Class:
     def h(self):
         return self.ba.h
 
+    def rs_rec(self):
+        return self.th.rs_rec
+
     def n_s(self):
         return self.pm.n_s
 
