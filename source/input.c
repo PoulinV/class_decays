@@ -883,6 +883,8 @@ int input_read_parameters(
         ppt->dark_radiation_perturbations = _FALSE_;
       }
     }
+    class_read_double("time_over_tau_dcdm_threshold",ppt->time_over_tau_dcdm_threshold);
+
     class_call(parser_read_string(pfc,"massive_daughter_perturbations",&string1,&flag1,errmsg),
                errmsg,
                errmsg);
@@ -987,7 +989,11 @@ int input_read_parameters(
       pba->PDmax_dcdm[n] = pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2; // in GeV
       pba->ncdm_qmax[n] = pba->PDmax_dcdm[n];
       pba->epsilon_dcdm = 0.5*(1 - pow(pba->m_dcdm/pba->M_dcdm,2));
-
+      // if(pba->bt_size != 0 ){
+      //   pba->q_size_ncdm_bg[n] = pba->bt_size;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
+      //   printf("pba->q_size_ncdm_bg[k] %d pba->bt_size %d  \n",pba->q_size_ncdm_bg[n],pba->bt_size);
+      //   pba->q_size_ncdm[n] = pba->bt_size;
+      // }
       // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
     }else{
       pba->PDmax_dcdm[n] = 0;
@@ -3421,6 +3427,7 @@ int input_default_params(
   ppt->selection_width[0]=0.1;
 
   ppt->dark_radiation_perturbations = _TRUE_;
+  ppt->time_over_tau_dcdm_threshold = 0;
   ppt->massive_daughter_perturbations = _TRUE_;
   /** - primordial structure */
 
@@ -4142,7 +4149,12 @@ int input_try_unknown_parameters(double * unknown_parameter,
         for (n=0; n<ba.N_ncdm; n++) {
           if (ba.background_ncdm_distribution[n] == _massive_daughter_) {
             rho_wdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_ncdm1+n];
-          }
+          //   if(ba.bt_size!= 0 ){
+          //     ba.q_size_ncdm_bg[n] = ba.bt_size;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
+          //     // printf("pba->q_size_ncdm_bg[k] %d pba->bt_size %d 20/ppr->back_integration_stepsize %d \n",pba->q_size_ncdm_bg[k],pba->bt_size,20/ppr->back_integration_stepsize);
+          //     ba.q_size_ncdm[n] = ba.bt_size;
+          //   // }
+          // }
         }
       }
       output[i] = (rho_dcdm_today+rho_dr_today+rho_wdm_today)/(ba.H0*ba.H0)-pfzw->target_value[i]/ba.h/ba.h;
@@ -4170,6 +4182,14 @@ int input_try_unknown_parameters(double * unknown_parameter,
         for (n=0; n<ba.N_ncdm; n++) {
           if (ba.background_ncdm_distribution[n] == _massive_daughter_) {
             rho_wdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_ncdm1+n];
+                          // pba->q_size_ncdm_bg[k] =20/ppr->back_integration_stepsize;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
+              // if(ba.bt_size!= 0 ){
+              //   ba.q_size_ncdm_bg[n] = ba.bt_size;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
+              //   printf("pba->q_size_ncdm_bg[k] %d pba->bt_size %d  \n",ba.q_size_ncdm_bg[n],ba.bt_size);
+              //   ba.q_size_ncdm[n] = ba.bt_size;
+              // }
+
+            }
         //     printf("Omega_dcdm_today = %e\n",rho_dcdm_today/(ba.H0*ba.H0));
         //     printf("Omega_dr_today = %e\n",rho_dr_today/(ba.H0*ba.H0));
         //     printf("Omega_wdm_today = %e\n",rho_wdm_today/(ba.H0*ba.H0));

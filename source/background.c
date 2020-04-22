@@ -1467,7 +1467,7 @@ int background_ncdm_init(
     /* GFA:  q_size_ncdm_bg for the massive daughter should be equal to the number of time steps */
     if(pba->background_ncdm_distribution[k] == _massive_daughter_){
       pba->q_size_ncdm_bg[k] =20/ppr->back_integration_stepsize;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
-      pba->q_size_ncdm[k] = pba->q_size_ncdm_bg[k];
+      pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
     }
 
       // pba->q_size_ncdm[k] = 10;
@@ -1547,7 +1547,7 @@ int background_ncdm_init(
                 pba->q_size_ncdm[k]*sizeof(double),
                 pba->error_message);
 
-
+    f0 =0;            
     for (index_q=0; index_q<pba->q_size_ncdm[k]; index_q++) {
       q = pba->q_ncdm[k][index_q];
       class_call(background_ncdm_distribution(&pbadist,q,&f0),
