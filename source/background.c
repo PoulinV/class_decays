@@ -704,7 +704,7 @@ if (pba->background_verbose > 0) { /* GFA: now this has to be called at the end 
                                   pba->background_ncdm_distribution[n_ncdm],
                                   n_ncdm,
                                   0.,
-                                  pba->t_today,
+                                  pba->age*_Gyr_over_Mpc_,
                                   pba->H0,
                                   NULL,
                                   &rho_ncdm_rel,
@@ -722,14 +722,16 @@ if (pba->background_verbose > 0) { /* GFA: now this has to be called at the end 
         rho_nu_rel = 56.0/45.0*pow(_PI_,6)*pow(4.0/11.0,4.0/3.0)*_G_/pow(_h_P_,3)/pow(_c_,7)*
           pow(_Mpc_over_m_,2)*pow(pba->T_cmb*_k_B_,4);
 
-        printf(" -> ncdm species i=%d sampled with %d (resp. %d) points for purpose of background (resp. perturbation) integration. In the relativistic limit it gives Delta N_eff = %g\n",
-               n_ncdm+1,
-               pba->q_size_ncdm_bg[n_ncdm],
-               pba->q_size_ncdm[n_ncdm],
-               rho_ncdm_rel/rho_nu_rel);
 
-        Neff += rho_ncdm_rel/rho_nu_rel;
+        if (pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_ ) { /* GFA: I commented this out because it gives a weirdly big value for Delta N_eff */
+          printf(" -> ncdm species i=%d sampled with %d (resp. %d) points for purpose of background (resp. perturbation) integration. In the relativistic limit it gives Delta N_eff = %g\n",
+                n_ncdm+1,
+                pba->q_size_ncdm_bg[n_ncdm],
+                pba->q_size_ncdm[n_ncdm],
+                rho_ncdm_rel/rho_nu_rel);
 
+         Neff += rho_ncdm_rel/rho_nu_rel;
+        }
       }
 
       printf(" -> total N_eff = %g (sumed over ultra-relativistic and ncdm species)\n",Neff);
@@ -1959,8 +1961,7 @@ int background_solve(
   //  printf("rho_wdm = %e\n",pvecback[pba->index_bg_rho_ncdm1] );
 
   }
-  /* GFA */
-  pba->t_today=pvecback_integration[pba->index_bi_time];
+
   /** - save last data in growTable with gt_add() */
   class_call(gt_add(&gTable,_GT_END_,(void *) pvecback_integration,sizeof(double)*pba->bi_size),
              gTable.error_message,
