@@ -1463,11 +1463,12 @@ int background_ncdm_init(
     }
     else{
       /** Manual q-sampling for this species. Same sampling used for both perturbation and background sampling, since this will usually be a high precision setting anyway */
-    //  pba->q_size_ncdm_bg[k] = pba->ncdm_input_q_size_bg[k];
+     pba->q_size_ncdm_bg[k] = pba->ncdm_input_q_size_bg[k];
+     pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
+
     /* GFA:  q_size_ncdm_bg for the massive daughter should be equal to the number of time steps */
-    if(pba->background_ncdm_distribution[k] == _massive_daughter_){
+    if(pba->background_ncdm_distribution[k] == _massive_daughter_ && ppr->back_integration_stepsize > 0){
       pba->q_size_ncdm_bg[k] =20/ppr->back_integration_stepsize;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
-      pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
     }
 
       // pba->q_size_ncdm[k] = 10;
@@ -1494,38 +1495,24 @@ int background_ncdm_init(
 		 pba->error_message,
 		 pba->error_message);
      // printf("pba->ncdm_quadrature_strategy[k] %d\n",pba->ncdm_quadrature_strategy[k]);
-//      class_call(get_qsampling_manual(pba->q_ncdm[k],
-//				      pba->w_ncdm[k],
-//				      pba->q_size_ncdm[k],
-//              qmin_tmp*pba->ncdm_qmax[k],
-//				      pba->ncdm_qmax[k],
-//				      pba->ncdm_quadrature_strategy[k],
-//				      pbadist.q,
-//				      pbadist.tablesize,
-//				      background_ncdm_distribution,
-//				      &pbadist,
-//				      pba->error_message),
-//		 pba->error_message,
-//		 pba->error_message);
+     class_call(get_qsampling_manual(pba->q_ncdm[k],
+				      pba->w_ncdm[k],
+				      pba->q_size_ncdm[k],
+             qmin_tmp*pba->ncdm_qmax[k],
+				      pba->ncdm_qmax[k],
+				      pba->ncdm_quadrature_strategy[k],
+				      pbadist.q,
+				      pbadist.tablesize,
+				      background_ncdm_distribution,
+				      &pbadist,
+				      pba->error_message),
+		 pba->error_message,
+		 pba->error_message);
      // for (index_q=0; index_q<pba->q_size_ncdm[k]; index_q++) {
     	// pba->q_ncdm_bg[k][index_q] = pba->q_ncdm[k][index_q];
     	// pba->w_ncdm_bg[k][index_q] = pba->w_ncdm[k][index_q];
      // }
     if(pba->background_ncdm_distribution[k] == _massive_daughter_){
-      //we need to correct w_ncdm because we use a slightly different definition for the description of dcdm perturbations
-      for (index_q=0; index_q<pba->q_size_ncdm[k];index_q++){
-        background_ncdm_distribution(&pbadist,
-                                     pba->q_ncdm[k][index_q],
-                                     &f0);
-        // printf("pba->q_ncdm[k][index_q] %e\n", pba->q_ncdm[k][index_q]);
-        // printf("before pba->w_ncdm[k][index_q] %e\n", pba->w_ncdm[k][index_q]);
-        // if(f0!=0)pba->w_ncdm[k][index_q] /= f0 ;
-        // else pba->w_ncdm[k][index_q] =0;
-        pba->w_ncdm[k][index_q] /= f0;
-        // pba->w_ncdm_bg[k][index_q] *= f0;
-        // printf("after pba->q_ncdm[k][index_q] %e pba->w_ncdm[k][index_q] %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q]);
-        // printf("after q %e w %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q]);
-      }
       for(index_q=0; index_q<pba->q_size_ncdm_bg[k];index_q++){
         pba->Hq_table[k][index_q] = 0;
         pba->tq_table[k][index_q] = 0;
@@ -1547,7 +1534,9 @@ int background_ncdm_init(
                 pba->q_size_ncdm[k]*sizeof(double),
                 pba->error_message);
 
-    f0 =0;            
+    f0 =0;
+    if(pba->background_ncdm_distribution[k] != _massive_daughter_){
+
     for (index_q=0; index_q<pba->q_size_ncdm[k]; index_q++) {
       q = pba->q_ncdm[k][index_q];
       class_call(background_ncdm_distribution(&pbadist,q,&f0),
@@ -1597,6 +1586,7 @@ int background_ncdm_init(
         pba->f0[k][index_q] = f0; //We also store f0, only useful in the decaying neutrino case;
       }
     }
+  }
 
     if(pba->background_ncdm_distribution[k] == _massive_daughter_){
       pba->factor_ncdm[k]=pba->deg_ncdm[k]*4*_PI_*pow(1e9*_eV_,4)*8*_PI_*_G_
@@ -2207,18 +2197,20 @@ int background_initial_conditions(
   double number_density_ncdm,rho_dcdm,pseudo_p_ncdm;
   /** - fix initial value of \f$ a \f$ */
   a = ppr->a_ini_over_a_today_default * pba->a_today;
+  printf("a %e ppr->a_ini_over_a_today_default %e  pba->a_today %e\n",a,ppr->a_ini_over_a_today_default , pba->a_today );
   /**  If we have ncdm species, perhaps we need to start earlier
       than the standard value for the species to be relativistic.
       This could happen for some WDM models.
   */
 
   if (pba->has_ncdm == _TRUE_) {
-
+  for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
+    if(pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_){
     for (counter=0; counter < _MAX_IT_; counter++) {
 
       is_early_enough = _TRUE_;
       rho_ncdm_rel_tot = 0.;
-      for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
+
         // if(pba->m_dcdm > 0){
         //   pba->M_ncdm[n_ncdm] = pba->m_dcdm * (_c_ * _c_)/_k_B_;
         // }
@@ -2243,21 +2235,19 @@ int background_initial_conditions(
                      pba->error_message);
 
 	if (fabs(p_ncdm/rho_ncdm-1./3.)>ppr->tol_ncdm_initial_w)is_early_enough = _FALSE_;
-      }
-      if (is_early_enough == _TRUE_){
-        for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
-        rho_ncdm_rel_tot += 3.*p_ncdm;
-        }
-        break;
 
+      if (is_early_enough == _TRUE_){
+        rho_ncdm_rel_tot += 3.*p_ncdm;
+        break;
       }
-      else
-	a *= _SCALE_BACK_;
+      else a *= _SCALE_BACK_;
     }
     class_test(counter == _MAX_IT_,
 	       pba->error_message,
 	       "Search for initial scale factor a such that all ncdm species are relativistic failed.");
 
+      }
+    }
 
   }
 
