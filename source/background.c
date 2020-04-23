@@ -354,7 +354,7 @@ int background_functions(
     for(n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++){
       /* function returning background ncdm[n_ncdm] quantities (only
          those for which non-NULL pointers are passed) */
-     if(a ==  1e-14){
+     if(a ==  pba->a_ini_over_a_today){ /* gfa */
       // t = 0;
       t = pvecback_B[pba->index_bi_time];
      }
@@ -1469,10 +1469,10 @@ int background_ncdm_init(
     /* GFA:  q_size_ncdm_bg for the massive daughter should be equal to the number of time steps */
     if(pba->background_ncdm_distribution[k] == _massive_daughter_){
       pba->q_size_ncdm_bg[k] =20/ppr->back_integration_stepsize;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
-      pba->q_size_ncdm[k] = pba->q_size_ncdm_bg[k];
+    //   printf("q_size_ncdm_bg = %d\n",pba->q_size_ncdm_bg[k] );
     }
+     pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
 
-      // pba->q_size_ncdm[k] = 10;
       class_alloc(pba->q_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
       class_alloc(pba->w_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
       class_alloc(pba->Hq_table[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
@@ -1524,7 +1524,6 @@ int background_ncdm_init(
         // if(f0!=0)pba->w_ncdm[k][index_q] /= f0 ;
         // else pba->w_ncdm[k][index_q] =0;
         pba->w_ncdm[k][index_q] /= f0;
-        // pba->w_ncdm_bg[k][index_q] *= f0;
         // printf("after pba->q_ncdm[k][index_q] %e pba->w_ncdm[k][index_q] %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q]);
         // printf("after q %e w %e  \n",pba->q_ncdm[k][index_q], pba->w_ncdm[k][index_q]);
       }
@@ -1978,6 +1977,8 @@ int background_solve(
              pba->error_message);
   pba->bt_size++;
 
+//  printf("Background time steps = %d\n",pba->bt_size);
+
 
   /* integration finished */
 
@@ -2215,11 +2216,14 @@ int background_initial_conditions(
 
   if (pba->has_ncdm == _TRUE_) {
 
+  if (pba->m_dcdm == 0.) { /* GFA */
+
     for (counter=0; counter < _MAX_IT_; counter++) {
 
       is_early_enough = _TRUE_;
       rho_ncdm_rel_tot = 0.;
       for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
+
         // if(pba->m_dcdm > 0){
         //   pba->M_ncdm[n_ncdm] = pba->m_dcdm * (_c_ * _c_)/_k_B_;
         // }
@@ -2234,7 +2238,7 @@ int background_initial_conditions(
                n_ncdm,
   					   pba->a_today/a-1.0,
                0,
-               pba->H0,
+               0,
   					   &number_density_ncdm,
   					   &rho_ncdm,
   					   &p_ncdm,
@@ -2242,7 +2246,7 @@ int background_initial_conditions(
   					   &pseudo_p_ncdm),
                      pba->error_message,
                      pba->error_message);
-
+  /* GFA: Are we correctly considering massive_daughter here? */
 	if (fabs(p_ncdm/rho_ncdm-1./3.)>ppr->tol_ncdm_initial_w)is_early_enough = _FALSE_;
       }
       if (is_early_enough == _TRUE_){
@@ -2259,7 +2263,7 @@ int background_initial_conditions(
 	       pba->error_message,
 	       "Search for initial scale factor a such that all ncdm species are relativistic failed.");
 
-
+    } /* GFA */
   }
 
   pvecback_integration[pba->index_bi_a] = a;

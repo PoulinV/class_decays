@@ -44,6 +44,8 @@ struct background
 
   //@{
 
+  double a_ini_over_a_today; /* GFA */
+
   double H0; /**< \f$ H_0 \f$: Hubble parameter (in fact, [\f$H_0/c\f$]) in \f$ Mpc^{-1} \f$ */
 
   double Omega0_g; /**< \f$ \Omega_{0 \gamma} \f$: photons */
