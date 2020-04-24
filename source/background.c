@@ -2201,7 +2201,7 @@ int background_initial_conditions(
   double number_density_ncdm,rho_dcdm,pseudo_p_ncdm;
   /** - fix initial value of \f$ a \f$ */
   a = ppr->a_ini_over_a_today_default * pba->a_today;
-  printf("a %e ppr->a_ini_over_a_today_default %e  pba->a_today %e\n",a,ppr->a_ini_over_a_today_default , pba->a_today );
+  //printf("a %e ppr->a_ini_over_a_today_default %e  pba->a_today %e\n",a,ppr->a_ini_over_a_today_default , pba->a_today );
   /**  If we have ncdm species, perhaps we need to start earlier
       than the standard value for the species to be relativistic.
       This could happen for some WDM models.
