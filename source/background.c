@@ -347,6 +347,8 @@ int background_functions(
     //printf(" a= %e, Omega_scf = %f, \n ",a_rel, pvecback[pba->index_bg_rho_scf]/rho_tot );
   }
 
+
+
   /* ncdm */
   if (pba->has_ncdm == _TRUE_) {
 
@@ -356,6 +358,7 @@ int background_functions(
          those for which non-NULL pointers are passed) */
      if(a ==  pba->a_ini_over_a_today){ /* gfa */
       // t = 0;
+
       t = pvecback_B[pba->index_bi_time];
      }
      else{
@@ -367,45 +370,62 @@ int background_functions(
        }
      }
 
-      // printf("t %e pvecback[pba->index_bg_H] %e\n", t/_Gyr_over_Mpc_,pvecback[pba->index_bg_H]);
-        class_call(background_ncdm_momenta(pba,
-                                           pba->q_ncdm_bg[n_ncdm],
-                                           pba->w_ncdm_bg[n_ncdm],
-                                           pba->q_size_ncdm_bg[n_ncdm],
-                                           pba->M_ncdm[n_ncdm],
-                                           pba->factor_ncdm[n_ncdm],
-                                           pba->background_ncdm_distribution[n_ncdm],
-                                           n_ncdm,
-                                           1./a_rel-1.,
-                                           t,
-                                           pvecback[pba->index_bg_H],
-                                           &num_ncdm,
-                                           &rho_ncdm,
-                                           &p_ncdm,
-                                           NULL,
-                                           &pseudo_p_ncdm),
-                   pba->error_message,
-                   pba->error_message);
+        // printf("t %e pvecback[pba->index_bg_H] %e\n", t/_Gyr_over_Mpc_,pvecback[pba->index_bg_H]);
+          class_call(background_ncdm_momenta(pba,
+                                             pba->q_ncdm_bg[n_ncdm],
+                                             pba->w_ncdm_bg[n_ncdm],
+                                             pba->q_size_ncdm_bg[n_ncdm],
+                                             pba->M_ncdm[n_ncdm],
+                                             pba->factor_ncdm[n_ncdm],
+                                             pba->background_ncdm_distribution[n_ncdm],
+                                             n_ncdm,
+                                             1./a_rel-1.,
+                                             t,
+                                             pvecback[pba->index_bg_H],
+                                             &num_ncdm,
+                                             &rho_ncdm,
+                                             &p_ncdm,
+                                             NULL,
+                                             &pseudo_p_ncdm),
+                     pba->error_message,
+                     pba->error_message);
 
 
-        pvecback[pba->index_bg_n_ncdm1+n_ncdm] = num_ncdm;
-        pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
-        pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
-        pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm] = pseudo_p_ncdm;
+    // num_ncdm = 0;
+    // rho_ncdm = 0;
+    // p_ncdm = 0;
+    // pseudo_p_ncdm = 0;
+        // if(isnan(num_ncdm) || isnan(rho_ncdm) || isnan(p_ncdm) || isnan(pseudo_p_ncdm)){
+        //   num_ncdm = 0;
+        //   rho_ncdm = 0;
+        //   p_ncdm = 0;
+        //   pseudo_p_ncdm = 0;
+        // }
 
-        rho_tot += rho_ncdm;
-        p_tot += p_ncdm;
-        /* (3 p_ncdm1) is the "relativistic" contribution to rho_ncdm1 */
-        rho_r += 3.* p_ncdm;
-        /* (rho_ncdm1 - 3 p_ncdm1) is the "non-relativistic" contribution
-           to rho_ncdm1 */
-        rho_m += rho_ncdm - 3.* p_ncdm;
-        // if( 1./a_rel-1.<10000 &&  1./a_rel-1. > 9800) printf("%e %e \n",1./a_rel-1., rho_ncdm - 3.* p_ncdm);
+
+
+
+          pvecback[pba->index_bg_n_ncdm1+n_ncdm] = num_ncdm;
+          pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
+          pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
+          pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm] = pseudo_p_ncdm;
+
+          rho_tot += rho_ncdm;
+          p_tot += p_ncdm;
+          /* (3 p_ncdm1) is the "relativistic" contribution to rho_ncdm1 */
+          rho_r += 3.* p_ncdm;
+          /* (rho_ncdm1 - 3 p_ncdm1) is the "non-relativistic" contribution
+             to rho_ncdm1 */
+          rho_m += rho_ncdm - 3.* p_ncdm;
+          // if( 1./a_rel-1.<10000 &&  1./a_rel-1. > 9800) printf("%e %e \n",1./a_rel-1., rho_ncdm - 3.* p_ncdm);
+
+
 
 
 
     }
   }
+
 
   /* Lambda */
   if (pba->has_lambda == _TRUE_) {
@@ -440,6 +460,7 @@ int background_functions(
     rho_r += pvecback[pba->index_bg_rho_ur];
   }
 
+
   /** - compute expansion rate H from Friedmann equation: this is the
       only place where the Friedmann equation is assumed. Remember
       that densities are all expressed in units of \f$ [3c^2/8\pi G] \f$, ie
@@ -452,6 +473,7 @@ int background_functions(
   /** - compute relativistic density to total density ratio */
   pvecback[pba->index_bg_Omega_r] = rho_r / rho_tot;
 
+  // if(a_rel ==  1.e-14)printf(" pba->index_bg_Omega_r %d pvecback[pba->index_bg_Omega_r] %e\n",pba->index_bg_Omega_r,pvecback[pba->index_bg_Omega_r]);
   /** - compute other quantities in the exhaustive, redundant format */
   if (return_format == pba->long_info) {
 
@@ -802,6 +824,8 @@ int background_free_input(
   if (pba->N_ncdm != 0.){ /* GFA */
 
     for(k=0; k<pba->N_ncdm; k++){
+      free(pba->q_ncdm_bg[k]);
+      free(pba->w_ncdm_bg[k]);
       free(pba->q_ncdm[k]);
       free(pba->w_ncdm[k]);
       free(pba->Hq_table[k]);
@@ -816,6 +840,7 @@ int background_free_input(
     free(pba->ncdm_input_q_size);
     free(pba->ncdm_qmax);
     free(pba->PDmax_dcdm);
+
     free(pba->q_ncdm);
     free(pba->w_ncdm);
     free(pba->Hq_table);
@@ -831,6 +856,7 @@ int background_free_input(
     free(pba->ksi_ncdm);
     free(pba->deg_ncdm);
     free(pba->Omega0_ncdm);
+    free(pba->Gamma_neutrinos);
     free(pba->m_ncdm_in_eV);
     free(pba->factor_ncdm);
     if(pba->got_files!=NULL)
@@ -889,6 +915,8 @@ int background_indices(
 
 
 if (pba->Omega0_dcdmdr != 0.){ /* GFA */
+  // printf("pba->Omega0_dcdmdr %e\n", pba->Omega0_dcdmdr);
+
     pba->has_dcdm = _TRUE_;
      if (pba->Gamma_dcdm != 0.) {
       pba->has_dr = _TRUE_;
@@ -896,6 +924,7 @@ if (pba->Omega0_dcdmdr != 0.){ /* GFA */
      }
 
   if (pba->Omega0_dcdmdrwdm  != 0.){ /* GFA */
+    // printf("pba->Omega0_dcdmdrwdm %e\n", pba->Omega0_dcdmdrwdm);
     pba->has_dcdm = _TRUE_;
     if (pba->Gamma_dcdm != 0. && pba->m_dcdm == 0.)
       pba->has_dr = _TRUE_;
@@ -1718,8 +1747,11 @@ int background_ncdm_momenta(
         }
         else if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<10 &&  pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm>=1e-3){
           exp_factor = exp(-pba->Gamma_dcdm*pba->tq_table[n_ncdm][index_q]);
+        }else if(t==0 || H == 0){
+          exp_factor = 0;
         }else{
           exp_factor = 0;
+
         }
         // printf("exp_factor %e G %e t %e\n",exp_factor,pba->Gamma_dcdm,pba->tq_table[n_ncdm][index_q]);
         if(pba->Hq_table[n_ncdm][index_q] != 0.0){
@@ -2206,53 +2238,52 @@ int background_initial_conditions(
       than the standard value for the species to be relativistic.
       This could happen for some WDM models.
   */
-
   if (pba->has_ncdm == _TRUE_) {
-  for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
-    if(pba->background_ncdm_distribution[n_ncdm] != _massive_daughter_){
+
     for (counter=0; counter < _MAX_IT_; counter++) {
 
       is_early_enough = _TRUE_;
       rho_ncdm_rel_tot = 0.;
 
-        // if(pba->m_dcdm > 0){
-        //   pba->M_ncdm[n_ncdm] = pba->m_dcdm * (_c_ * _c_)/_k_B_;
-        // }
-        // printf("pba->M_ncdm[n_ncdm] %e\n", pba->M_ncdm[n_ncdm]);
-  	class_call(background_ncdm_momenta(pba,
-               pba->q_ncdm_bg[n_ncdm],
-  					   pba->w_ncdm_bg[n_ncdm],
-  					   pba->q_size_ncdm_bg[n_ncdm],
-  					   pba->M_ncdm[n_ncdm],
-  					   pba->factor_ncdm[n_ncdm],
-  					   pba->background_ncdm_distribution[n_ncdm],
-               n_ncdm,
-  					   pba->a_today/a-1.0,
-               0,
-               0,
-  					   &number_density_ncdm,
-  					   &rho_ncdm,
-  					   &p_ncdm,
-  					   NULL,
-  					   &pseudo_p_ncdm),
+      for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
+
+        if(pba->background_ncdm_distribution[n_ncdm]==_massive_daughter_){
+          //VP: for simplicity, we assume massive daughter is negligible at initial time.
+          p_ncdm = 0;
+          rho_ncdm = 0;
+        }else{
+          class_call(background_ncdm_momenta(pba,
+                                             pba->q_ncdm_bg[n_ncdm],
+                                             pba->w_ncdm_bg[n_ncdm],
+                                             pba->q_size_ncdm_bg[n_ncdm],
+                                             pba->M_ncdm[n_ncdm],
+                                             pba->factor_ncdm[n_ncdm],
+                                             pba->background_ncdm_distribution[n_ncdm],
+                                             n_ncdm,
+                                             pba->a_today/a-1.0,
+                                             0,
+                                             0,
+                                             NULL,
+                                             &rho_ncdm,
+                                             &p_ncdm,
+                                             NULL,
+                                             NULL),
                      pba->error_message,
                      pba->error_message);
-  /* GFA: Are we correctly considering massive_daughter here? */
-	if (fabs(p_ncdm/rho_ncdm-1./3.)>ppr->tol_ncdm_initial_w)is_early_enough = _FALSE_;
+          rho_ncdm_rel_tot += 3.*p_ncdm;
+          if (fabs(p_ncdm/rho_ncdm-1./3.)>ppr->tol_ncdm_initial_w)
+            is_early_enough = _FALSE_;
+        }
 
-      if (is_early_enough == _TRUE_){
-        rho_ncdm_rel_tot += 3.*p_ncdm;
-        break;
       }
-      else a *= _SCALE_BACK_;
+      if (is_early_enough == _TRUE_)
+        break;
+      else
+        a *= _SCALE_BACK_;
     }
     class_test(counter == _MAX_IT_,
-	       pba->error_message,
-	       "Search for initial scale factor a such that all ncdm species are relativistic failed.");
-
-      }
-    }
-
+               pba->error_message,
+               "Search for initial scale factor a such that all ncdm species are relativistic failed.");
   }
 
   pvecback_integration[pba->index_bi_a] = a;
@@ -2289,6 +2320,7 @@ int background_initial_conditions(
        * ignoring f(a) in the Hubble rate.
        */
       f = 1./3.*pow(a/pba->a_today,6)*pvecback_integration[pba->index_bi_rho_dcdm]*pba->Gamma_dcdm/pow(pba->H0,3)/sqrt(Omega_rad)*pba->epsilon_dcdm;
+      // printf("pba->Omega0_dcdmdrwdm %e pba->Gamma_dcdm %e pba->epsilon_dcdm %e \n",pba->Omega0_dcdmdrwdm,pba->Gamma_dcdm,pba->epsilon_dcdm);
       pvecback_integration[pba->index_bi_rho_dr] = f*pba->H0*pba->H0/pow(a/pba->a_today,4);
     }
     /* GFA */
@@ -2364,6 +2396,7 @@ int background_initial_conditions(
   class_call(background_functions(pba, pvecback_integration, pba->normal_info, pvecback),
 	     pba->error_message,
 	     pba->error_message);
+  // printf("pvecback[pba->index_bg_Omega_r] %e\n", pvecback[pba->index_bg_Omega_r]);
   /* Just checking that our initial time indeed is deep enough in the radiation
      dominated regime */
   class_test(fabs(pvecback[pba->index_bg_Omega_r]-1.) > ppr->tol_initial_Omega_r,
