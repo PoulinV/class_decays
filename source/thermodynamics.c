@@ -1114,7 +1114,7 @@ int thermodynamics_helium_from_bbn(
                                  &tau_bbn),
              pba->error_message,
              pth->error_message);
-
+  // printf("tau_bbn %e\n", tau_bbn);
   class_call(background_at_tau(pba,
                                tau_bbn,
                                pba->long_info,

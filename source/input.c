@@ -3705,19 +3705,19 @@ int input_default_precision ( struct precision * ppr ) {
   ppr->tol_perturb_integration=1.e-5;
   ppr->perturb_sampling_stepsize=0.10;
 
-  // ppr->radiation_streaming_approximation = rsa_MD_with_reio;
-  ppr->radiation_streaming_approximation = rsa_none;
+  ppr->radiation_streaming_approximation = rsa_MD_with_reio;
+  // ppr->radiation_streaming_approximation = rsa_none;
   ppr->radiation_streaming_trigger_tau_over_tau_k = 45.;
   ppr->radiation_streaming_trigger_tau_c_over_tau = 5.;
 
-  // ppr->ur_fluid_approximation = ufa_CLASS;
-  ppr->ur_fluid_approximation = ufa_none;
+  ppr->ur_fluid_approximation = ufa_CLASS;
+  // ppr->ur_fluid_approximation = ufa_none;
   ppr->ur_fluid_trigger_tau_over_tau_k = 30.;
 
   // ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
   ppr->ncdm_fluid_approximation = ncdmfa_none;
-  ppr->ncdm_fluid_trigger_tau_over_tau_k = 31.;
-//  ppr->ncdm_fluid_trigger_tau_over_tau_k = 10.;
+  // ppr->ncdm_fluid_trigger_tau_over_tau_k = 31.;
+ ppr->ncdm_fluid_trigger_tau_over_tau_k = 50.;
 
   ppr->neglect_CMB_sources_below_visibility = 1.e-3;
 
@@ -4402,7 +4402,7 @@ int input_get_guess(double *xguess,
       break;
     case omega_ini_dcdm2:
       Omega0_dcdmdrwdm = 1./(ba.h*ba.h);
-      printf("Omega0_dcdmdrwdm %e\n",Omega0_dcdmdrwdm );
+      // printf("Omega0_dcdmdrwdm %e\n",Omega0_dcdmdrwdm );
     case Omega_ini_dcdm2:
         /** - This works since correspondence is
             Omega_ini_dcdm2 -> Omega_dcdmdrwdm and
@@ -4416,7 +4416,7 @@ int input_get_guess(double *xguess,
        a_decay = pow(1+(gamma*gamma-1.)/Omega_M,-1./3.);
     xguess[index_guess] = pfzw->target_value[index_guess]*a_decay;
     dxdy[index_guess] = a_decay;
-    printf("xguess[index_guess] %e dxdy[index_guess] %e\n",xguess[index_guess], dxdy[index_guess]);
+    // printf("xguess[index_guess] %e dxdy[index_guess] %e\n",xguess[index_guess], dxdy[index_guess]);
     if (gamma > 100)
       dxdy[index_guess] *= gamma/100;
     break;
