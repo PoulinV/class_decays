@@ -826,7 +826,7 @@ int input_read_parameters(
  if (flag2 == _TRUE_)
    pba->Omega0_dcdmdrwdm = param2/pba->h/pba->h;
 
-   if (pba->Omega0_dcdmdrwdm >0)   {
+   if (pba->Omega0_dcdmdrwdm !=0)   {
     Omega_tot += pba->Omega0_dcdmdrwdm;
     /** - Read Omega_ini_dcdm2 or omega_ini_dcdm2 */
     class_call(parser_read_double(pfc,"Omega_ini_dcdm2",&param1,&flag1,errmsg),
@@ -1287,7 +1287,7 @@ int input_read_parameters(
   if (flag1 == _FALSE_) {
     //Fill with Lambda
     pba->Omega0_lambda= 1. - pba->Omega0_k - Omega_tot;
-    if (input_verbose > 0) printf(" -> matched budget equations by adjusting Omega_Lambda = %e\n",pba->Omega0_lambda);
+    if (input_verbose > 0)printf(" -> matched budget equations by adjusting Omega_Lambda = %e\n",pba->Omega0_lambda);
   }
   else if (flag2 == _FALSE_) {
     // Fill up with fluid
@@ -4158,6 +4158,7 @@ int input_try_unknown_parameters(double * unknown_parameter,
         }
       }
       output[i] = (rho_dcdm_today+rho_dr_today+rho_wdm_today)/(ba.H0*ba.H0)-pfzw->target_value[i]/ba.h/ba.h;
+      // printf("output[i] %e\n",output[i]);
       break;
     case Omega_scf:
       /** - In case scalar field is used to fill, pba->Omega0_scf is not equal to pfzw->target_value[i].*/
@@ -4190,9 +4191,9 @@ int input_try_unknown_parameters(double * unknown_parameter,
               // }
 
             }
-        //     printf("Omega_dcdm_today = %e\n",rho_dcdm_today/(ba.H0*ba.H0));
-        //     printf("Omega_dr_today = %e\n",rho_dr_today/(ba.H0*ba.H0));
-        //     printf("Omega_wdm_today = %e\n",rho_wdm_today/(ba.H0*ba.H0));
+            // printf("Omega_dcdm_today = %e\n",rho_dcdm_today/(ba.H0*ba.H0));
+            // printf("Omega_dr_today = %e\n",rho_dr_today/(ba.H0*ba.H0));
+            // printf("Omega_wdm_today = %e\n",rho_wdm_today/(ba.H0*ba.H0));
           }
         }
       }
@@ -4337,8 +4338,10 @@ int input_get_guess(double *xguess,
       a_decay = 1.0;
     else
       a_decay = pow(1+(gamma*gamma-1.)/Omega_M,-1./3.);
+    // printf("a_decay %e\n",a_decay);
     xguess[index_guess] = pfzw->target_value[index_guess]/a_decay;
     dxdy[index_guess] = 1./a_decay;
+
     break;
 
    case omega_dcdmdrwdm: /* GFA */
@@ -4350,6 +4353,8 @@ int input_get_guess(double *xguess,
       a_decay = pow(1+(gamma*gamma-1.)/Omega_M,-1./3.);
    xguess[index_guess] = pfzw->target_value[index_guess]/ba.h/ba.h/a_decay;
    dxdy[index_guess] = 1./a_decay/ba.h/ba.h;
+   // printf("x = Omega_ini_guess = %g, dxdy = %g\n",*xguess,*dxdy);
+
    break;
 
   case Omega_scf:
@@ -4391,6 +4396,7 @@ int input_get_guess(double *xguess,
       break;
     case omega_ini_dcdm2:
       Omega0_dcdmdrwdm = 1./(ba.h*ba.h);
+      printf("Omega0_dcdmdrwdm %e\n",Omega0_dcdmdrwdm );
     case Omega_ini_dcdm2:
         /** - This works since correspondence is
             Omega_ini_dcdm2 -> Omega_dcdmdrwdm and
@@ -4404,6 +4410,7 @@ int input_get_guess(double *xguess,
        a_decay = pow(1+(gamma*gamma-1.)/Omega_M,-1./3.);
     xguess[index_guess] = pfzw->target_value[index_guess]*a_decay;
     dxdy[index_guess] = a_decay;
+    printf("xguess[index_guess] %e dxdy[index_guess] %e\n",xguess[index_guess], dxdy[index_guess]);
     if (gamma > 100)
       dxdy[index_guess] *= gamma/100;
     break;
@@ -4447,13 +4454,13 @@ int input_find_root(double *xzero,
                                errmsg),
                  errmsg, errmsg);
   (*fevals)++;
-  //printf("x1= %g, f1= %g\n",x1,f1);
+  // printf("x1= %g, f1= %g\n",x1,f1);
 
   dx = 1.5*f1*dxdy;
 
   /** - Do linear hunt for boundaries */
   for (iter=1; iter<=30; iter++){ /* GFA */
-    //x2 = x1 + search_dir*dx;
+    // x2 = x1 + search_dir*dx;
     x2 = x1 - dx;
 
     for (iter2=1; iter2 <= 3; iter2++) {
