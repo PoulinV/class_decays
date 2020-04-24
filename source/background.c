@@ -356,20 +356,19 @@ int background_functions(
     for(n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++){
       /* function returning background ncdm[n_ncdm] quantities (only
          those for which non-NULL pointers are passed) */
-     if(a_rel ==  1.e-14){
-      num_ncdm =0;
-      rho_ncdm =0;
-      p_ncdm =0;
-      pseudo_p_ncdm =0;
-      // printf("here!\n");
-    }
-    else{
-      if(isnan(pvecback_B[pba->index_bi_time]) || pvecback_B[pba->index_bi_time] < 0 ){
-        t = 0;
-      }
-      else{
-        t = pvecback_B[pba->index_bi_time];
-      }
+     if(a ==  pba->a_ini_over_a_today){ /* gfa */
+      // t = 0;
+
+      t = pvecback_B[pba->index_bi_time];
+     }
+     else{
+       if(isnan(pvecback_B[pba->index_bi_time]) || pvecback_B[pba->index_bi_time] < 0 ){
+         t = 0;
+       }
+       else{
+         t = pvecback_B[pba->index_bi_time];
+       }
+     }
 
         // printf("t %e pvecback[pba->index_bg_H] %e\n", t/_Gyr_over_Mpc_,pvecback[pba->index_bg_H]);
           class_call(background_ncdm_momenta(pba,
@@ -390,7 +389,7 @@ int background_functions(
                                              &pseudo_p_ncdm),
                      pba->error_message,
                      pba->error_message);
-    }
+
 
     // num_ncdm = 0;
     // rho_ncdm = 0;
@@ -1501,9 +1500,10 @@ int background_ncdm_init(
     /* GFA:  q_size_ncdm_bg for the massive daughter should be equal to the number of time steps */
     if(pba->background_ncdm_distribution[k] == _massive_daughter_ && ppr->back_integration_stepsize > 0){
       pba->q_size_ncdm_bg[k] =20/ppr->back_integration_stepsize;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
+    //   printf("q_size_ncdm_bg = %d\n",pba->q_size_ncdm_bg[k] );
     }
+     pba->q_size_ncdm[k] = pba->ncdm_input_q_size[k];
 
-      // pba->q_size_ncdm[k] = 10;
       class_alloc(pba->q_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
       class_alloc(pba->w_ncdm_bg[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
       class_alloc(pba->Hq_table[k],pba->q_size_ncdm_bg[k]*sizeof(double),pba->error_message);
@@ -2001,6 +2001,8 @@ int background_solve(
              pba->error_message);
   pba->bt_size++;
 
+//  printf("Background time steps = %d\n",pba->bt_size);
+
 
   /* integration finished */
 
@@ -2246,6 +2248,7 @@ int background_initial_conditions(
       for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
 
         if(pba->background_ncdm_distribution[n_ncdm]==_massive_daughter_){
+          //VP: for simplicity, we assume massive daughter is negligible at initial time. 
           p_ncdm = 0;
           rho_ncdm = 0;
         }else{

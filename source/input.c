@@ -898,8 +898,12 @@ int input_read_parameters(
       }
     }
 
-  /* GFA: back_integration_stepsize needs to be read here, before background_ncdm_init is called */
+  /* GFA: back_integration_stepsize and a_ini_over_a_today_default
+   need to be read here, before background_ncdm_init is called */
+  class_read_double("a_ini_over_a_today_default",ppr->a_ini_over_a_today_default);
+  class_read_double("a_ini_over_a_today_default",pba->a_ini_over_a_today); /* GFA */
   class_read_double("back_integration_stepsize",ppr->back_integration_stepsize);
+
   /** - non-cold relics (ncdm) */
   class_read_int("N_ncdm",N_ncdm);
   // if(pba->Gamma_dcdm > 0  && (pba->m_dcdm > 0)){
@@ -2854,7 +2858,7 @@ int input_read_parameters(
   class_read_int("output_verbose",
                  pop->output_verbose);
 
- class_read_double("a_ini_over_a_today_default",ppr->a_ini_over_a_today_default);
+
 
   /** (h) all precision parameters */
 
@@ -3000,9 +3004,9 @@ int input_read_parameters(
   // for(n = 0;n<pba->N_ncdm;n++){
     //if there are decaying warm relics we enforce solving the full set of equation: no streaming/fluid approximation.
     // if(pba->background_ncdm_distribution[n] != _fermi_dirac_){
-      ppr->radiation_streaming_approximation=rsa_none;//streaming approximation checked to be accurate at the 0.04% level.
-      ppr->ur_fluid_approximation=ufa_none;//streaming approx is incorrect
-      ppr->ncdm_fluid_approximation=ncdmfa_none;//streaming approx is incorrect
+  //    ppr->radiation_streaming_approximation=rsa_none;//streaming approximation checked to be accurate at the 0.04% level.
+  //    ppr->ur_fluid_approximation=ufa_none;//streaming approx is incorrect
+  //    ppr->ncdm_fluid_approximation=ncdmfa_none;// GFA
     // }
   // }
 
@@ -3267,6 +3271,7 @@ int input_default_params(
      paper. */
 
   pba->h = 0.67556;
+  pba->a_ini_over_a_today =1.e-14; /* gfa */
   pba->H0 = pba->h * 1.e5 / _c_;
   pba->T_cmb = 2.7255;
   pba->Omega0_g = (4.*sigma_B/_c_*pow(pba->T_cmb,4.)) / (3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./_PI_/_G_);
@@ -3712,6 +3717,7 @@ int input_default_precision ( struct precision * ppr ) {
   // ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
   ppr->ncdm_fluid_approximation = ncdmfa_none;
   ppr->ncdm_fluid_trigger_tau_over_tau_k = 31.;
+//  ppr->ncdm_fluid_trigger_tau_over_tau_k = 10.;
 
   ppr->neglect_CMB_sources_below_visibility = 1.e-3;
 
