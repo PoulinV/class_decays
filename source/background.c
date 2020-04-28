@@ -694,6 +694,7 @@ int background_init(
 
   /** - this function integrates the background over time, allocates
       and fills the background table */
+
   class_call(background_solve(ppr,pba),
              pba->error_message,
              pba->error_message);

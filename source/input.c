@@ -3716,8 +3716,7 @@ int input_default_precision ( struct precision * ppr ) {
 
   // ppr->ncdm_fluid_approximation = ncdmfa_CLASS;
   ppr->ncdm_fluid_approximation = ncdmfa_none;
-  // ppr->ncdm_fluid_trigger_tau_over_tau_k = 31.;
- ppr->ncdm_fluid_trigger_tau_over_tau_k = 50.;
+  ppr->ncdm_fluid_trigger_tau_over_tau_k = 31.;
 
   ppr->neglect_CMB_sources_below_visibility = 1.e-3;
 
