@@ -883,6 +883,9 @@ int input_read_parameters(
         ppt->dark_radiation_perturbations = _FALSE_;
       }
     }
+    /** do we want to insure massive daugther is like DR? */
+    /** 0: no; 1: yes in background; 2: yes in background & perts */
+    class_read_double("massive_daugther_is_radiation",pba->massive_daugther_is_radiation);
     class_read_double("time_over_tau_dcdm_threshold",ppt->time_over_tau_dcdm_threshold);
 
     class_call(parser_read_string(pfc,"massive_daughter_perturbations",&string1,&flag1,errmsg),
@@ -3432,6 +3435,7 @@ int input_default_params(
   ppt->selection_width[0]=0.1;
 
   ppt->dark_radiation_perturbations = _TRUE_;
+  pba->massive_daugther_is_radiation = 0;
   ppt->time_over_tau_dcdm_threshold = 0;
   ppt->massive_daughter_perturbations = _TRUE_;
   /** - primordial structure */

@@ -93,7 +93,7 @@ struct background
   double * PDmax_dcdm; /**< Max impulsion given to the daugher particles */
   double Omega_ini_dcdm;    /**< \f$ \Omega_{ini,dcdm} \f$: rescaled initial value for dcdm density (see 1407.2418 for definitions) */
   double Omega_ini_dcdm2;    /**< GFA: \f$ \Omega_{ini,dcdm2} \f$: rescaled initial value for dcdm density (two-body decay) */
-
+  int massive_daugther_is_radiation; /** for debugging massive_daughter */     /** 0: no; 1: yes in background; 2: yes in background & perts */
   double Omega0_scf;        /**< \f$ \Omega_{0 scf} \f$: scalar field */
   short attractor_ic_scf;   /**< whether the scalar field has attractor initial conditions */
   double phi_ini_scf;       /**< \f$ \phi(t_0) \f$: scalar field initial value */
