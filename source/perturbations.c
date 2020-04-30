@@ -7361,6 +7361,7 @@ int perturb_derivs(double tau,
   /* for use with curvature */
   double cotKgen, sqrt_absK;
   double s2_squared, ssqrt3;
+  double decay, metric_eta_prime; /* GFA */
 
   /* for use with dcdm and dr */
   double f_dr, fprime_dr, M,a2_M_Gamma;
@@ -7518,6 +7519,7 @@ int perturb_derivs(double tau,
       metric_shear = k2 * pvecmetric[ppw->index_mt_alpha];
       //metric_shear_prime = k2 * pvecmetric[ppw->index_mt_alpha_prime];
       metric_ufa_class = pvecmetric[ppw->index_mt_h_prime]/2.;
+      metric_eta_prime = pvecmetric[ppw->index_mt_eta_prime]; /* GFA */
     }
 
     if (ppt->gauge == newtonian) {
@@ -7955,9 +7957,11 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
           rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
-          ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+        //  ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+          ratio_rho = rho_dcdm_bg/pvecback[pba->index_bg_rho_dr];
         //  printf("ratio_rho =%e\n",ratio_rho);
           gamma = pba->Gamma_dcdm;
+          decay =a*gamma*ratio_rho; /* GFA*/
           eps = pba->epsilon_dcdm;
           H = pvecback[pba->index_bg_H];
           }
@@ -8012,7 +8016,7 @@ int perturb_derivs(double tau,
           //     ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
           //     + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*y[idx+1];
 
-            dy[idx+1] = (1./4.)*k2*y[idx]-k2*y[idx+2]+(1./2.)*metric_euler-a*gamma*ratio_rho*y[idx+1];
+            dy[idx+1] = (1./4.)*k2*y[idx]-k2*y[idx+2]+metric_euler-(1./2.)*a*gamma*ratio_rho*(y[idx+1]-(3./4.)*y[pv->index_pt_theta_dcdm]);
 
                      /** - ----->  ansatz for approximate shear derivative */
 
@@ -8021,7 +8025,8 @@ int perturb_derivs(double tau,
 
 
             // (corrected)formula (A.8) of 1505.05511v2
-            dy[idx+2] = -3.0/tau*y[idx+2]-(1./2.)*a*gamma*ratio_rho*y[idx+2]+2./3.*(y[idx+1]+metric_ufa_class)-(1./4.)*a*gamma*ratio_rho*y[pv->index_pt_delta_dcdm];
+            dy[idx+2] = -(3.0/tau+(1./2.)*a*gamma*ratio_rho)*y[idx+2]+2./3.*(y[idx+1]+metric_continuity)-(1./4.)*a*gamma*ratio_rho*y[pv->index_pt_delta_dcdm];
+                  //     +(3.*_PI_/(8.*k))*(a*decay*(2.*H-gamma)*y[pv->index_pt_delta_dcdm] -decay*metric_ufa_class);
           //  dy[idx+2] = -3.0/tau*y[idx+2]-0.5*a*gamma*ratio_rho*y[idx+2]+2./3.*(y[idx+1]+metric_shear);
 
           } else {
