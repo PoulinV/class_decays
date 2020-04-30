@@ -404,7 +404,12 @@ int background_functions(
 
 
 
+        if(pba->massive_daugther_is_radiation >= 1 && pba->has_dr == _TRUE_){
+          //for debugging massive daugther
 
+          rho_ncdm =   pvecback[pba->index_bg_rho_dr];
+          p_ncdm =   1./3*pvecback[pba->index_bg_rho_dr];
+        }
           pvecback[pba->index_bg_n_ncdm1+n_ncdm] = num_ncdm;
           pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
           pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;

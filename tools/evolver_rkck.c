@@ -168,7 +168,7 @@ int evolver_rk(int (*derivs)(double x,
 				  error_message),
 	       error_message,
 	       error_message);
-    printf("Number of integration time steps in interval of cte approx = %d\n", counter);
+    // printf("Number of integration time steps in interval of cte approx = %d\n", counter);
 	}
   class_call(cleanup_generic_integrator(&gi),
 	     gi.error_message,
