@@ -8031,32 +8031,35 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
              /** - -----> exact continuity equation */
-             dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
-               3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
-               +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]);
+            dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
+              3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
+              +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
 
-           // Relativistic limit of above equation:
-           //    dy[idx] = -(4./3.)*(y[idx+1]+metric_continuity)+(1./2.)*a*gamma*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
+            //this is the relativistic limit, for testing
+            // dy[idx] = -(4./3.)*(y[idx+1]+metric_continuity)+(1./2.)*a*gamma*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
 
-          // /** - -----> exact euler equation */
-             dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
-               ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
-               + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*y[idx+1];
 
-         // Relativistic limit of above equation:
-         //      dy[idx+1] = (1./4.)*k2*y[idx]-k2*y[idx+2]+metric_euler-(1./2.)*a*gamma*ratio_rho*(y[idx+1]-(3./4.)*y[pv->index_pt_theta_dcdm]);
+
+             // /** - -----> exact euler equation */
+            dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
+              ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
+              + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
+
+            //this is the relativistic limit, for testing
+            // dy[idx+1] = (1./4.)*k2*y[idx]-k2*y[idx+2]+metric_euler-(1./2.)*a*gamma*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
 
                      /** - ----->  ansatz for approximate shear derivative */
 
-             dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau+a*gamma*(1.-eps)*((1.+ca2_ncdm)/(3.+3.*w_ncdm))*ratio_rho)*y[idx+2]
-               +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*(y[idx+1]+metric_ufa_class)
-               -(2./3.)*pow(eps,2)*a*gamma*ratio_rho*y[pv->index_pt_delta_dcdm]/((1.-eps)*(1.+w_ncdm));
+            dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau+a*gamma*(1.-eps)*((1.+ca2_ncdm)/(3.+3.*w_ncdm))*ratio_rho)*y[idx+2]
+              +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*(y[idx+1]+metric_ufa_class)
+              -2.0/3.0*eps*eps*a*gamma*ratio_rho/(1-eps)*y[pv->index_pt_delta_dcdm]/(1.+w_ncdm);
 
 
-        // Relativistic limit of above equation: corresponds to (corrected) eq. A.8 of 1505.05511v2
-        //    dy[idx+2] = -(3.0/tau+(1./2.)*a*gamma*ratio_rho)*y[idx+2]+2./3.*(y[idx+1]+metric_continuity)-(1./4.)*a*gamma*ratio_rho*y[pv->index_pt_delta_dcdm];
-           // possible correction term
-            //  +(3.*_PI_/(8.*k))*a*decay*(2.*H-gamma)*y[pv->index_pt_delta_dcdm];
+            // (corrected)formula (A.8) of 1505.05511v2
+            //this is the relativistic limit, for testing
+            // dy[idx+2] = -3.0/tau*y[idx+2]+2./3.*(y[idx+1]+metric_ufa_class)
+            // -(1./4)*a*gamma*ratio_rho*(y[pv->index_pt_delta_dcdm])-(1./2.)*a*gamma*ratio_rho*y[idx+2];
+
 
           } else {
             /** - -----> exact continuity equation */
