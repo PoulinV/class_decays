@@ -6545,10 +6545,11 @@ int perturb_sources(
 
     /* delta_ur */
     if (ppt->has_source_delta_ur == _TRUE_) {
-      if (ppw->approx[ppw->index_ap_rsa]==(int)rsa_off)
+      if (ppw->approx[ppw->index_ap_rsa]==(int)rsa_off) {
         _set_source_(ppt->index_tp_delta_ur) = y[ppw->pv->index_pt_delta_ur];
-      else
+      }else {
         _set_source_(ppt->index_tp_delta_ur) = ppw->rsa_delta_ur;
+      }
     }
 
     /* delta_ncdm1 */
@@ -7386,6 +7387,7 @@ int perturb_derivs(double tau,
   /* for use with curvature */
   double cotKgen, sqrt_absK;
   double s2_squared, ssqrt3;
+  double decay, metric_eta_prime; /* GFA */
 
   /* for use with dcdm and dr */
   double f_dr, fprime_dr, M,a2_M_Gamma;
@@ -7543,7 +7545,7 @@ int perturb_derivs(double tau,
       metric_shear = k2 * pvecmetric[ppw->index_mt_alpha];
       //metric_shear_prime = k2 * pvecmetric[ppw->index_mt_alpha_prime];
       metric_ufa_class = pvecmetric[ppw->index_mt_h_prime]/2.;
-      // metric_ufa_class = pvecmetric[ppw->index_mt_h_prime]/6+2*ppw->pvecmetric[ppw->index_mt_eta_prime];
+      metric_eta_prime = pvecmetric[ppw->index_mt_eta_prime]; /* GFA */
     }
 
     if (ppt->gauge == newtonian) {
@@ -7787,6 +7789,7 @@ int perturb_derivs(double tau,
       l = pv->l_max_dr;
       dy[pv->index_pt_F0_dr+l] =
         k*(s_l[l]*y[pv->index_pt_F0_dr+l-1]-(1.+l)*cotKgen*y[pv->index_pt_F0_dr+l]);
+        //-(_PI_/32.)*(1.+l)*(metric_eta_prime*4.*f_dr+pow(a,5)*pba->Gamma_dcdm*(pvecback[pba->index_bg_rho_dcdm]/pow(pba->H0,2))*y[pv->index_pt_delta_dcdm]); /* GFA, for l_max_dr=5 */
 
 
       if(pba->has_dcdm == _TRUE_){
@@ -7981,8 +7984,11 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
           rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
-          ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+        //  ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+          ratio_rho = rho_dcdm_bg/pvecback[pba->index_bg_rho_dr];
+        //  printf("ratio_rho =%e\n",ratio_rho);
           gamma = pba->Gamma_dcdm;
+          decay =a*gamma*ratio_rho; /* GFA*/
           eps = pba->epsilon_dcdm;
           H = pvecback[pba->index_bg_H];
           }

@@ -26,11 +26,11 @@ start_time = time.time()
 
 # esthetic definitions for the plots
 
-rc('font',**{'family':'serif','serif':['Times']})
-rc('text', usetex=True)
+#rc('font',**{'family':'serif','serif':['Times']})
+#rc('text', usetex=True)
 # matplotlib.rc('font', **font)
-matplotlib.mathtext.rcParams['legend.fontsize']='medium'
-plt.rcParams["figure.figsize"] = [8.0,6.0]
+#matplotlib.mathtext.rcParams['legend.fontsize']='medium'
+#plt.rcParams["figure.figsize"] = [8.0,6.0]
 
 
 ###planck 2015

@@ -861,7 +861,7 @@ int input_read_parameters(
      if (flag2 == _TRUE_)
        pba->Gamma_dcdm = pow(10.,param2)*(1.e3 / _c_);
 
-    pba->epsilon_dcdm = 1; //default to avoid bug: will be updated a few lines below if necessary
+    pba->epsilon_dcdm = 1.; //default to avoid bug: will be updated a few lines below if necessary
    }
    // else{
    //   pba->Omega_ini_dcdm2 = 0;
@@ -1003,8 +1003,8 @@ int input_read_parameters(
       // }
       // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
     }else{
-      pba->PDmax_dcdm[n] = 0;
-      pba->epsilon_dcdm = 1;
+      pba->PDmax_dcdm[n] = 0.;
+      pba->epsilon_dcdm = 1.;
     }
   }
     /* Read temperatures: */
