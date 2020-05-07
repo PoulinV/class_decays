@@ -91,7 +91,7 @@ M.set(common_settings)
 M.set({
 'omega_cdm': 0.00001,
 'Omega_ini_dcdm': 0.24,
-'Gamma_dcdm': 10000,
+'Gamma_dcdm': 100,
 'evolver': 0,
 'dark_radiation_perturbations': 'yes'
 })
@@ -185,7 +185,7 @@ print("time =%.f s; computing our code"%(timeafterref-start_time))
 M.set({
 'omega_cdm': 0.00001,
 'Omega_ini_dcdm2': 0.24,
-'Gamma_dcdm': 10000,
+'Gamma_dcdm': 100,
 'M_dcdm': 1,
 'm_dcdm': 0.0000000000001,
 'background_ncdm_distribution': 1,

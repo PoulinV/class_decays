@@ -5736,8 +5736,8 @@ int perturb_total_stress_energy(
             gamma = pba->Gamma_dcdm;
             eps = pba->epsilon_dcdm;
             H = ppw->pvecback[pba->index_bg_H];
-          //  cg2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
-            cg2_ncdm = 1./3.;
+            cg2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
+          //  cg2_ncdm = 1./3.;
           } else {
             cg2_ncdm = w_ncdm*(1.0-1.0/(3.0+3.0*w_ncdm)*(3.0*w_ncdm-2.0+pseudo_p_ncdm/p_ncdm_bg));
           }
@@ -7984,9 +7984,8 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
           rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
-        //  ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
-          ratio_rho = rho_dcdm_bg/pvecback[pba->index_bg_rho_dr];
-        //  printf("ratio_rho =%e\n",ratio_rho);
+          ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+        //  ratio_rho = rho_dcdm_bg/pvecback[pba->index_bg_rho_dr];
           gamma = pba->Gamma_dcdm;
           decay =a*gamma*ratio_rho; /* GFA*/
           eps = pba->epsilon_dcdm;
@@ -7995,13 +7994,13 @@ int perturb_derivs(double tau,
 
           /* adiabatic sound speed */
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
-        //   ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
-        //   ceff2_ncdm = ca2_ncdm;
-        //   cvis2_ncdm = 3.*w_ncdm*ca2_ncdm;
+           ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
+           ceff2_ncdm = ca2_ncdm;
+           cvis2_ncdm = 3.*w_ncdm*ca2_ncdm;
 
-           ca2_ncdm = 1./3.;
-           ceff2_ncdm = 1./3.;
-           cvis2_ncdm = 1./3.;
+        //   ca2_ncdm = 1./3.;
+        //   ceff2_ncdm = 1./3.;
+        //   cvis2_ncdm = 1./3.;
         //   printf("ceff2_ncdm-w_ncdm=%e\n",ceff2_ncdm-w_ncdm );
           } else {
            ca2_ncdm = w_ncdm/3.0/(1.0+w_ncdm)*(5.0-pseudo_p_ncdm/p_ncdm_bg);
@@ -8032,55 +8031,32 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
              /** - -----> exact continuity equation */
-          //   dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
-          //     3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
-          //     +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]);
+             dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
+               3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
+               +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]);
 
-          /** - -----> ur density */
-          // dy[pv->index_pt_delta_ur] =
-          //   // standard term
-          //   -4./3.*(y[pv->index_pt_theta_ur] + metric_continuity)
-          //   // non-standard term, non-zero if if ceff2_ur not 1/3
-          //   +(1.-ppt->three_ceff2_ur)*a_prime_over_a*(y[pv->index_pt_delta_ur] + 4.*a_prime_over_a*y[pv->index_pt_theta_ur]/k/k);
+           // Relativistic limit of above equation:
+           //    dy[idx] = -(4./3.)*(y[idx+1]+metric_continuity)+(1./2.)*a*gamma*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
 
-          /** - -----> ur velocity */
-          // dy[pv->index_pt_theta_ur] =
-          //   // standard term with extra coefficient (3 ceff2_ur), normally equal to one
-          //   k2*(ppt->three_ceff2_ur*y[pv->index_pt_delta_ur]/4.-s2_squared*y[pv->index_pt_shear_ur]) + metric_euler
-          //   // non-standard term, non-zero if ceff2_ur not 1/3
-          // //   -(1.-ppt->three_ceff2_ur)*a_prime_over_a*y[pv->index_pt_theta_ur];
-          //
-          // dy[pv->index_pt_F0_dr] = -k*y[pv->index_pt_F0_dr+1]-4./3.*metric_continuity*f_dr;
-          // f_dr = pow(pow(a/pba->a_today,2)/pba->H0,2)*pvecback[pba->index_bg_rho_dr];
-          //
-          //
-          // /** - ----> dr F1 */
-          // dy[pv->index_pt_F0_dr+1] = k/3.*y[pv->index_pt_F0_dr]-2./3.*k*y[pv->index_pt_F0_dr+2]*s2_squared+4*metric_euler/(3.*k)*f_dr;
-          //
-          // fprime_dr = pba->Gamma_dcdm*pvecback[pba->index_bg_rho_dcdm]*pow(a,5)/pow(pba->H0,2);
-          // dy[pv->index_pt_F0_dr] +=  fprime_dr*(y[pv->index_pt_delta_dcdm]+metric_euler/k2);
-          // dy[pv->index_pt_F0_dr+1] += fprime_dr/k*y[pv->index_pt_theta_dcdm];
+          // /** - -----> exact euler equation */
+             dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
+               ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
+               + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*y[idx+1];
 
-            dy[idx] = -(4./3.)*(y[idx+1]+metric_continuity)+(1./2.)*a*gamma*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
-             //
-             // /** - -----> exact euler equation */
-          //   dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
-          //     ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
-          //     + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*y[idx+1];
-
-            dy[idx+1] = (1./4.)*k2*y[idx]-k2*y[idx+2]+metric_euler-(1./2.)*a*gamma*ratio_rho*(y[idx+1]-(3./4.)*y[pv->index_pt_theta_dcdm]);
+         // Relativistic limit of above equation:
+         //      dy[idx+1] = (1./4.)*k2*y[idx]-k2*y[idx+2]+metric_euler-(1./2.)*a*gamma*ratio_rho*(y[idx+1]-(3./4.)*y[pv->index_pt_theta_dcdm]);
 
                      /** - ----->  ansatz for approximate shear derivative */
 
-        //     dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau+a*gamma*(1.-eps)*((1.+ca2_ncdm)/(3.+3.*w_ncdm))*ratio_rho)*y[idx+2]
-        //       +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*(y[idx+1]+metric_ufa_class)-(2./3.)*pow(eps,2)*a*gamma*ratio_rho*y[pv->index_pt_delta_dcdm]/((1.-eps)*(1.+w_ncdm));
+             dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau+a*gamma*(1.-eps)*((1.+ca2_ncdm)/(3.+3.*w_ncdm))*ratio_rho)*y[idx+2]
+               +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*(y[idx+1]+metric_ufa_class)
+               -(2./3.)*pow(eps,2)*a*gamma*ratio_rho*y[pv->index_pt_delta_dcdm]/((1.-eps)*(1.+w_ncdm));
 
 
-            // (corrected)formula (A.8) of 1505.05511v2
-          //  dy[idx+2]=0.;
-            dy[idx+2] = -(3.0/tau+(1./2.)*a*gamma*ratio_rho)*y[idx+2]+2./3.*(y[idx+1]+metric_continuity)-(1./4.)*a*gamma*ratio_rho*y[pv->index_pt_delta_dcdm];
-                  //     +(3.*_PI_/(8.*k))*a*decay*(2.*H-gamma)*y[pv->index_pt_delta_dcdm];
-          //  dy[idx+2] = -3.0/tau*y[idx+2]-0.5*a*gamma*ratio_rho*y[idx+2]+2./3.*(y[idx+1]+metric_continuity);
+        // Relativistic limit of above equation: corresponds to (corrected) eq. A.8 of 1505.05511v2
+        //    dy[idx+2] = -(3.0/tau+(1./2.)*a*gamma*ratio_rho)*y[idx+2]+2./3.*(y[idx+1]+metric_continuity)-(1./4.)*a*gamma*ratio_rho*y[pv->index_pt_delta_dcdm];
+           // possible correction term
+            //  +(3.*_PI_/(8.*k))*a*decay*(2.*H-gamma)*y[pv->index_pt_delta_dcdm];
 
           } else {
             /** - -----> exact continuity equation */
