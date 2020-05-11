@@ -861,7 +861,6 @@ int input_read_parameters(
      if (flag2 == _TRUE_)
        pba->Gamma_dcdm = pow(10.,param2)*(1.e3 / _c_);
 
-    pba->epsilon_dcdm = 1.; //default to avoid bug: will be updated a few lines below if necessary
    }
    // else{
    //   pba->Omega_ini_dcdm2 = 0;
@@ -934,6 +933,29 @@ int input_read_parameters(
     class_read_double("M_dcdm",pba->M_dcdm); //mass [GeV] of the  decaying cold dark matter
     class_read_double("m_dcdm",pba->m_dcdm); //mass [GeV] of the  daugher particle
 
+    /** GFA: - Read Gamma2 (two-body decay) in same units as H0, i.e. km/(s Mpc)*/
+      class_call(parser_read_double(pfc,"m_dcdm",&param1,&flag1,errmsg),
+                 errmsg,
+                 errmsg);
+      class_call(parser_read_double(pfc,"log10_epsilon_dcdm",&param2,&flag2,errmsg),
+                 errmsg,
+                 errmsg);
+      class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+                 errmsg,
+                 "In input file, you can only enter one of m_dcdm or m_dcdm, choose one");
+
+      /* GFA: Convert Gamma to Mpc */
+      if (flag1 == _TRUE_)
+        pba->m_dcdm = param1;
+        pba->epsilon_dcdm = 0.5*(1 - pow(pba->m_dcdm/pba->M_dcdm,2));
+      if (flag2 == _TRUE_)
+        pba->epsilon_dcdm = pow(10,param2);
+        pba->m_dcdm = pba->M_dcdm * pow(1 - 2 * pba->epsilon_dcdm,0.5);
+
+      // printf("pba->m_dcdm %e pba->epsilon_dcdm %e\n",pba->m_dcdm,pba->epsilon_dcdm);
+
+      if (flag1 == _FALSE_ && flag2 == _FALSE_)
+      pba->epsilon_dcdm = 1;
 
     /* background ncdm distribution, 0 is fermi_dirac. */
     class_read_list_of_integers_or_default("background_ncdm_distribution",pba->background_ncdm_distribution,0,N_ncdm);
@@ -995,7 +1017,6 @@ int input_read_parameters(
       // pba->ncdm_qmax[0]=100*pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2/(pba->T_cmb*8.617343e-05*1e-9);//5 has been optimized to capture enough of the distribution around the maximum.
       pba->PDmax_dcdm[n] = pow(pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm+pow(pba->m_dcdm,4)/pow(pba->M_dcdm,2),0.5)/2; // in GeV
       pba->ncdm_qmax[n] = pba->PDmax_dcdm[n];
-      pba->epsilon_dcdm = 0.5*(1 - pow(pba->m_dcdm/pba->M_dcdm,2));
       // if(pba->bt_size != 0 ){
       //   pba->q_size_ncdm_bg[n] = pba->bt_size;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
       //   printf("pba->q_size_ncdm_bg[k] %d pba->bt_size %d  \n",pba->q_size_ncdm_bg[n],pba->bt_size);
@@ -1004,7 +1025,6 @@ int input_read_parameters(
       // printf("pba->ncdm_qmax[0] %e pba->ncdm_input_q_size[0] %d\n",pba->ncdm_qmax[0],pba->ncdm_input_q_size[0]);
     }else{
       pba->PDmax_dcdm[n] = 0.;
-      pba->epsilon_dcdm = 1.;
     }
   }
     /* Read temperatures: */

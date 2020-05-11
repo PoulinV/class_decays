@@ -7984,8 +7984,8 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
           rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
-        //  ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
-          ratio_rho = rho_dcdm_bg/pvecback[pba->index_bg_rho_dr];
+          ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+          // ratio_rho = rho_dcdm_bg/pvecback[pba->index_bg_rho_dr];
         //  printf("ratio_rho =%e\n",ratio_rho);
           gamma = pba->Gamma_dcdm;
           decay =a*gamma*ratio_rho; /* GFA*/
