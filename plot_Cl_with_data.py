@@ -46,7 +46,7 @@ start_time = time.time()
 lTT,DlTT_mean,DlTT_error_minus,DlTT_error_plus,DlTT_bestfit= np.loadtxt("error_Planck/Planck2018_errorTT.txt",unpack=True)
 lEE,DlEE_mean,DlEE_error_minus,DlEE_error_plus,DlEE_bestfit= np.loadtxt("error_Planck/Planck2018_errorEE.txt",unpack=True)
 lTE,DlTE_mean,DlTE_error_minus,DlTE_error_plus,DlTE_bestfit= np.loadtxt("error_Planck/Planck2018_errorTE.txt",unpack=True)
-ref_M0p999= np.loadtxt("output/dcdmdr_G10000_M0p999_100000bins_cl_lensed.dat")
+#ref_M0p999= np.loadtxt("output/dcdmdr_G10000_M0p999_100000bins_cl_lensed.dat")
 # 1:l     2:TT                     3:EE                     4:TE                     5:BB                     6:phiphi                 7:TPhi                   8:Ephi
 
 ##create plot
@@ -83,9 +83,9 @@ M = Class()
 
 
 ###choose the value of Gamma and the number of bins in perts
-Gamma_dcdm = 10000
+Gamma_dcdm = 1000
 nbins = 300
-m_dcdm = 0.999
+m_dcdm = 0.00001
 #
 print("~~~~~computing reference~~~~~")
 M.set(common_settings)
@@ -200,6 +200,7 @@ M.set({
 'N_ncdm': 1,
 'evolver': 0,
 'ncdm_fluid_approximation': 2,
+'ncdm_fluid_trigger_tau_over_tau_k': 31,
 'Number of momentum bins perturbs': nbins,
 'massive_daughter_perturbations': 'yes',
 'dark_radiation_perturbations': 'yes'
