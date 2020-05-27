@@ -2636,6 +2636,8 @@ int perturb_prepare_output(struct background * pba,
       class_store_columntitle(ppt->scalar_titles,"theta_b",_TRUE_);
       class_store_columntitle(ppt->scalar_titles,"psi",_TRUE_);
       class_store_columntitle(ppt->scalar_titles,"phi",_TRUE_);
+      class_store_columntitle(ppt->scalar_titles,"eta_prime",_TRUE_);
+      class_store_columntitle(ppt->scalar_titles,"h_prime",_TRUE_);
       /* Perturbed recombination */
       class_store_columntitle(ppt->scalar_titles,"delta_Tb",ppt->has_perturbed_recombination);
       class_store_columntitle(ppt->scalar_titles,"delta_chi",ppt->has_perturbed_recombination);
@@ -6722,6 +6724,7 @@ int perturb_print_variables(double tau,
   double delta_dcdm=0.,theta_dcdm=0.;
   double delta_dr=0.,theta_dr=0.,shear_dr=0., f_dr=1.0;
   double delta_ur=0.,theta_ur=0.,shear_ur=0.,l4_ur=0.;
+  double eta_prime=0., h_prime=0.; /* GFA */
   double delta_rho_scf=0., rho_plus_p_theta_scf=0.;
   double delta_scf=0., theta_scf=0.;
   /** - ncdm sector begins */
@@ -6882,6 +6885,10 @@ int perturb_print_variables(double tau,
 
       psi = pvecback[pba->index_bg_H]*pvecback[pba->index_bg_a] * alpha + pvecmetric[ppw->index_mt_alpha_prime];
       phi = y[ppw->pv->index_pt_eta] - pvecback[pba->index_bg_H]*pvecback[pba->index_bg_a]*alpha;
+
+      /* GFA */
+      eta_prime = pvecmetric[ppw->index_mt_eta_prime];
+      h_prime = pvecmetric[ppw->index_mt_h_prime];
     }
     else if (ppt->gauge == newtonian){
       psi = pvecmetric[ppw->index_mt_psi];
@@ -7139,6 +7146,8 @@ int perturb_print_variables(double tau,
     class_store_double(dataptr, theta_b, _TRUE_, storeidx);
     class_store_double(dataptr, psi, _TRUE_, storeidx);
     class_store_double(dataptr, phi, _TRUE_, storeidx);
+    class_store_double(dataptr, eta_prime, _TRUE_, storeidx); /* GFA */
+    class_store_double(dataptr, h_prime, _TRUE_, storeidx);  /* GFA */
     /* perturbed recombination */
     class_store_double(dataptr, delta_temp, ppt->has_perturbed_recombination, storeidx);
     class_store_double(dataptr, delta_chi, ppt->has_perturbed_recombination, storeidx);
@@ -7986,6 +7995,7 @@ int perturb_derivs(double tau,
           rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
           ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
         //  ratio_rho = rho_dcdm_bg/pvecback[pba->index_bg_rho_dr];
+        //  ratio_rho = 0.;
           gamma = pba->Gamma_dcdm;
           decay =a*gamma*ratio_rho; /* GFA*/
           eps = pba->epsilon_dcdm;

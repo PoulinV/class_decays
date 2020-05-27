@@ -83,7 +83,7 @@ M = Class()
 
 
 ###choose the value of Gamma and the number of bins in perts
-Gamma_dcdm = 1000
+Gamma_dcdm = 10
 nbins = 300
 m_dcdm = 0.00001
 #
@@ -160,7 +160,7 @@ while step < l_max:
                 (int(step), -1*binned_cosmic_variance(result,int(step),width)),   # (x,y)
                 width,          # width
                 2*binned_cosmic_variance(result,int(step),width),          # height
-                color='r',
+                color='g',
                 alpha=0.1
             )
         )
@@ -170,7 +170,7 @@ while step < l_max:
                 (int(step), -1*binned_cosmic_variance(result,int(step),width)),   # (x,y)
                 width,          # width
                 2*binned_cosmic_variance(result,int(step),width),          # height
-                color='r',
+                color='g',
                 alpha=0.1
             )
         )
@@ -180,9 +180,9 @@ while step < l_max:
 print("~~~~~print planck error bar around mean, i.e, residuals are 0 for simplicity~~~~~")
 
 
-ax_1.errorbar(lTT, DlTT_mean/DlTT_mean-1, yerr=(DlTT_error_plus)/DlTT_mean, fmt='.',color='b',label=r'TT')
-# # ax_1.errorbar(lTT, DlTT_mean/(DlTT_bestfit)-1, yerr=[(-DlTT_error_minus)/DlTT_bestfit, (+DlTT_error_plus)/DlTT_bestfit], fmt='.',color='b',label=r'TT')
-ax_2.errorbar(lEE, DlEE_mean/DlEE_mean-1, yerr=DlEE_error_plus/DlEE_mean, fmt='.',color='b',label=r'EE')
+ax_1.errorbar(lTT, DlTT_mean/DlTT_mean-1, yerr=(DlTT_error_plus)/DlTT_mean, fmt='.',color='r')
+#ax_1.errorbar(lTT, DlTT_mean/(DlTT_bestfit)-1, yerr=[(DlTT_error_minus)/DlTT_bestfit, (+DlTT_error_plus)/DlTT_bestfit], fmt='.',color='b',label=r'TT')
+ax_2.errorbar(lEE, DlEE_mean/DlEE_mean-1, yerr=DlEE_error_plus/DlEE_mean, fmt='.',color='r')
 # ax_2.errorbar(lEE, DlEE_mean/(DlEE_bestfit)-1, yerr=[(-DlEE_error_minus)/DlEE_bestfit, (+DlEE_error_plus)/DlEE_bestfit], fmt='.',color='b',label=r'EE')
 
 timeafterref=time.time()
@@ -200,7 +200,7 @@ M.set({
 'N_ncdm': 1,
 'evolver': 0,
 'ncdm_fluid_approximation': 2,
-'ncdm_fluid_trigger_tau_over_tau_k': 31,
+'ncdm_fluid_trigger_tau_over_tau_k': 25,
 'Number of momentum bins perturbs': nbins,
 'massive_daughter_perturbations': 'yes',
 'dark_radiation_perturbations': 'yes'
