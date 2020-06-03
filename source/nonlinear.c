@@ -701,7 +701,7 @@ int nonlinear_halofit(
      result at the *highest* redshift at which halofit can make
      computations, at the expense of requiring a larger k_max; but
      this parameter is not relevant for the precision on P_nl(k,z) at
-     other redshifts, so there is normally no need to change i
+     other redshifts, so there is normally no need to change it
    */
 
   R=sqrt(-log(ppr->halofit_sigma_precision))/integrand_array[(integrand_size-1)*ia_size + index_ia_k];

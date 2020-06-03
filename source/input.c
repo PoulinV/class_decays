@@ -4190,13 +4190,8 @@ int input_try_unknown_parameters(double * unknown_parameter,
         for (n=0; n<ba.N_ncdm; n++) {
           if (ba.background_ncdm_distribution[n] == _massive_daughter_) {
             rho_wdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_ncdm1+n];
-          //   if(ba.bt_size!= 0 ){
-          //     ba.q_size_ncdm_bg[n] = ba.bt_size;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
-          //     // printf("pba->q_size_ncdm_bg[k] %d pba->bt_size %d 20/ppr->back_integration_stepsize %d \n",pba->q_size_ncdm_bg[k],pba->bt_size,20/ppr->back_integration_stepsize);
-          //     ba.q_size_ncdm[n] = ba.bt_size;
-          //   // }
-          // }
         }
+       }
       }
       output[i] = (rho_dcdm_today+rho_dr_today+rho_wdm_today)/(ba.H0*ba.H0)-pfzw->target_value[i]/ba.h/ba.h;
       // printf("output[i] %e\n",output[i]);
@@ -4224,20 +4219,9 @@ int input_try_unknown_parameters(double * unknown_parameter,
         for (n=0; n<ba.N_ncdm; n++) {
           if (ba.background_ncdm_distribution[n] == _massive_daughter_) {
             rho_wdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_ncdm1+n];
-                          // pba->q_size_ncdm_bg[k] =20/ppr->back_integration_stepsize;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
-              // if(ba.bt_size!= 0 ){
-              //   ba.q_size_ncdm_bg[n] = ba.bt_size;  /* GFA: approximate empirical relation I found between stepsize of tau and number of time steps  */
-              //   printf("pba->q_size_ncdm_bg[k] %d pba->bt_size %d  \n",ba.q_size_ncdm_bg[n],ba.bt_size);
-              //   ba.q_size_ncdm[n] = ba.bt_size;
-              // }
-
             }
-            // printf("Omega_dcdm_today = %e\n",rho_dcdm_today/(ba.H0*ba.H0));
-            // printf("Omega_dr_today = %e\n",rho_dr_today/(ba.H0*ba.H0));
-            // printf("Omega_wdm_today = %e\n",rho_wdm_today/(ba.H0*ba.H0));
           }
         }
-      }
 
       output[i]=-(rho_dcdm_today+rho_dr_today+rho_wdm_today)/(ba.H0*ba.H0)+ba.Omega0_dcdmdrwdm;
       break;
@@ -4434,6 +4418,8 @@ int input_get_guess(double *xguess,
       dxdy[index_guess] = a_decay;
       if (gamma > 100)
         dxdy[index_guess] *= gamma/100;
+  //    else if (gamma >10000)
+  //      dxdy[index_guess] *= gamma/10000; /* GFA */
       break;
     case omega_ini_dcdm2:
       Omega0_dcdmdrwdm = 1./(ba.h*ba.h);
@@ -4443,7 +4429,7 @@ int input_get_guess(double *xguess,
             Omega_ini_dcdm2 -> Omega_dcdmdrwdm and
             omega_ini_dcdm2 -> omega_dcdmdrwdm */
     Omega0_dcdmdrwdm*=pfzw->target_value[index_guess];
-    Omega_M = Omega0_dcdmdrwdm+ba.Omega0_b;  /* GFA: I imposed that we cannot have both cdm and dcdm components  */
+    Omega_M = Omega0_dcdmdrwdm+ba.Omega0_cdm+ba.Omega0_b;
     gamma = ba.Gamma_dcdm/ba.H0;
     if (gamma < 1)
         a_decay = 1.0;
@@ -4454,6 +4440,8 @@ int input_get_guess(double *xguess,
     // printf("xguess[index_guess] %e dxdy[index_guess] %e\n",xguess[index_guess], dxdy[index_guess]);
     if (gamma > 100)
       dxdy[index_guess] *= gamma/100;
+  //  else if (gamma >10000)
+  //    dxdy[index_guess] *= gamma/10000; /* GFA */
     break;
 
   case sigma8:
