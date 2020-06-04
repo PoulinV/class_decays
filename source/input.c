@@ -966,7 +966,7 @@ int input_read_parameters(
 
       // printf("pba->m_dcdm %e pba->epsilon_dcdm %e\n",pba->m_dcdm,pba->epsilon_dcdm);
 
-      if (flag1 == _FALSE_ && flag2 == _FALSE_)
+      if (flag1 == _FALSE_ && flag2 == _FALSE_ && flag3 == _FALSE_)
       pba->epsilon_dcdm = 1;
 
     /* background ncdm distribution, 0 is fermi_dirac. */
