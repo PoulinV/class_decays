@@ -27,19 +27,17 @@ ax_2.set_ylim([-0.5,0.5])
 ax_1.set_xlim([2,2500])
 ax_2.set_xlim([2,2500])
 
-#Gamma_dcdm = 32.679
+Gamma_dcdm = 1.58
 
-Gamma_dcdm = np.array([9.8039, 32.679, 98.0392])
-tau =1./(Gamma_dcdm*1.02e-3)
-tau
+#Gamma_dcdm = np.array([9.8039, 32.679, 98.0392])
+#tau =1./(Gamma_dcdm*1.02e-3)
+#tau
 
 nbins = 300
 
-#m_dcdm = np.array([0.1414, 0.6324, 0.8944])
+epsilon = np.array([0.05, 0.2, 0.49])
 
-m_dcdm = 0.6324
-epsilon =0.5*(1.0-m_dcdm**2)
-epsilon
+
 #%%
 
 #set general configuration
@@ -84,9 +82,9 @@ for i in range(3):
     M.set({
     'omega_cdm': 0.00001,
     'Omega_ini_dcdm2': 0.2636,
-    'Gamma_dcdm': Gamma_dcdm[i],
+    'Gamma_dcdm': Gamma_dcdm,
     'M_dcdm': 1,
-    'm_dcdm': m_dcdm,
+    'epsilon_dcdm': epsilon[i],
     'background_ncdm_distribution': 1,
     'Quadrature strategy': 4,
     'N_ncdm': 1,
@@ -136,25 +134,25 @@ print("~~~~~ready to plot~~~~~")
 
 ax_2.tick_params(axis='both', which='minor', labelsize=12)
 
-#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = 0.49$')
-#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = 0.49$')
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = 100 \, \mathrm{Gyrs}$')
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = 100 \, \mathrm{Gyrs}$')
-#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = 0.3$')
-#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = 0.3$')
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = 30 \, \mathrm{Gyrs}$')
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = 30 \, \mathrm{Gyrs}$')
-#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = 0.1$')
-#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = 0.1$')
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\Gamma^{-1} = 10 \, \mathrm{Gyrs}$')
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = 10 \, \mathrm{Gyrs}$')
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = 0.49$')
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = 0.49$')
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = 100 \, \mathrm{Gyrs}$')
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = 100 \, \mathrm{Gyrs}$')
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = 0.2$')
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = 0.2$')
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = 30 \, \mathrm{Gyrs}$')
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = 30 \, \mathrm{Gyrs}$')
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = 0.05$')
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = 0.05$')
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\Gamma^{-1} = 10 \, \mathrm{Gyrs}$')
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = 10 \, \mathrm{Gyrs}$')
 ax_2.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=15)
 ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\mathrm{DCDM})}{C_\ell^\mathrm{TT}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
 ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}(\mathrm{DCDM})}{C_\ell^\mathrm{EE}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
 
 
-#ax_1.text(500, -0.4, r'$\Gamma^{-1} = 30 \, \,  \mathrm{Gyrs}$', fontsize =13)
-ax_1.text(500, -0.4, r'$\varepsilon = 0.3$', fontsize =13)
+ax_1.text(500, -0.4, r'$\Gamma^{-1} = 620 \, \,  \mathrm{Gyrs}$', fontsize =13)
+#ax_1.text(500, -0.4, r'$\varepsilon = 0.3$', fontsize =13)
 ax_1.legend(frameon=False,fontsize =13,loc='best',borderaxespad=0.)
 plt.show()
 

@@ -953,33 +953,21 @@ int input_read_parameters(
       class_call(parser_read_double(pfc,"log10_epsilon_dcdm",&param2,&flag2,errmsg),
                  errmsg,
                  errmsg);
-      class_call(parser_read_double(pfc,"epsilon_dcdm",&param3,&flag3,errmsg),
-                 errmsg,
-                 errmsg);
       class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
                  errmsg,
-                 "In input file, you can only enter one of m_dcdm or log10espilon_dcdm or epsilon_dcdm, choose one");
-      class_test(((flag1 == _TRUE_) && (flag3 == _TRUE_)),
-                 errmsg,
-                 "In input file, you can only enter one of m_dcdm or log10espilon_dcdm or epsilon_dcdm, choose one");
-      class_test(((flag2 == _TRUE_) && (flag3 == _TRUE_)),
-                 errmsg,
-                 "In input file, you can only enter one of m_dcdm or log10espilon_dcdm or epsilon_dcdm, choose one");
+                 "In input file, you can only enter one of m_dcdm or m_dcdm, choose one");
 
       /* GFA: Convert Gamma to Mpc */
       if (flag1 == _TRUE_)
         pba->m_dcdm = param1;
-        pba->= 0.5*(1 - pow(pba->m_dcdm/pba->M_dcdm,2));
+        pba->epsilon_dcdm= 0.5*(1 - pow(pba->m_dcdm/pba->M_dcdm,2));
       if (flag2 == _TRUE_)
         pba->epsilon_dcdm = pow(10,param2);
-        pba->m_dcdm = pba->M_dcdm * pow(1 - 2 * pba->epsilon_dcdm,0.5);
-      if (flag3 == _TRUE_)
-        pba->epsilon_dcdm = param3;
         pba->m_dcdm = pba->M_dcdm * pow(1 - 2 * pba->epsilon_dcdm,0.5);
 
       // printf("pba->m_dcdm %e pba->epsilon_dcdm %e\n",pba->m_dcdm,pba->epsilon_dcdm);
 
-      if (flag1 == _FALSE_ && flag2 == _FALSE_ && flag3 == _FALSE_)
+      if (flag1 == _FALSE_ && flag2 == _FALSE_)
       pba->epsilon_dcdm = 1;
 
     /* background ncdm distribution, 0 is fermi_dirac. */
