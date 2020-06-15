@@ -33,15 +33,6 @@ start_time = time.time()
 #plt.rcParams["figure.figsize"] = [8.0,6.0]
 
 
-###planck 2015
-# l_TT_low,Dl_TT_low,err_TT_low= np.loadtxt("error_Planck/COM_PowerSpect_CMB-TT-loL-full_R2.02.txt",unpack=True,usecols=(0,1,2))
-# l_TE_low,Dl_TE_low,err_TE_low= np.loadtxt("error_Planck/COM_PowerSpect_CMB-TE-loL-full_R2.02.txt",unpack=True,usecols=(0,1,2))
-# l_TT_high,Dl_TT_high,err_TT_high= np.loadtxt("error_Planck/COM_PowerSpect_CMB-TT-hiL-binned_R2.02.txt",unpack=True,usecols=(0,3,4))
-# l_TE_high,Dl_TE_high,err_TE_high= np.loadtxt("error_Planck/COM_PowerSpect_CMB-TE-hiL-binned_R2.02.txt",unpack=True,usecols=(0,3,4))
-# l_EE_low,Dl_EE_low,err_EE_low= np.loadtxt("error_Planck/COM_PowerSpect_CMB-EE-loL-full_R2.02.txt",unpack=True,usecols=(0,1,2))
-# l_EE_high,Dl_EE_high,err_EE_high= np.loadtxt("error_Planck/COM_PowerSpect_CMB-EE-hiL-binned_R2.02.txt",unpack=True,usecols=(0,3,4))
-# lmin_phiphi,lmax_phiphi,cl_phiphi,err_phiphi= np.loadtxt("error_Planck/agressive_lensing.csv",unpack=True)
-
 ###planck 2018: problem, only the large l are binned. lowell unbinned?
 lTT,DlTT_mean,DlTT_error_minus,DlTT_error_plus,DlTT_bestfit= np.loadtxt("error_Planck/Planck2018_errorTT.txt",unpack=True)
 lEE,DlEE_mean,DlEE_error_minus,DlEE_error_plus,DlEE_bestfit= np.loadtxt("error_Planck/Planck2018_errorEE.txt",unpack=True)
@@ -53,37 +44,36 @@ lTE,DlTE_mean,DlTE_error_minus,DlTE_error_plus,DlTE_bestfit= np.loadtxt("error_P
 ax_1 = plt.subplot(211)
 ax_2 = plt.subplot(212, sharex = ax_1)
 plt.subplots_adjust(hspace=0)
-ax_1.set_ylim([-0.1,0.1])
-ax_2.set_ylim([-0.1,0.1])
+ax_1.set_ylim([-0.12,0.12])
+ax_2.set_ylim([-0.12,0.12])
+ax_1.set_xlim([2,2500])
+ax_2.set_xlim([2,2500])
 # ax_1.set_ylim([30,30000])
 # ax_2.set_ylim([-1,9])
 # ax_2.set_ylim([-2,2])
 
-
+# PUT PLANCK 2015 TT, TE, EE+lowP+lensing best-fit values 
+#for omega_b, n_s, A_s, tau_reio, Omega_ini_dcdm2 and H0
 
 ##LCDM BESTFIT Planck 2018####
 common_settings = {'output':'tCl,pCl,lCl,mPk',
                    'lensing':'yes',
                    'format':'camb',
-                   'l_max_scalars':2600
+                   'l_max_scalars':2600,                    
+                   'n_s':0.9656,
+                   'A_s':2.09e-9,
+                   'tau_reio':0.0536,
+                   'omega_b':0.02229,
+                   'h':0.6739
                    }
-                   # ,'input_verbose': 1,
-                   # 'background_verbose': 1,
-                   # 'thermodynamics_verbose': 1,
-                   # 'perturbations_verbose': 1,
-                   # 'transfer_verbose': 1,
-                   # 'primordial_verbose': 1,
-                   # 'spectra_verbose': 1,
-                   # 'nonlinear_verbose': 1,
-                   # 'lensing_verbose': 1,
-                   # 'output_verbose': 1}
+
 M = Class()
 
 
 
 
 ###choose the value of Gamma and the number of bins in perts
-Gamma_dcdm = 10
+Gamma_dcdm = 10000
 nbins = 300
 m_dcdm = 0.00001
 #
@@ -91,7 +81,7 @@ print("~~~~~computing reference~~~~~")
 M.set(common_settings)
 M.set({
 'omega_cdm': 0.00001,
-'Omega_ini_dcdm': 0.24,
+'Omega_ini_dcdm': 0.2636,
 'Gamma_dcdm': Gamma_dcdm,
 'evolver': 0,
 'dark_radiation_perturbations': 'yes'
@@ -117,11 +107,6 @@ def binned_cosmic_variance (result,l_ini,width):
     weight_total = 0
     result = 0
     Clb = 0
-    # for i in range(0,int(width)):
-    #     weight_total += (l_ini+i)*(l_ini+i+1)
-    #     result += np.sqrt(2/(2*(l_ini+float(i))+1))*(l_ini+float(i))*(l_ini+float(i)+1)
-    # print l_ini,l_ini+width,result, weight_total
-    # return result/weight_total/np.sqrt(2)/np.pi
     for i in range(0,int(width)):
         weight_total += (l_ini+i)*(l_ini+i+1)
         result += 2/(2*(l_ini+float(i))+1)*(l_ini+float(i))*(l_ini+float(i)+1)*(l_ini+float(i))*(l_ini+float(i)+1)*fTT_ref(l_ini+i)*fTT_ref(l_ini+i)
@@ -181,9 +166,7 @@ print("~~~~~print planck error bar around mean, i.e, residuals are 0 for simplic
 
 
 ax_1.errorbar(lTT, DlTT_mean/DlTT_mean-1, yerr=(DlTT_error_plus)/DlTT_mean, fmt='.',color='r')
-#ax_1.errorbar(lTT, DlTT_mean/(DlTT_bestfit)-1, yerr=[(DlTT_error_minus)/DlTT_bestfit, (+DlTT_error_plus)/DlTT_bestfit], fmt='.',color='b',label=r'TT')
 ax_2.errorbar(lEE, DlEE_mean/DlEE_mean-1, yerr=DlEE_error_plus/DlEE_mean, fmt='.',color='r')
-# ax_2.errorbar(lEE, DlEE_mean/(DlEE_bestfit)-1, yerr=[(-DlEE_error_minus)/DlEE_bestfit, (+DlEE_error_plus)/DlEE_bestfit], fmt='.',color='b',label=r'EE')
 
 timeafterref=time.time()
 
@@ -191,7 +174,7 @@ print("~~~~~time =%.f s; computing our code~~~~~"%(timeafterref-start_time))
 M.set(common_settings)
 M.set({
 'omega_cdm': 0.00001,
-'Omega_ini_dcdm2': 0.24,
+'Omega_ini_dcdm2': 0.2636,
 'Gamma_dcdm': Gamma_dcdm,
 'M_dcdm': 1,
 'm_dcdm': m_dcdm,
@@ -206,11 +189,11 @@ M.set({
 'dark_radiation_perturbations': 'yes'
 })
 
-#want verbose? uncomment the following
 
 M.compute()
-print("~~~~~done computing our code in %.f s~~~~~"%(time.time()-timeafterref))
-print("~~~~~ready to plot~~~~~")
+print("~~~~~ computing our code in %.f s~~~~~"%(time.time()-timeafterref))
+t2 = time.time()
+
 
 clM = M.lensed_cl(2500)
 ll_LCDM = clM['ell'][2:]
@@ -219,29 +202,66 @@ clEE_LCDM = clM['ee'][2:]
 fTT_ourcode = interp1d(ll_LCDM,clTT_LCDM*(ll_LCDM)*(ll_LCDM+1)/2/np.pi*(T_cmb*1.e6)**2)
 fEE_ourcode = interp1d(ll_LCDM,clEE_LCDM*(ll_LCDM)*(ll_LCDM+1)/2/np.pi*(T_cmb*1.e6)**2)
 
+M.struct_cleanup()
+M.empty()
 
-# plt.loglog(ll_LCDM,clTT_LCDM*(ll_LCDM)*(ll_LCDM+1)/2/np.pi*(T_cmb*1.e6)**2,lw=2,label=r'$H_0 = %.1f $km/s/Mpc'%(H0))
-# fcdm_100 = fcdm*100
-# ax_2.semilogx(ll_LCDM,clTT_LCDM/fTT(ll_LCDM)-1,lw=2,label=r'$f_{\rm cdm} = %.2f$'%(fcdm))
-ax_1.semilogx(ll_LCDM,fTT_ourcode(ll_LCDM)/fTT_ref(ll_LCDM)-1,lw=2)
-ax_2.semilogx(ll_LCDM,fEE_ourcode(ll_LCDM)/fEE_ref(ll_LCDM)-1,lw=2)
-ax_2.set_xlabel(r'$\ell$',fontsize=20)
-ax_1.set_ylabel(r'$\Delta D_\ell^\mathrm{TT}/D_\ell^\mathrm{TT}$',fontsize=20)
-ax_2.set_ylabel(r'$\Delta D_\ell^\mathrm{EE}/D_\ell^\mathrm{EE}$',fontsize=20)
-# ax_1.tick_params(fontsize=20)
-# ax_2.tick_params(fontsize=20)
-# ax_1.tick_params(fontsize=20)
+#compute evolution but setting gamma=0 in the wdm fluid eqs.
+M.set(common_settings)
+
+M.set({
+'omega_cdm': 0.00001,
+'Omega_ini_dcdm2': 0.2636,
+'Gamma_dcdm': Gamma_dcdm,
+'M_dcdm': 1,
+'m_dcdm': m_dcdm,
+'background_ncdm_distribution': 1,
+'Quadrature strategy': 4,
+'N_ncdm': 1,
+'evolver': 0,
+'ncdm_fluid_approximation': 2,
+'ncdm_fluid_trigger_tau_over_tau_k': 25,
+'Number of momentum bins perturbs': nbins,
+'massive_daughter_perturbations': 'yes',
+'dark_radiation_perturbations': 'yes',
+'switch_off_gamma_in_wdm_perts': 'yes'
+})
+
+M.compute()
+
+print("~~~~~ computing our code in %.f s~~~~~"%(time.time()-t2))
+clM = M.lensed_cl(2500)
+ll_LCDM = clM['ell'][2:]
+clTT_LCDM = clM['tt'][2:]
+clEE_LCDM = clM['ee'][2:]
+fTT_ourcode2 = interp1d(ll_LCDM,clTT_LCDM*(ll_LCDM)*(ll_LCDM+1)/2/np.pi*(T_cmb*1.e6)**2)
+fEE_ourcode2 = interp1d(ll_LCDM,clEE_LCDM*(ll_LCDM)*(ll_LCDM+1)/2/np.pi*(T_cmb*1.e6)**2)
+
+
+print("~~~~~ready to plot~~~~~")
+
+
+ax_1.semilogx(ll_LCDM,fTT_ourcode(ll_LCDM)/fTT_ref(ll_LCDM)-1,'black', label=r'Fluid WDM ')
+ax_2.semilogx(ll_LCDM,fEE_ourcode(ll_LCDM)/fEE_ref(ll_LCDM)-1,'black', label = r'Fluid WDM')
+ax_1.semilogx(ll_LCDM,fTT_ourcode2(ll_LCDM)/fTT_ref(ll_LCDM)-1,'blue', label=r'Fluid WDM with $\Gamma = 0$')
+ax_2.semilogx(ll_LCDM,fEE_ourcode2(ll_LCDM)/fEE_ref(ll_LCDM)-1,'blue', label = r'Fluid WDM $\Gamma = 0$')
+ax_2.set_xlabel(r'$\mathrm{multipole} \, \, \ell$',fontsize=15)
+ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\mathrm{approx})}{C_\ell^\mathrm{TT}(\mathrm{full} )} -1$',fontsize=20)
+ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}(\mathrm{approx})}{C_\ell^\mathrm{EE}(\mathrm{full} )} -1$',fontsize=20)
+
+
 ax_2.tick_params(axis="x", labelsize=20)
 ax_2.tick_params(axis="y", labelsize=20)
 ax_1.tick_params(axis="y", labelsize=20)
-# plt.set_logscalex()
-plt.legend(frameon=False,prop={'size':15},loc='lower right',borderaxespad=0.)
-# plt.savefig('omcdm_%.1f_scan.pdf'%(fcdm_100), bbox_inches='tight')
+
+ax_1.legend(frameon=False,fontsize = 13,loc='upper center',borderaxespad=0.)
+
 plt.show()
-# plt.savefig('omcdm_%.2f_scan_v2.pdf'%(omega_cdm), bbox_inches='tight')
 plt.clf()
 
 M.struct_cleanup()
+M.empty()
+
+
 #
 
 # In[ ]:

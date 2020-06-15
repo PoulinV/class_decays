@@ -386,6 +386,7 @@ struct perturbs
   /** do we want to include DR pertubations? */
   short dark_radiation_perturbations;
   short massive_daughter_perturbations;
+  short switch_off_gamma_in_wdm_perts; /* GFA */
   double time_over_tau_dcdm_threshold;
   //@}
 

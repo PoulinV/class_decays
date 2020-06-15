@@ -7993,9 +7993,12 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
           rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
-          ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
-        //  ratio_rho = rho_dcdm_bg/pvecback[pba->index_bg_rho_dr];
-        //  ratio_rho = 0.;
+          if (ppt->switch_off_gamma_in_wdm_perts == _TRUE_) {
+            ratio_rho = 0.;
+          } else {
+            ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+          }
+
           gamma = pba->Gamma_dcdm;
           decay =a*gamma*ratio_rho; /* GFA*/
           eps = pba->epsilon_dcdm;
