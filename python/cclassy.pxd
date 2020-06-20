@@ -53,6 +53,7 @@ cdef extern from "class.h":
         double Omega0_b
         double Omega0_cdm
         double Omega0_dcdm
+        double Omega0_wdm
         double Omega0_ncdm_tot
         double Omega0_lambda
         double Omega0_fld
@@ -64,6 +65,7 @@ cdef extern from "class.h":
         double Omega0_scf
         double Omega0_k
         int bt_size
+        double k_fss_wdm
 
     cdef struct thermo:
         ErrorMsg error_message
@@ -110,7 +112,6 @@ cdef extern from "class.h":
         int number_of_scalar_titles
         int number_of_vector_titles
         int number_of_tensor_titles
-
 
         double * scalar_perturbations_data[_MAX_NUMBER_OF_K_FILES_]
         double * vector_perturbations_data[_MAX_NUMBER_OF_K_FILES_]

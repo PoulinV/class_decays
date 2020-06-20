@@ -8015,6 +8015,7 @@ int perturb_derivs(double tau,
         //   ceff2_ncdm = 1./3.;
         //   cvis2_ncdm = 1./3.;
         //   printf("ceff2_ncdm-w_ncdm=%e\n",ceff2_ncdm-w_ncdm );
+
           } else {
            ca2_ncdm = w_ncdm/3.0/(1.0+w_ncdm)*(5.0-pseudo_p_ncdm/p_ncdm_bg);
           }
@@ -8067,12 +8068,10 @@ int perturb_derivs(double tau,
               +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*(y[idx+1]+metric_ufa_class)
               -2.0/3.0*eps*eps*a*gamma*ratio_rho/(1-eps)*y[pv->index_pt_delta_dcdm]/(1.+w_ncdm);
 
-
             // (corrected)formula (A.8) of 1505.05511v2
             //this is the relativistic limit, for testing
             // dy[idx+2] = -3.0/tau*y[idx+2]+2./3.*(y[idx+1]+metric_ufa_class)
             // -(1./4)*a*gamma*ratio_rho*(y[pv->index_pt_delta_dcdm])-(1./2.)*a*gamma*ratio_rho*y[idx+2];
-
 
           } else {
             /** - -----> exact continuity equation */
@@ -8110,8 +8109,6 @@ int perturb_derivs(double tau,
             }
 
           }
-
-
 
           /** - -----> jump to next species */
 
@@ -9134,9 +9131,11 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
   double * pvecback;
   int i, i_step_max = 10000;
   int first_index_back;
-  double h, a_step, a_D = 1.0;
+  double h, a_step, a_D = 1.0, H_at_a_D; /* GFA */
   double tau;
   double qmin_tmp;
+  double ca2_ncdm; /* GFA */
+  double rho_ncdm_bg, p_ncdm_bg, pseudo_p_ncdm, w_ncdm, rho_dcdm_bg, ratio_rho, gamma, eps, H_D; /* GFA*/
   struct background_parameters_for_distributions pbadist;
 
   pbadist.pba = pba;
@@ -9144,6 +9143,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
   pbadist.q = NULL;
   pbadist.tablesize = 0;
 
+  H_D = pba->H0; /* GFA */
   class_alloc(pvecback,pba->bg_size_normal*sizeof(double),pba->error_message);
 
   /** loop to find a_decay **/
@@ -9166,12 +9166,30 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
                pba->error_message,
                ppr->error_message);
     // printf("pvecback[pba->index_bg_time] %e (1.0/pba->Gamma_dcdm) %e\n",pvecback[pba->index_bg_time],(1.0/pba->Gamma_dcdm));
+
+
+
     if(pvecback[pba->index_bg_time]<(1.0/pba->Gamma_dcdm)){
       a_D = a_step;
+      H_D= pvecback[pba->index_bg_H];
+      rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm]; /* background density */
+      p_ncdm_bg = pvecback[pba->index_bg_p_ncdm1+n_ncdm]; /* background pressure */
+      pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm]; /* pseudo-pressure (see CLASS IV paper) */
+      w_ncdm = p_ncdm_bg/rho_ncdm_bg; /* equation of state parameter */
+      rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
+      ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+      gamma = pba->Gamma_dcdm;
+      eps = pba->epsilon_dcdm;
+      ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H_D))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H_D)*(1.-eps));
     }else{
       break;
     }
   }
+
+    /* GFA: compute free-streaming length of the warm dark daughter,
+    evaluated at the time of decay a_D (equal to present time if lifetime >age universe) */
+    pba->k_fss_wdm = sqrt(3./2.)*a_D*H_D/sqrt(ca2_ncdm);
+    //Note: works well for lifetime > age_universe, but not on the contrary, maybe I should evaluate it before a_D
 
     /** Manual q-sampling for this species. Same sampling used for both perturbation and background sampling, since this will usually be a high precision setting anyway */
     // pba->ncdm_qmax[n_ncdm] = pba->PDmax_dcdm[n_ncdm];
@@ -9179,7 +9197,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
     // qmin_tmp = 1e-4 * a_D * pba->PDmax_dcdm[n_ncdm];
     qmin_tmp = ppr->a_ini_over_a_today_default* pba->a_today * pba->PDmax_dcdm[n_ncdm];
     // qmin_tmp = ppr->a_ini_over_a_today_default* pba->a_today * pba->PDmax_dcdm[n_ncdm];
-    // if(pba->background_verbose>0)printf("found a_D %e qmin %e qmax %e\n", a_D,qmin_tmp,pba->ncdm_qmax[n_ncdm]);
+  //   if(pba->background_verbose>0)printf("found a_D %e ca_ncdm %e H_D %e\n", a_D,sqrt(ca2_ncdm),H_D);
 
     class_call(get_qsampling_manual(pba->q_ncdm[n_ncdm],
             pba->w_ncdm[n_ncdm],
