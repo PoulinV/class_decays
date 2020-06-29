@@ -39,9 +39,8 @@ tau
 nbins = 300
 
 
-m_dcdm = np.array([0.7, 0.8, 0.9])
+m_dcdm = np.array([0.7, 0.8, 0.95])
 epsilon =0.5*(1.-m_dcdm*m_dcdm)
-epsilon
 
 
 
@@ -134,7 +133,7 @@ for i in range(3):
 
     M.compute()
     h = M.h()
-    derived = M.get_current_derived_parameters(['sigma8','k_fss_wdm', 'age'])
+    derived = M.get_current_derived_parameters(['sigma8','k_fss_wdm', 'age', 'rho0_wdm_over_rho0_m'])
     print("~~~~~computing our code in %.f s~~~~~"%(time.time()-t_i))
     t_i = time.time()
     
@@ -147,8 +146,11 @@ for i in range(3):
             Pk2.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
         print("sigma8 for DCDM with epsilon=%.4f is %f" %(epsilon[0],derived['sigma8']) )
         k_fss_wdm[0]=derived['k_fss_wdm']
-        suppression[0]=((np.exp(-derived['age']/tau))**2)-1.0
+        suppression[0]=-5.0*derived['rho0_wdm_over_rho0_m']
+#        suppression[0]=((np.exp(-derived['age']/tau))**2)-1.0
+#        suppression[0]=-1.0+((1.0-(np.exp(-derived['age']/tau)) )*epsilon[0]/(1.0-epsilon[0]))**2
         print("k_fss_wdm for DCDM with epsilon=%.4f is %f Mpc^-1" %(epsilon[0],k_fss_wdm[0]) )
+        print("rho_wdm/rho_m for DCDM with epsilon=%.4f is %f " %(epsilon[0],derived['rho0_wdm_over_rho0_m']))
     elif i==1:
         clM_1 = M.lensed_cl(2500)
         ll_DCDM_1 = clM_1['ell'][2:]
@@ -158,8 +160,11 @@ for i in range(3):
             Pk3.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
         print("sigma8 for DCDM with epsilon=%.4f is %f" %(epsilon[1],derived['sigma8']) )
         k_fss_wdm[1]=derived['k_fss_wdm']
-        suppression[1]=((np.exp(-derived['age']/tau))**2)-1.0
+        suppression[1]=-5.0*derived['rho0_wdm_over_rho0_m']
+#        suppression[1]=((np.exp(-derived['age']/tau))**2)-1.0
+#        suppression[1]=-1.0+((1.0-(np.exp(-derived['age']/tau)) )*epsilon[1]/(1.0-epsilon[1]))**2
         print("k_fss_wdm for DCDM with epsilon=%.4f is %f Mpc^-1" %(epsilon[1],k_fss_wdm[1]) )
+        print("rho_wdm/rho_m for DCDM with epsilon=%.4f is %f " %(epsilon[0],derived['rho0_wdm_over_rho0_m']))
     else:
         clM_2 = M.lensed_cl(2500)
         ll_DCDM_2 = clM_2['ell'][2:]
@@ -169,8 +174,11 @@ for i in range(3):
             Pk4.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
         print("sigma8 for DCDM with epsilon=%.4f is %f" %(epsilon[2],derived['sigma8']) )
         k_fss_wdm[2]=derived['k_fss_wdm']
-        suppression[2]=((np.exp(-derived['age']/tau))**2)-1.0
+        suppression[2]=-5.0*derived['rho0_wdm_over_rho0_m']
+#        suppression[2]=((np.exp(-derived['age']/tau))**2)-1.0
+#        suppression[2]=-1.0+((1.0-(np.exp(-derived['age']/tau)) )*epsilon[2]/(1.0-epsilon[2]))**2
         print("k_fss_wdm for DCDM with epsilon=%.4f is %f Mpc^-1" %(epsilon[2],k_fss_wdm[2]) )
+        print("rho_wdm/rho_m for DCDM with epsilon=%.4f is %f " %(epsilon[0],derived['rho0_wdm_over_rho0_m']))
     
     M.struct_cleanup()
     M.empty()
@@ -231,9 +239,9 @@ plt.axvline(k_fss_wdm[0], color='b', linestyle='dotted')
 plt.axvline(k_fss_wdm[1], color='r', linestyle='dotted')
 plt.axvline(k_fss_wdm[2], color='g', linestyle='dotted')
 
-#plt.axhline(suppression[0], color='b', linestyle='dotted')
-#plt.axhline(suppression[1], color='r', linestyle='dotted')
-#plt.axhline(suppression[2], color='g', linestyle='dotted')
+plt.axhline(suppression[0], color='b', linestyle='dotted')
+plt.axhline(suppression[1], color='r', linestyle='dotted')
+plt.axhline(suppression[2], color='g', linestyle='dotted')
 plt.text(0.2e-3, -0.08, r'$\Gamma^{-1} = %.1f \, \mathrm{Gyrs} $'%tau, fontsize =13)
 #plt.text(0.2e-3, -1.0, r'$\Gamma^{-1} = %.1f \, \mathrm{Gyrs} $'%tau, fontsize =13)
 plt.show()
@@ -241,3 +249,4 @@ plt.show()
 plt.clf()
 
 
+#%%

@@ -3326,7 +3326,8 @@ int input_default_params(
   pba->Omega0_dcdmdr = 0.0;
   pba->Omega0_dcdmdrwdm=0.0; /* GFA, for shooting method */
   pba->Omega0_dcdm = 0.0;
-  pba->Omega0_wdm = 0.0;
+  pba->Omega0_wdm = 0.0; /* GFA */
+  pba->rho0_wdm_over_rho0_m = 0.0; /* GFA */
   pba->Gamma_dcdm = 0.0;
   pba->Gamma_neutrinos = NULL;
   pba->neutrino_hierarchy = degenerate;

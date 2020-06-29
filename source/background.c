@@ -2167,9 +2167,10 @@ int background_solve(
     for (n=0; n<pba->N_ncdm; n++) {  /* GFA: compute the contribution of wdm to the total matter fraction today */
      if (pba->background_ncdm_distribution[n] == _massive_daughter_) {
      pba->Omega0_wdm = (pba->background_table[(pba->bt_size-1)*pba->bg_size+pba->index_bg_rho_ncdm1+n]-3.0*pba->background_table[(pba->bt_size-1)*pba->bg_size+pba->index_bg_p_ncdm1+n])/pba->H0/pba->H0;
+     pba->rho0_wdm_over_rho0_m = pba->Omega0_wdm /(pba->Omega0_wdm+pba->Omega0_dcdm+pba->Omega0_cdm+pba->Omega0_b);
     }
   }
-//  printf("Omega0_wdm = %f\n",pba->Omega0_wdm);
+  // printf("Omega0_wdm = %f\n",pba->Omega0_wdm);
   }
 
 

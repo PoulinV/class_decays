@@ -14,9 +14,7 @@ Gamma_dcdm = 4
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
-nbins = 300
-
-m_dcdm = 0.00001
+m_dcdm = 0.9
 epsilon =0.5*(1.-m_dcdm*m_dcdm)
 epsilon
 
@@ -43,14 +41,24 @@ M = Class()
 print("~~~~~computing reference~~~~~")
 M.set(common_settings)
 M.set({
-'omega_cdm': 0.00001,
-'omega_ini_dcdm': 0.1197,
+'omega_cdm': 0.000001,
+'omega_ini_dcdm2':  0.1197,
 'Gamma_dcdm': Gamma_dcdm,
+'M_dcdm': 1,
+'m_dcdm': m_dcdm,
+'background_ncdm_distribution': 1,
+'Quadrature strategy': 4,
+'N_ncdm': 1,
 'evolver': 0,
-'dark_radiation_perturbations': 'yes'})
+'ncdm_fluid_approximation': 3,
+'Number of momentum bins perturbs': 5000,
+'l_max_ncdm':49,
+'massive_daughter_perturbations': 'yes',
+'dark_radiation_perturbations': 'yes'
+})
 M.compute()
 derived = M.get_current_derived_parameters(['sigma8'])
-print("sigma8 for DCDM to DR is %f"%derived['sigma8'])
+print("sigma8 for two-body DCDM (full hierarchy with epsilon =%.3f ) is %f"%(epsilon, derived['sigma8']))
 # get P(k) at redhsift z=0
 h = M.h() # get reduced Hubble for conversions to 1/Mpc
 
@@ -66,7 +74,7 @@ timeafterref=time.time()
 print("~~~~~time =%.f s; computing our code~~~~~"%(timeafterref-start_time))
 M.set(common_settings)
 M.set({
-'omega_cdm': 0.00001,
+'omega_cdm': 0.000001,
 'omega_ini_dcdm2':  0.1197,
 'Gamma_dcdm': Gamma_dcdm,
 'M_dcdm': 1,
@@ -77,7 +85,7 @@ M.set({
 'evolver': 0,
 'ncdm_fluid_approximation': 2,
 'ncdm_fluid_trigger_tau_over_tau_k': 25,
-'Number of momentum bins perturbs': nbins,
+'Number of momentum bins perturbs': 300,
 'massive_daughter_perturbations': 'yes',
 'dark_radiation_perturbations': 'yes'
  })
@@ -90,7 +98,7 @@ print("~~~~~computing our code in %.f s~~~~~"%(time.time()-timeafterref))
 for k in kk:
     Pk2.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
-print("sigma8 for DCDM to DR (fluid WDM with epsilon=0.49999) is %f"%derived['sigma8'])
+print("sigma8 for two-body DCDM (fluid WDM with epsilon=%.3f) is %f"%(epsilon, derived['sigma8']))
 
 M.struct_cleanup()
 M.empty()
@@ -102,7 +110,7 @@ plt.xscale('log')
 plt.xlim(kk[0],kk[-1])
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
 plt.ylabel(r'$P_{\mathrm{approx}}/P_{\mathrm{full}}-1$', fontsize=20)
-plt.plot(kk,map(truediv, list(np.array(Pk2) - np.array(Pk1)), Pk1),'b',label=r'$\tau = 245 \, \mathrm{Gyrs}$')
+plt.plot(kk,map(truediv, list(np.array(Pk2) - np.array(Pk1)), Pk1),'b',label=r'$\tau = %.3f \, \mathrm{Gyrs} \, \, \, \varepsilon = %.3f $'%(tau, epsilon))
 
 plt.legend(loc='best', fontsize=13)
 

@@ -984,6 +984,9 @@ cdef class Class:
     # On would need to add contributions from ncdm, ddmdr, etc.
     #def Omega_r(self):
     #    return self.ba.Omega0_g+self.ba.Omega0_ur
+    def rho0_wdm_over_rho0_m(self):
+        return self.ba.rho0_wdm_over_rho0_m
+    
     def k_fss_wdm(self):
         return self.ba.k_fss_wdm
     
@@ -1537,6 +1540,8 @@ cdef class Class:
             elif name == 'omega_m':
                 value = (self.ba.Omega0_b + self.ba.Omega0_cdm+
                          self.ba.Omega0_ncdm_tot + self.ba.Omega0_dcdm+self.ba.Omega0_wdm)/self.ba.h**2
+            elif name == 'rho0_wdm_over_rho0_m':
+                value = self.ba.rho0_wdm_over_rho0_m
             elif name == 'k_fss_wdm':
                 value = self.ba.k_fss_wdm
             elif name == 'tau_reio':
