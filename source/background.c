@@ -424,6 +424,10 @@ int background_functions(
           rho_m += rho_ncdm - 3.* p_ncdm;
           // if( 1./a_rel-1.<10000 &&  1./a_rel-1. > 9800) printf("%e %e \n",1./a_rel-1., rho_ncdm - 3.* p_ncdm);
 
+
+
+
+
     }
   }
 
@@ -2045,7 +2049,6 @@ int background_solve(
   if (pba->has_dcdm == _TRUE_){
     pba->Omega0_dcdm = pvecback_integration[pba->index_bi_rho_dcdm]/pba->H0/pba->H0;
   }
-
   if (pba->has_dr == _TRUE_){
     pba->Omega0_dr = pvecback_integration[pba->index_bi_rho_dr]/pba->H0/pba->H0;
   }
@@ -2704,6 +2707,13 @@ int background_derivs(
   rho_M = pvecback[pba->index_bg_rho_b];
   if (pba->has_cdm)
     rho_M += pvecback[pba->index_bg_rho_cdm];
+  if (pba->has_dcdm)
+    rho_M += pvecback[pba->index_bg_rho_dcdm];
+  if (pba->has_ncdm){
+    for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++){
+      rho_M += pvecback[pba->index_bg_rho_ncdm1+n_ncdm]-3*pvecback[pba->index_bg_p_ncdm1+n_ncdm];//from Clark++2006.03678, Eq. (7)
+    }
+  }
   dy[pba->index_bi_D] = y[pba->index_bi_D_prime];
   dy[pba->index_bi_D_prime] = -a*H*y[pba->index_bi_D_prime] + 1.5*a*a*rho_M*y[pba->index_bi_D];
 
