@@ -424,6 +424,10 @@ int background_functions(
           rho_m += rho_ncdm - 3.* p_ncdm;
           // if( 1./a_rel-1.<10000 &&  1./a_rel-1. > 9800) printf("%e %e \n",1./a_rel-1., rho_ncdm - 3.* p_ncdm);
 
+
+
+
+
     }
   }
 
@@ -2045,7 +2049,6 @@ int background_solve(
   if (pba->has_dcdm == _TRUE_){
     pba->Omega0_dcdm = pvecback_integration[pba->index_bi_rho_dcdm]/pba->H0/pba->H0;
   }
-
   if (pba->has_dr == _TRUE_){
     pba->Omega0_dr = pvecback_integration[pba->index_bi_rho_dr]/pba->H0/pba->H0;
   }
@@ -2161,15 +2164,6 @@ int background_solve(
       }
       // printf("pba->Omega0_ncdm[n]  %e\n", pba->Omega0_ncdm[n] );
     }
-  }
-
-  if (pba->has_dcdm == _TRUE_){
-    for (n=0; n<pba->N_ncdm; n++) {  /* GFA: compute the contribution of wdm to the total matter fraction today */
-     if (pba->background_ncdm_distribution[n] == _massive_daughter_) {
-     pba->Omega0_wdm = (pba->background_table[(pba->bt_size-1)*pba->bg_size+pba->index_bg_rho_ncdm1+n]-3.0*pba->background_table[(pba->bt_size-1)*pba->bg_size+pba->index_bg_p_ncdm1+n])/pba->H0/pba->H0;
-    }
-  }
-//  printf("Omega0_wdm = %f\n",pba->Omega0_wdm);
   }
 
 
@@ -2703,6 +2697,13 @@ int background_derivs(
   rho_M = pvecback[pba->index_bg_rho_b];
   if (pba->has_cdm)
     rho_M += pvecback[pba->index_bg_rho_cdm];
+  if (pba->has_dcdm)
+    rho_M += pvecback[pba->index_bg_rho_dcdm];
+  if (pba->has_ncdm){
+    for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++){
+      rho_M += pvecback[pba->index_bg_rho_ncdm1+n_ncdm]-3*pvecback[pba->index_bg_p_ncdm1+n_ncdm];//from Clark++2006.03678, Eq. (7)
+    }
+  }
   dy[pba->index_bi_D] = y[pba->index_bi_D_prime];
   dy[pba->index_bi_D_prime] = -a*H*y[pba->index_bi_D_prime] + 1.5*a*a*rho_M*y[pba->index_bi_D];
 
