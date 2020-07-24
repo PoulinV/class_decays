@@ -9,12 +9,11 @@ import time
 start_time = time.time()
 
 #%%
-Gamma_dcdm = 4
-
+Gamma_dcdm = 13.5
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
-m_dcdm = 0.9
+m_dcdm = 0.99
 epsilon =0.5*(1.-m_dcdm*m_dcdm)
 epsilon
 
@@ -22,6 +21,22 @@ kk = np.logspace(-4,np.log10(1),1000) # k in h/Mpc
 
 Pk1 = [] # P(k) in (Mpc/h)**3
 Pk2 = [] # P(k) in (Mpc/h)**3
+
+##without fluid approx, taking 5000 momentum bins and l_max_ncdm=49,
+#epsilon=0.095 (m_dcdm=0.9) and gamma=4 (tau = 245 Gyrs) --->sigma8 = 0.7806 (around 8 hours)
+#--->instead, with 1000 momentum bins and l_max_ncdm=17--->sigma8 = 0.779850 (around 12 minutes)
+#--->instead, with 700 momentum bins and l_max_mcdm=17--->sigma8 = 0.779807 (around 6 minutes) 
+#--->instead, with 700 momentum bins and l_max_mcdm=13--->sigma8 = 0.779611 (around 4 minutes 44s) 
+#--->instead, with 600 momentum bins and l_max_mcdm=13--->sigma8 = 0.779625 (around 3 minutes 49s) 
+#--->instead, with 400 momentum bins and l_max_mcdm=13--->sigma8 = 0.779835 (around 2 minutes 34s)
+#--->instead, with 300 momentum bins and l_max_mcdm=13--->sigma8 = 0.780142 (around 1 minute 54s) -->good
+#--->instead, with 300 momentum bins and l_max_mcdm=9--->sigma8 = 0.779863 (around 1 minute 38s) -->good
+
+
+#for the same values of epsilon and gamma, switching-on fluid approx
+# at ktau = 25 and taking 300 momentum bins ---> sigma8 = 0.7352 (around 38 seconds)
+#--->instead, switching on fluid at ktau= 50 and taking 500 momentum bins --->sigma8 = 0.735246 (around 1m26 s)
+#--->instead, switching on fluid at ktau = 300 and taking 500 momentum bins--->sigma8 =  0.736419 (around 1m57 s)
 
 #%%
 #set general configuration
@@ -51,8 +66,8 @@ M.set({
 'N_ncdm': 1,
 'evolver': 0,
 'ncdm_fluid_approximation': 3,
-'Number of momentum bins perturbs': 5000,
-'l_max_ncdm':49,
+'Number of momentum bins perturbs': 300,
+'l_max_ncdm':9,
 'massive_daughter_perturbations': 'yes',
 'dark_radiation_perturbations': 'yes'
 })

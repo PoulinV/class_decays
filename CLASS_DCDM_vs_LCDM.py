@@ -1,15 +1,8 @@
-
 # import necessary modules
-#get_ipython().magic(u'matplotlib inline')
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from classy import Class
 from operator import truediv
-from scipy.optimize import fsolve
-import math
-
-
 from scipy.interpolate import interp1d
 
 import time
@@ -23,61 +16,59 @@ plt.subplots_adjust(hspace=0)
 #ax_1.set_ylim([-0.5,0.5])
 #ax_2.set_ylim([-0.3,0.3])
 
-ax_1.set_ylim([-0.05,0.05])
-ax_2.set_ylim([-0.02,0.02])
+ax_1.set_ylim([-0.17,0.17])
+ax_2.set_ylim([-0.1,0.1])
 ax_1.set_xlim([2,2500])
 ax_2.set_xlim([2,2500])
 
-#Gamma_dcdm = 980
-Gamma_dcdm = 4
-#convert gamma to Mpc^{-1}
-gamma_Mpc=Gamma_dcdm*1.0e3/2.99792458e8
+
+
+Gamma_dcdm = np.array([32.679, 32.679, 32.679])
 #Gamma_dcdm = np.array([9.8039, 32.679, 98.0392])
+
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
+
+
 
 nbins = 300
 
 
-m_dcdm = np.array([0.7, 0.8, 0.95])
-epsilon =0.5*(1.-m_dcdm*m_dcdm)
+epsilon = np.array([0.49, 0.15, 0.01])
+#epsilon =  np.array([0.15,0.15,0.15])
 
-
-
-#compute characteristic scale factor at decay, t(a_d)=tau
-h=0.6739
-H0=h*100
-Omega_b=0.02229/h**2
-Omega_dcdm=0.2636
-Omega_m = Omega_b+Omega_dcdm
-a_d = ((3./2.)*(H0/Gamma_dcdm)*np.sqrt(Omega_m))**(2./3.)
-a_d
-#only if tau < age universe, otherwise a_d=1
 v_kick=epsilon/(1.0-epsilon)
-lambda_fss=3.0*v_kick/(gamma_Mpc*a_d) 
-#formula 4.2 from Aoyama et al., works well if tau < age universe, 
-#on the contrary it doesn't give good results
-k_fss=(np.pi/lambda_fss)
+
 k_fss_wdm=np.zeros(3) # for the one computed with CLASS
 suppression=np.zeros(3) #for the asymptote of the matter power suppression
-kk = np.logspace(-4,np.log10(1),1000) # k in h/Mpc
+kk = np.logspace(-4,-0.3,1000) # k in h/Mpc
+
 Pk1 = [] # P(k) in (Mpc/h)**3
 Pk2 = [] # P(k) in (Mpc/h)**3
 Pk3 = [] # P(k) in (Mpc/h)**3
 Pk4 = []# P(k) in (Mpc/h)**3
+#Pk5 = []# P(k) in (Mpc/h)**3
+#Pk6 = []# P(k) in (Mpc/h)**3
+#Pk7 = []# P(k) in (Mpc/h)**3
+
+
 #%%
 
 #set general configuration
-common_settings = {'output':'tCl,pCl,lCl,mPk',
+common_settings = {'output':'tCl,pCl,lCl, mPk',
                    'lensing':'yes',
                    'l_max_scalars':2600,
-                   'n_s':0.9656,
-                   'A_s':2.09e-9,
-                   'tau_reio':0.0536,
-                   'omega_b':0.02229,
-                   'h':0.6739,
+                   'n_s':0.9652,
+                   'ln10^{10}A_s':3.043,
+                   'z_reio':7.64,
+                   'omega_b':0.02233,
+                   '100*theta_s':1.04108,
                    'P_k_max_1/Mpc':1.0
                    }
+
+#maybe implement ln(10^10 A_s exp(-2*tau_reio)) as input parameter in class, 
+#this should be passed as input together with z_reio, tau_reio is then inferred
+
 #Planck 2018 best-fit (TT,TE,EE+lowE+lensing)
 #see table 1. in arXiv: 1807.06209v2 
 M = Class()
@@ -85,12 +76,18 @@ M = Class()
 print("~~~~~computing reference~~~~~")
 M.set(common_settings)
 M.set({
-'omega_cdm': 0.1197})
+'omega_cdm': 0.1198,
+'N_ncdm':1,
+'background_ncdm_distribution': 0,
+'N_ur':2.0328,
+'m_ncdm':0.06})
 M.compute()
-derived = M.get_current_derived_parameters(['sigma8'])
+derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
 print("sigma8 for LCDM is %f"%derived['sigma8'])
+print("Omega_m for LCDM is %f"%derived['Omega_m'])
 
 clM = M.lensed_cl(2600)
+#clM = M.raw_cl(2600)
 ll_LCDM = clM['ell'][2:]
 clTT_LCDM = clM['tt'][2:]
 clEE_LCDM = clM['ee'][2:]
@@ -116,29 +113,34 @@ for i in range(3):
     M.set(common_settings)
     M.set({
     'omega_cdm': 0.00001,
-    'Omega_ini_dcdm2': 0.2636,
-    'Gamma_dcdm': Gamma_dcdm,
+    'omega_ini_dcdm2':  0.1198,
+    'Gamma_dcdm': Gamma_dcdm[i],
     'M_dcdm': 1,
-    'm_dcdm': m_dcdm[i],
-    'background_ncdm_distribution': 1,
-    'Quadrature strategy': 4,
-    'N_ncdm': 1,
+    'epsilon_dcdm': epsilon[i],
+    'background_ncdm_distribution': '0,1',
+    'Quadrature strategy': '0,4',
+    'N_ncdm': 2,
+    'N_ur':2.0328,
+    'm_ncdm':'0.06,0',
     'evolver': 0,
     'ncdm_fluid_approximation': 2,
+#    'ncdm_fluid_approximation': 3,
     'ncdm_fluid_trigger_tau_over_tau_k': 25,
-    'Number of momentum bins perturbs': nbins,
+    'Number of momentum bins perturbs': '50,300',
+#    'l_max_ncdm':9,
     'massive_daughter_perturbations': 'yes',
     'dark_radiation_perturbations': 'yes'
     })
 
     M.compute()
     h = M.h()
-    derived = M.get_current_derived_parameters(['sigma8','k_fss_wdm', 'age', 'rho0_wdm_over_rho0_m'])
+    derived = M.get_current_derived_parameters(['sigma8','k_fss_wdm', 'age', 'rho0_wdm_over_rho0_m', 'Omega_m'])
     print("~~~~~computing our code in %.f s~~~~~"%(time.time()-t_i))
     t_i = time.time()
     
     if i==0:
         clM_0 = M.lensed_cl(2500)
+#        clM_0 = M.raw_cl(2500)
         ll_DCDM_0 = clM_0['ell'][2:]
         clTT_DCDM_0 = clM_0['tt'][2:]
         clEE_DCDM_0 = clM_0['ee'][2:]
@@ -146,13 +148,20 @@ for i in range(3):
             Pk2.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
         print("sigma8 for DCDM with epsilon=%.4f is %f" %(epsilon[0],derived['sigma8']) )
         k_fss_wdm[0]=derived['k_fss_wdm']
-        suppression[0]=-5.0*derived['rho0_wdm_over_rho0_m']
-#        suppression[0]=((np.exp(-derived['age']/tau))**2)-1.0
-#        suppression[0]=-1.0+((1.0-(np.exp(-derived['age']/tau)) )*epsilon[0]/(1.0-epsilon[0]))**2
-        print("k_fss_wdm for DCDM with epsilon=%.4f is %f Mpc^-1" %(epsilon[0],k_fss_wdm[0]) )
-        print("rho_wdm/rho_m for DCDM with epsilon=%.4f is %f " %(epsilon[0],derived['rho0_wdm_over_rho0_m']))
+#        suppression[0]=-5.0*derived['rho0_wdm_over_rho0_m'] #this formula works well only for very high values of Gamma, and not very high epsilon
+        om_m=derived['Omega_m']
+        om_l=1.0-om_m
+        g0=(5.0/2.0)*om_m/((om_m**(4.0/7.0))-om_l+(1.0+0.5*om_m)*(1.0+(1.0/70.0)*om_l))
+        suppression[0]=-1.0+(((1.0-derived['rho0_wdm_over_rho0_m'])**6)/((1.0-(6.0/25.0)*derived['rho0_wdm_over_rho0_m'])**2))*(g0)**(-(6./5.)*derived['rho0_wdm_over_rho0_m'])
+        print("k_fss_wdm for DCDM with epsilon=%.4f and Gamma^{-1}=%.1f Gyrs is %f Mpc^-1" %(epsilon[0],tau[0], k_fss_wdm[0]) )
+        print("rho_wdm/rho_m for DCDM with epsilon=%.4f  and Gamma^{-1}=%.1f Gyrs  is %f " %(epsilon[0],tau[0],derived['rho0_wdm_over_rho0_m']))
+        Omega_dcdm_ini =0.1198/(M.h()**2) 
+        analytical_ratio = (Omega_dcdm_ini/derived['Omega_m'])*(1.0-np.exp(-derived['age']/tau[0]))*np.sqrt(1.0-2.0*epsilon[0])
+        print("and its analytical formula gives %f"%analytical_ratio)
+        print("Omega_m for DCDM with epsilon=%.4f  and Gamma^{-1}=%.1f Gyrs  is %f " %(epsilon[0],tau[0],derived['Omega_m']))
     elif i==1:
         clM_1 = M.lensed_cl(2500)
+#        clM_1 = M.raw_cl(2500)
         ll_DCDM_1 = clM_1['ell'][2:]
         clTT_DCDM_1 = clM_1['tt'][2:]
         clEE_DCDM_1 = clM_1['ee'][2:]
@@ -160,13 +169,20 @@ for i in range(3):
             Pk3.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
         print("sigma8 for DCDM with epsilon=%.4f is %f" %(epsilon[1],derived['sigma8']) )
         k_fss_wdm[1]=derived['k_fss_wdm']
-        suppression[1]=-5.0*derived['rho0_wdm_over_rho0_m']
-#        suppression[1]=((np.exp(-derived['age']/tau))**2)-1.0
-#        suppression[1]=-1.0+((1.0-(np.exp(-derived['age']/tau)) )*epsilon[1]/(1.0-epsilon[1]))**2
-        print("k_fss_wdm for DCDM with epsilon=%.4f is %f Mpc^-1" %(epsilon[1],k_fss_wdm[1]) )
-        print("rho_wdm/rho_m for DCDM with epsilon=%.4f is %f " %(epsilon[0],derived['rho0_wdm_over_rho0_m']))
+#        suppression[1]=-5.0*derived['rho0_wdm_over_rho0_m'] #this formula works well only for very high values of Gamma, and not very high epsilon
+        om_m=derived['Omega_m']
+        om_l=1.0-om_m
+        g0=(5.0/2.0)*om_m/((om_m**(4.0/7.0))-om_l+(1.0+0.5*om_m)*(1.0+(1.0/70.0)*om_l))
+        suppression[1]=-1.0+(((1.0-derived['rho0_wdm_over_rho0_m'])**6)/((1.0-(6.0/25.0)*derived['rho0_wdm_over_rho0_m'])**2))*(g0)**(-(6./5.)*derived['rho0_wdm_over_rho0_m'])
+        print("k_fss_wdm for DCDM with epsilon=%.4f  and Gamma^{-1}=%.1f Gyrs  is %f Mpc^-1" %(epsilon[1],tau[1],k_fss_wdm[1]) )
+        print("rho_wdm/rho_m for DCDM with epsilon=%.4f  and Gamma^{-1}=%.1f Gyrs  is %f " %(epsilon[1],tau[1],derived['rho0_wdm_over_rho0_m']))
+        Omega_dcdm_ini =0.1198/(M.h()**2) 
+        analytical_ratio = (Omega_dcdm_ini/derived['Omega_m'])*(1.0-np.exp(-derived['age']/tau[1]))*np.sqrt(1.0-2.0*epsilon[1])
+        print("and its analytical formula gives %f"%analytical_ratio)
+        print("Omega_m for DCDM with epsilon=%.4f  and Gamma^{-1}=%.1f Gyrs  is %f " %(epsilon[1],tau[1],derived['Omega_m']))
     else:
         clM_2 = M.lensed_cl(2500)
+#        clM_2 = M.raw_cl(2500)
         ll_DCDM_2 = clM_2['ell'][2:]
         clTT_DCDM_2 = clM_2['tt'][2:]
         clEE_DCDM_2 = clM_2['ee'][2:]
@@ -174,11 +190,17 @@ for i in range(3):
             Pk4.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
         print("sigma8 for DCDM with epsilon=%.4f is %f" %(epsilon[2],derived['sigma8']) )
         k_fss_wdm[2]=derived['k_fss_wdm']
-        suppression[2]=-5.0*derived['rho0_wdm_over_rho0_m']
-#        suppression[2]=((np.exp(-derived['age']/tau))**2)-1.0
-#        suppression[2]=-1.0+((1.0-(np.exp(-derived['age']/tau)) )*epsilon[2]/(1.0-epsilon[2]))**2
-        print("k_fss_wdm for DCDM with epsilon=%.4f is %f Mpc^-1" %(epsilon[2],k_fss_wdm[2]) )
-        print("rho_wdm/rho_m for DCDM with epsilon=%.4f is %f " %(epsilon[0],derived['rho0_wdm_over_rho0_m']))
+#        suppression[2]=-5.0*derived['rho0_wdm_over_rho0_m'] #this formula works well only for very high values of Gamma, and not very high epsilon
+        om_m=derived['Omega_m']
+        om_l=1.0-om_m
+        g0=(5.0/2.0)*om_m/((om_m**(4.0/7.0))-om_l+(1.0+0.5*om_m)*(1.0+(1.0/70.0)*om_l))
+        suppression[2]=-1.0+(((1.0-derived['rho0_wdm_over_rho0_m'])**6)/((1.0-(6.0/25.0)*derived['rho0_wdm_over_rho0_m'])**2))*(g0)**(-(6./5.)*derived['rho0_wdm_over_rho0_m'])
+        print("k_fss_wdm for DCDM with epsilon=%.4f  and Gamma^{-1}=%.1f Gyrs  is %f Mpc^-1" %(epsilon[2],tau[2], k_fss_wdm[2]) )
+        print("rho_wdm/rho_m for DCDM with epsilon=%.4f  and Gamma^{-1}=%.1f Gyrs  is %f " %(epsilon[2],tau[2],derived['rho0_wdm_over_rho0_m']))
+        Omega_dcdm_ini =0.1198/(M.h()**2) 
+        analytical_ratio = (Omega_dcdm_ini/derived['Omega_m'])*(1.0-np.exp(-derived['age']/tau[2]))*np.sqrt(1.0-2.0*epsilon[2])
+        print("and its analytical formula gives %f"%analytical_ratio)
+        print("Omega_m for DCDM with epsilon=%.4f  and Gamma^{-1}=%.1f Gyrs  is %f " %(epsilon[2],tau[2],derived['Omega_m']))
     
     M.struct_cleanup()
     M.empty()
@@ -190,32 +212,102 @@ fTT_ourcode_1 = interp1d(ll_DCDM_1, clTT_DCDM_1)
 fEE_ourcode_1 = interp1d(ll_DCDM_1, clEE_DCDM_1)
 fTT_ourcode_2 = interp1d(ll_DCDM_2, clTT_DCDM_2)
 fEE_ourcode_2 = interp1d(ll_DCDM_2, clEE_DCDM_2)
+
+
+
+
+#%% repeat the computations but neglecting perturbations of the warm daughter 
+#for i in range(3):
+#    M.set(common_settings)
+#    M.set({   'omega_cdm': 0.00001,   'Omega_ini_dcdm2': 0.2636, 'Gamma_dcdm': Gamma_dcdm, 'M_dcdm': 1, 'm_dcdm': m_dcdm[i], 'background_ncdm_distribution': 1, 'Quadrature strategy': 4,
+#   'N_ncdm': 1, 'evolver': 0, 'Number of momentum bins perturbs': nbins, 'massive_daughter_perturbations': 'no', 'dark_radiation_perturbations': 'no','mother_dcdm_perturbations': 'yes'})
+
+#    M.compute()
+#    h = M.h()
+#    if i==0:
+#        clM_3 = M.lensed_cl(2500)
+#        ll_DCDM_3 = clM_3['ell'][2:]
+#        clTT_DCDM_3 = clM_3['tt'][2:]
+#        clEE_DCDM_3 = clM_3['ee'][2:]
+#        for k in kk:
+#            Pk5.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+
+#    elif i==1:
+#        clM_4 = M.lensed_cl(2500)
+#        ll_DCDM_4 = clM_4['ell'][2:]
+#        clTT_DCDM_4 = clM_4['tt'][2:]
+#        clEE_DCDM_4 = clM_4['ee'][2:]
+#        for k in kk:
+#            Pk6.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+#    else:
+#        clM_5 = M.lensed_cl(2500)
+#        ll_DCDM_5 = clM_5['ell'][2:]
+#        clTT_DCDM_5 = clM_5['tt'][2:]
+#        clEE_DCDM_5 = clM_5['ee'][2:]
+#        for k in kk:
+#            Pk7.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+
+#    M.struct_cleanup()
+#    M.empty()
+
+
+#fTT_ourcode_3 = interp1d(ll_DCDM_3, clTT_DCDM_3)
+#fEE_ourcode_3 = interp1d(ll_DCDM_3, clEE_DCDM_3)
+#fTT_ourcode_4 = interp1d(ll_DCDM_4, clTT_DCDM_4)
+#fEE_ourcode_4 = interp1d(ll_DCDM_4, clEE_DCDM_4)
+#fTT_ourcode_5 = interp1d(ll_DCDM_5, clTT_DCDM_5)
+#fEE_ourcode_5 = interp1d(ll_DCDM_5, clEE_DCDM_5)
+
+
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_3(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b--',label=r'$\varepsilon = %.4f$'%epsilon[0])
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_3(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b--',label=r'$\varepsilon = %.4f$'%epsilon[0])
+
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_4(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r--',label=r'$\varepsilon = %.4f$'%epsilon[1])
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_4(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r--',label=r'$\varepsilon = %.4f$'%epsilon[1])
+
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_5(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g--',label=r'$\varepsilon = %.4f$'%epsilon[2])
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_5(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g--',label=r'$\varepsilon = %.4f$'%epsilon[2])
+
+
+
+#plt.figure(1)
+#plt.xscale('log')
+#plt.xlim(kk[0],kk[-1])
+#plt.plot(kk,map(truediv, list(np.array(Pk5) - np.array(Pk1)), Pk1),'b--',label=r'$\varepsilon = %.4f$'%epsilon[0])
+#plt.plot(kk,map(truediv, list(np.array(Pk6) - np.array(Pk1)), Pk1),'r--', label=r'$\varepsilon = %.4f$'%epsilon[1])
+#plt.plot(kk,map(truediv, list(np.array(Pk7) - np.array(Pk1)), Pk1),'g--', label = r'$\varepsilon = %.4f$'%epsilon[2])
+
 #%%
 
 print("~~~~~ready to plot~~~~~")
 #plot
 ax_2.tick_params(axis='both', which='minor', labelsize=12)
 
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.4f$'%epsilon[0])
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.4f$'%epsilon[0])
-#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = 100 \, \mathrm{Gyrs}$')
-#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = 100 \, \mathrm{Gyrs}$')
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.4f$'%epsilon[1])
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.4f$'%epsilon[1])
-#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = 30 \, \mathrm{Gyrs}$')
-#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = 30 \, \mathrm{Gyrs}$')
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.4f$'%epsilon[2])
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.4f$'%epsilon[2])
-#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\Gamma^{-1} = 10 \, \mathrm{Gyrs}$')
-#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = 10 \, \mathrm{Gyrs}$')
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.2f$'%epsilon[0])
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.2f$'%epsilon[0])
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.2f$'%epsilon[1])
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.2f$'%epsilon[1])
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
+#ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
+#ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
+
 ax_2.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=15)
-ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\mathrm{DCDM})}{C_\ell^\mathrm{TT}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
-ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}(\mathrm{DCDM})}{C_\ell^\mathrm{EE}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
+ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{TT}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
+ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{EE}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
+
+ax_2.tick_params(axis="x", labelsize=18)
+ax_2.tick_params(axis="y", labelsize=18)
+ax_1.tick_params(axis="y", labelsize=18)
 
 
-ax_1.text(500, -0.04, r'$\Gamma^{-1} = 392 \, \,  \mathrm{Gyrs}$', fontsize =13)
-#ax_1.text(500, -0.4, r'$\varepsilon = 0.3$', fontsize =13)
-ax_1.legend(frameon=False,fontsize =13,loc='best',borderaxespad=0.)
+ax_1.text(500, -0.1, r'$\Gamma^{-1} = %.0f \,  \mathrm{Gyrs}$'%tau[0], fontsize =15)
+#ax_1.text(500, -0.1, r'$\varepsilon = %.2f$'%epsilon[0], fontsize =15)
+ax_1.legend(frameon=False,fontsize =15,loc='best',borderaxespad=0.)
 plt.show()
 
 plt.clf()
@@ -226,24 +318,35 @@ plt.xscale('log')
 plt.xlim(kk[0],kk[-1])
 #plt.ylim(-1.5,2.0)
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
-plt.ylabel(r'$P_{\mathrm{DCDM}}/P_{\Lambda\mathrm{CDM}}-1$', fontsize=20)
-plt.plot(kk,map(truediv, list(np.array(Pk2) - np.array(Pk1)), Pk1),'b',label=r'$\varepsilon = %.4f$'%epsilon[0])
-plt.plot(kk,map(truediv, list(np.array(Pk3) - np.array(Pk1)), Pk1),'r', label=r'$\varepsilon = %.4f$'%epsilon[1])
-plt.plot(kk,map(truediv, list(np.array(Pk4) - np.array(Pk1)), Pk1),'g', label = r'$\varepsilon = %.4f$'%epsilon[2])
-plt.legend(loc='best', fontsize=13)
-#plt.axvline(k_fss[0], color='b', linestyle='dotted')
-#plt.axvline(k_fss[1], color='r', linestyle='dotted')
-#plt.axvline(k_fss[2], color='g', linestyle='dotted')
+plt.ylabel(r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', fontsize=20)
+
+plt.plot(kk,map(truediv, list(np.array(Pk2) - np.array(Pk1)), Pk1),'b',label=r'$\varepsilon = %.2f$'%epsilon[0])
+plt.plot(kk,map(truediv, list(np.array(Pk3) - np.array(Pk1)), Pk1),'r', label=r'$\varepsilon = %.2f$'%epsilon[1])
+plt.plot(kk,map(truediv, list(np.array(Pk4) - np.array(Pk1)), Pk1),'g', label = r'$\varepsilon = %.2f$'%epsilon[2])
+
+#plt.plot(kk,map(truediv, list(np.array(Pk2) - np.array(Pk1)), Pk1),'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+#plt.plot(kk,map(truediv, list(np.array(Pk3) - np.array(Pk1)), Pk1),'r', label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
+#plt.plot(kk,map(truediv, list(np.array(Pk4) - np.array(Pk1)), Pk1),'g', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
+
+
+plt.legend(frameon=False, loc='best', fontsize=15, borderaxespad=0.)
 
 plt.axvline(k_fss_wdm[0], color='b', linestyle='dotted')
 plt.axvline(k_fss_wdm[1], color='r', linestyle='dotted')
 plt.axvline(k_fss_wdm[2], color='g', linestyle='dotted')
 
-plt.axhline(suppression[0], color='b', linestyle='dotted')
-plt.axhline(suppression[1], color='r', linestyle='dotted')
-plt.axhline(suppression[2], color='g', linestyle='dotted')
-plt.text(0.2e-3, -0.08, r'$\Gamma^{-1} = %.1f \, \mathrm{Gyrs} $'%tau, fontsize =13)
-#plt.text(0.2e-3, -1.0, r'$\Gamma^{-1} = %.1f \, \mathrm{Gyrs} $'%tau, fontsize =13)
+plt.tick_params(axis="x", labelsize=18)
+plt.tick_params(axis="y", labelsize=18)
+
+#plt.axhline(suppression[0], color='b', linestyle='dashed')
+#plt.axhline(suppression[1], color='r', linestyle='dashed')
+#plt.axhline(suppression[2], color='g', linestyle='dashed')
+
+plt.text(0.13e-3, -0.2, r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs} $'%tau[0], fontsize =15)
+
+#plt.text(0.13e-3, -0.4,  r'$\varepsilon = %.2f$'%epsilon[0], fontsize =15)
+
+
 plt.show()
 
 plt.clf()

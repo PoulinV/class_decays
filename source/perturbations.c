@@ -171,6 +171,27 @@ int perturb_init(
                 "your ur_fluid_approximation is set to %d, out of range defined in perturbations.h",ppr->ur_fluid_approximation);
   }
 
+
+  //if(ppt->dark_radiation_perturbations == _FALSE_){
+  // pba->epsilon_dcdm = 0.00001;
+//  }
+//  if(ppt->massive_daughter_perturbations == _FALSE_){
+//    pba->epsilon_dcdm = 0.00001;
+//    for(n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++){
+//      if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+//       pba->M_ncdm[n_ncdm] =0.99999;
+//      }
+//    }
+//  }
+
+//  if (ppt->mother_dcdm_perturbations == _FALSE_){ /* GFA */
+  //  pba->has_dcdm = _FALSE_;
+//   pba->Gamma_dcdm =(1.e-2)*(1.e3/_c_);
+//  }
+
+
+
+
   if (pba->has_ncdm == _TRUE_) {
 
     class_test ((ppr->ncdm_fluid_approximation < ncdmfa_mb) ||
@@ -187,7 +208,7 @@ int perturb_init(
     for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
       if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
         // pba->background_ncdm_distribution[n_ncdm] = _fermi_dirac_;
-        compute_dfdlnq_ncdm(ppr,pba,n_ncdm);
+        compute_dfdlnq_ncdm(ppr,pba,ppt, n_ncdm);
       }
     }
 
@@ -225,12 +246,8 @@ int perturb_init(
                "Non-adiabatic initial conditions not coded in presence of decaying dark matter");
 
   }
-  if(ppt->dark_radiation_perturbations == _FALSE_){
-    pba->has_dr = _FALSE_;
-  }
-  if(ppt->massive_daughter_perturbations == _FALSE_){
-    pba->has_ncdm = _FALSE_;
-  }
+
+
   class_test(ppt->has_vectors == _TRUE_,
              ppt->error_message,
              "Vectors not coded yet");
@@ -456,12 +473,15 @@ int perturb_init(
   } /* end loop over modes */
 
   free(pppw);
-  if(ppt->dark_radiation_perturbations == _FALSE_ && pba->has_decaying_neutrinos == _TRUE_){
-    pba->has_dr = _TRUE_;
-  }
-  if(ppt->massive_daughter_perturbations == _FALSE_ && pba->has_dcdm == _TRUE_){
-    pba->has_ncdm = _TRUE_;
-  }
+
+
+// GFA: I think this should be commented out, but I'm not 100% sure
+//  if(ppt->dark_radiation_perturbations == _FALSE_ && pba->has_decaying_neutrinos == _TRUE_){
+//    pba->has_dr = _TRUE_;
+//  }
+//  if(ppt->massive_daughter_perturbations == _FALSE_ && pba->has_dcdm == _TRUE_){
+//    pba->has_ncdm = _TRUE_;
+//  }
   return _SUCCESS_;
 }
 
@@ -2638,6 +2658,7 @@ int perturb_prepare_output(struct background * pba,
       class_store_columntitle(ppt->scalar_titles,"phi",_TRUE_);
       class_store_columntitle(ppt->scalar_titles,"eta_prime",_TRUE_);
       class_store_columntitle(ppt->scalar_titles,"h_prime",_TRUE_);
+      class_store_columntitle(ppt->scalar_titles,"phi_prime",_TRUE_);
       /* Perturbed recombination */
       class_store_columntitle(ppt->scalar_titles,"delta_Tb",ppt->has_perturbed_recombination);
       class_store_columntitle(ppt->scalar_titles,"delta_chi",ppt->has_perturbed_recombination);
@@ -4279,7 +4300,12 @@ int perturb_initial_conditions(struct precision * ppr,
     rho_nu = 0.;
 
     if (pba->has_cdm == _TRUE_) {
-      rho_m += ppw->pvecback[pba->index_bg_rho_cdm];
+  //    if (ppt->mother_dcdm_perturbations == _FALSE_) { /* GFA */
+  //     rho_m += ppw->pvecback[pba->index_bg_rho_dcdm];
+  //    } else {
+       rho_m += ppw->pvecback[pba->index_bg_rho_cdm];
+  //    }
+
     }
 
     if (pba->has_dcdm == _TRUE_) {
@@ -4290,6 +4316,11 @@ int perturb_initial_conditions(struct precision * ppr,
       rho_r += ppw->pvecback[pba->index_bg_rho_dr];
       rho_nu += ppw->pvecback[pba->index_bg_rho_dr];
     }
+
+  //  if (ppt->dark_radiation_perturbations == _FALSE_) { /* GFA */
+  //    rho_r += ppw->pvecback[pba->index_bg_rho_dr];
+  //    rho_nu += ppw->pvecback[pba->index_bg_rho_dr];
+  //  }
 
     if (pba->has_ur == _TRUE_) {
       rho_r += ppw->pvecback[pba->index_bg_rho_ur];
@@ -5676,10 +5707,18 @@ int perturb_total_stress_energy(
 
     /* cdm contribution */
     if (pba->has_cdm == _TRUE_) {
-      ppw->delta_rho = ppw->delta_rho + ppw->pvecback[pba->index_bg_rho_cdm]*y[ppw->pv->index_pt_delta_cdm];
-      if (ppt->gauge == newtonian)
-        ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + ppw->pvecback[pba->index_bg_rho_cdm]*y[ppw->pv->index_pt_theta_cdm];
-      rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_cdm];
+  //    if (ppt->mother_dcdm_perturbations == _FALSE_) { /* GFA */
+  //      ppw->delta_rho = ppw->delta_rho + ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_delta_cdm];
+  //      if (ppt->gauge == newtonian)
+  //        ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_theta_cdm];
+  //      rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_dcdm];
+//      } else {
+        ppw->delta_rho = ppw->delta_rho + ppw->pvecback[pba->index_bg_rho_cdm]*y[ppw->pv->index_pt_delta_cdm];
+        if (ppt->gauge == newtonian)
+          ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + ppw->pvecback[pba->index_bg_rho_cdm]*y[ppw->pv->index_pt_theta_cdm];
+        rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_cdm];
+//      }
+
     }
 
     /* dcdm contribution */
@@ -5706,6 +5745,10 @@ int perturb_total_stress_energy(
       ppw->delta_p += 1./3.*rho_dr_over_f*y[ppw->pv->index_pt_F0_dr];
       rho_plus_p_tot += 4./3. * ppw->pvecback[pba->index_bg_rho_dr];
     }
+
+  //  if (ppt->dark_radiation_perturbations == _FALSE_) { /* GFA */
+  //    rho_plus_p_tot += 4./3. * ppw->pvecback[pba->index_bg_rho_dr];
+  //  }
 
     /* ultra-relativistic neutrino/relics contribution */
 
@@ -5917,6 +5960,13 @@ int perturb_total_stress_energy(
       }
     }
 
+
+//    if (ppt->massive_daughter_perturbations == _FALSE_) { /* GFA */
+//      for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
+//        rho_plus_p_tot += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
+//      }
+//    }
+
     /* scalar field contribution.
        In Newtonian gauge, delta_scf depends on the metric perturbation psi which is inferred
        from rho_plus_p_shear. So the contribution from the scalar field must be below all
@@ -6007,8 +6057,15 @@ int perturb_total_stress_energy(
       rho_m = ppw->pvecback[pba->index_bg_rho_b];
 
       if (pba->has_cdm == _TRUE_) {
-        delta_rho_m += ppw->pvecback[pba->index_bg_rho_cdm]*y[ppw->pv->index_pt_delta_cdm];
-        rho_m += ppw->pvecback[pba->index_bg_rho_cdm];
+
+    //    if (ppt->mother_dcdm_perturbations == _FALSE_) { /* GFA */
+    //      delta_rho_m += ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_delta_cdm];
+    //      rho_m += ppw->pvecback[pba->index_bg_rho_dcdm];
+    //    } else  {
+          delta_rho_m += ppw->pvecback[pba->index_bg_rho_cdm]*y[ppw->pv->index_pt_delta_cdm];
+          rho_m += ppw->pvecback[pba->index_bg_rho_cdm];
+    //    }
+
       }
 
       /* include decaying cold dark matter */
@@ -6034,6 +6091,14 @@ int perturb_total_stress_energy(
         }
       }
 
+//      if (ppt->massive_daughter_perturbations ==_FALSE_) {
+//        for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
+//         rho_m += ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
+//       }
+//      }
+
+
+
       /* infer delta_m */
 
       ppw->delta_m = delta_rho_m/rho_m;
@@ -6054,9 +6119,16 @@ int perturb_total_stress_energy(
       rho_plus_p_m = ppw->pvecback[pba->index_bg_rho_b];
 
       if (pba->has_cdm == _TRUE_) {
-        if (ppt->gauge == newtonian)
-          rho_plus_p_theta_m += ppw->pvecback[pba->index_bg_rho_cdm]*y[ppw->pv->index_pt_theta_cdm];
-        rho_plus_p_m += ppw->pvecback[pba->index_bg_rho_cdm];
+  //     if (ppt->mother_dcdm_perturbations == _FALSE_ ) { /* GFA */
+  //       if (ppt->gauge == newtonian)
+  //         rho_plus_p_theta_m += ppw->pvecback[pba->index_bg_rho_dcdm]*y[ppw->pv->index_pt_theta_cdm];
+  //       rho_plus_p_m += ppw->pvecback[pba->index_bg_rho_dcdm];
+  //     } else {
+         if (ppt->gauge == newtonian)
+           rho_plus_p_theta_m += ppw->pvecback[pba->index_bg_rho_cdm]*y[ppw->pv->index_pt_theta_cdm];
+         rho_plus_p_m += ppw->pvecback[pba->index_bg_rho_cdm];
+  //     }
+
       }
 
       if (pba->has_dcdm == _TRUE_) {
@@ -6075,6 +6147,12 @@ int perturb_total_stress_energy(
             rho_plus_p_m += (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
           }
       }
+
+  //    if (ppt->massive_daughter_perturbations ==_FALSE_) {
+  //      for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
+  //      rho_plus_p_m += (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
+  //     }
+  //    }
 
       /* infer theta_m */
 
@@ -6725,6 +6803,7 @@ int perturb_print_variables(double tau,
   double delta_dr=0.,theta_dr=0.,shear_dr=0., f_dr=1.0;
   double delta_ur=0.,theta_ur=0.,shear_ur=0.,l4_ur=0.;
   double eta_prime=0., h_prime=0.; /* GFA */
+  double phi_prime=0.; /* GFA */
   double delta_rho_scf=0., rho_plus_p_theta_scf=0.;
   double delta_scf=0., theta_scf=0.;
   /** - ncdm sector begins */
@@ -6889,6 +6968,9 @@ int perturb_print_variables(double tau,
       /* GFA */
       eta_prime = pvecmetric[ppw->index_mt_eta_prime];
       h_prime = pvecmetric[ppw->index_mt_h_prime];
+      phi_prime = eta_prime - pow(pvecback[pba->index_bg_H]*pvecback[pba->index_bg_a],2.0)*alpha
+      - pvecback[pba->index_bg_a]*pvecback[pba->index_bg_H_prime]*alpha
+      - pvecback[pba->index_bg_H]*pvecback[pba->index_bg_a]*pvecmetric[ppw->index_mt_alpha_prime];
     }
     else if (ppt->gauge == newtonian){
       psi = pvecmetric[ppw->index_mt_psi];
@@ -7148,6 +7230,7 @@ int perturb_print_variables(double tau,
     class_store_double(dataptr, phi, _TRUE_, storeidx);
     class_store_double(dataptr, eta_prime, _TRUE_, storeidx); /* GFA */
     class_store_double(dataptr, h_prime, _TRUE_, storeidx);  /* GFA */
+    class_store_double(dataptr, phi_prime, _TRUE_, storeidx);  /* GFA */
     /* perturbed recombination */
     class_store_double(dataptr, delta_temp, ppt->has_perturbed_recombination, storeidx);
     class_store_double(dataptr, delta_chi, ppt->has_perturbed_recombination, storeidx);
@@ -9125,6 +9208,7 @@ int background_ncdm_distribution_perts(
 
 int compute_dfdlnq_ncdm(  struct precision *ppr,
                           struct background *pba,
+                          struct perturbs *ppt,
                           int n_ncdm){
   int index_q, k,tolexp,row,status,filenum;
   double f0m2= 0,f0m1= 0,f0= 0,f0p1= 0,f0p2= 0,dq= 0,q= 0,df0dq= 0,tmp1= 0,tmp2= 0,f0back= 0;
@@ -9135,6 +9219,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
   double tau;
   double qmin_tmp;
   double ca2_ncdm; /* GFA */
+  double a_k0 = 1.0, a_k1 = 1.0; /* GFA */
   double rho_ncdm_bg, p_ncdm_bg, pseudo_p_ncdm, w_ncdm, rho_dcdm_bg, ratio_rho, gamma, eps, H_D; /* GFA*/
   struct background_parameters_for_distributions pbadist;
 
@@ -9197,7 +9282,74 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
     // qmin_tmp = 1e-4 * a_D * pba->PDmax_dcdm[n_ncdm];
     qmin_tmp = ppr->a_ini_over_a_today_default* pba->a_today * pba->PDmax_dcdm[n_ncdm];
     // qmin_tmp = ppr->a_ini_over_a_today_default* pba->a_today * pba->PDmax_dcdm[n_ncdm];
-  //   if(pba->background_verbose>0)printf("found a_D %e ca_ncdm %e H_D %e\n", a_D,sqrt(ca2_ncdm),H_D);
+
+    printf("found a_decay = %e \n", a_D); /* GFA */
+
+
+
+    /* GFA: loop to find horizon-crossing time (only valid for two modes requested) */
+     if (ppt->k_output_values_num == 2) {
+       for(i = 0; i < i_step_max; i++){
+
+         a_step = ppr->a_ini_over_a_today_default*pba->a_today*pow(10,i*h);
+
+         class_call(background_tau_of_z(pba,
+                                        1/a_step-1,
+                                        &tau),
+                    pba->error_message,
+                    ppr->error_message);
+         /* set values of first_index_back/thermo */
+         class_call(background_at_tau(pba,
+                                      tau,
+                                      pba->normal_info,
+                                      pba->inter_normal,
+                                      &first_index_back,
+                                      pvecback),
+                    pba->error_message,
+                    ppr->error_message);
+
+
+          if(a_step*pvecback[pba->index_bg_H] > ppt->k_output_values[0]){
+           a_k0 = a_step;
+
+          }else{
+             break;
+           }
+       }
+
+       printf("mode with k=%e Mpc^(-1) crosses horizon at a_k0 = %e \n",ppt->k_output_values[0], a_k0); /* GFA */
+
+        for(i = 0; i < i_step_max; i++){
+             a_step = ppr->a_ini_over_a_today_default*pba->a_today*pow(10,i*h);
+             class_call(background_tau_of_z(pba,
+                                            1/a_step-1,
+                                            &tau),
+                        pba->error_message,
+                        ppr->error_message);
+             /* set values of first_index_back/thermo */
+             class_call(background_at_tau(pba,
+                                          tau,
+                                          pba->normal_info,
+                                          pba->inter_normal,
+                                          &first_index_back,
+                                          pvecback),
+                        pba->error_message,
+                        ppr->error_message);
+
+
+              if(a_step*pvecback[pba->index_bg_H] > ppt->k_output_values[1]){
+               a_k1 = a_step;
+              }else{
+                 break;
+               }
+           }
+
+       printf("mode with k=%e Mpc^(-1) crosses horizon at a_k1 = %e \n",ppt->k_output_values[1], a_k1); /* GFA */
+
+     }
+
+
+
 
     class_call(get_qsampling_manual(pba->q_ncdm[n_ncdm],
             pba->w_ncdm[n_ncdm],

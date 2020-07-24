@@ -10,4 +10,4 @@ python/classy.c
 *.pyc
 python/build/
 RealSpaceInterface/cache/
-.DS_Store
+.DS_StorePk_DCDM_to_DR_fluid.py

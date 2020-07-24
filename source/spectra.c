@@ -3610,7 +3610,12 @@ int spectra_matter_transfers(
 
         if (pba->has_cdm == _TRUE_) {
 
-          rho_i = pvecback_sp_long[pba->index_bg_rho_cdm];
+      //    if (ppt->mother_dcdm_perturbations == _FALSE_) {
+      //      rho_i = pvecback_sp_long[pba->index_bg_rho_dcdm];
+      //    } else {
+            rho_i = pvecback_sp_long[pba->index_bg_rho_cdm];
+      //    }
+
 
           if (ppt->has_source_delta_cdm == _TRUE_) {
 
@@ -3825,6 +3830,11 @@ int spectra_matter_transfers(
 
         }
 
+      //  if (ppt->dark_radiation_perturbations ==_FALSE_) { /* GFA */
+      //    rho_tot += pvecback_sp_long[pba->index_bg_rho_dr];
+      //    rho_plus_p_tot += 4./3. * pvecback_sp_long[pba->index_bg_rho_dr];
+      //  }
+
         /* T_ncdm_i(k,tau) */
 
         if (pba->has_ncdm == _TRUE_) {
@@ -3864,6 +3874,13 @@ int spectra_matter_transfers(
           }
 
         }
+
+    //    if (ppt->massive_daughter_perturbations ==_FALSE_) { /* GFA */
+    //      for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
+    //        rho_tot += pvecback_sp_long[pba->index_bg_rho_ncdm1+n_ncdm];
+    //        rho_plus_p_tot += (pvecback_sp_long[pba->index_bg_rho_ncdm1+n_ncdm] + pvecback_sp_long[pba->index_bg_p_ncdm1+n_ncdm]);
+    //      }
+    //    }
 
         if (ppt->has_source_phi == _TRUE_) {
 

@@ -913,6 +913,20 @@ int input_read_parameters(
       }
     }
 
+/* GFA */
+    class_call(parser_read_string(pfc,"mother_dcdm_perturbations",&string1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+
+    if (flag1 == _TRUE_){
+      if((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)){
+        ppt->mother_dcdm_perturbations = _TRUE_;
+      }
+      else {
+        ppt->mother_dcdm_perturbations = _FALSE_;
+      }
+    }
+
   /* GFA: back_integration_stepsize and a_ini_over_a_today_default
    need to be read here, before background_ncdm_init is called */
   class_read_double("a_ini_over_a_today_default",ppr->a_ini_over_a_today_default);
@@ -3483,6 +3497,7 @@ int input_default_params(
   pba->massive_daugther_is_radiation = 0;
   ppt->time_over_tau_dcdm_threshold = 0;
   ppt->massive_daughter_perturbations = _TRUE_;
+  ppt->mother_dcdm_perturbations = _TRUE_;
   /** - primordial structure */
 
   ppm->primordial_spec_type = analytic_Pk;

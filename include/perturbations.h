@@ -386,6 +386,7 @@ struct perturbs
   /** do we want to include DR pertubations? */
   short dark_radiation_perturbations;
   short massive_daughter_perturbations;
+  short mother_dcdm_perturbations; /* GFA */
   short switch_off_gamma_in_wdm_perts; /* GFA */
   double time_over_tau_dcdm_threshold;
   //@}
@@ -827,6 +828,7 @@ extern "C" {
 
   int compute_dfdlnq_ncdm(  struct precision *ppr,
                             struct background *pba,
+                            struct perturbs *ppt,
                             int n_ncdm);
 
   int background_ncdm_distribution_perts(

@@ -1544,6 +1544,8 @@ cdef class Class:
                 value = self.ba.rho0_wdm_over_rho0_m
             elif name == 'k_fss_wdm':
                 value = self.ba.k_fss_wdm
+            elif name == 'z_eq':
+                value = self.ba.z_eq
             elif name == 'tau_reio':
                 value = self.th.tau_reio
             elif name == 'z_reio':

@@ -67,6 +67,7 @@ cdef extern from "class.h":
         double Omega0_k
         int bt_size
         double k_fss_wdm
+        double z_eq
 
     cdef struct thermo:
         ErrorMsg error_message
