@@ -26,22 +26,29 @@ ax_2.set_xlim([2,2500])
 Gamma_dcdm = np.array([32.679, 32.679, 32.679])
 #Gamma_dcdm = np.array([9.8039, 32.679, 98.0392])
 
+#Gamma_dcdm = np.array([4.9019, 9.8039,19.6078 ])
+#Gamma_dcdm = np.array([19.6078 , 19.6078 ,19.6078 ])
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
+
 
 
 
 nbins = 300
 
 
-epsilon = np.array([0.49, 0.15, 0.01])
+epsilon = np.array([0.49, 0.3, 0.001])
 #epsilon =  np.array([0.15,0.15,0.15])
+
+#epsilon =  np.array([0.095,0.095,0.095])
+#epsilon =  np.array([0.095,0.00995,0.0049875])
+
 
 v_kick=epsilon/(1.0-epsilon)
 
 k_fss_wdm=np.zeros(3) # for the one computed with CLASS
 suppression=np.zeros(3) #for the asymptote of the matter power suppression
-kk = np.logspace(-4,-0.3,1000) # k in h/Mpc
+kk = np.logspace(-4,0,1000) # k in h/Mpc
 
 Pk1 = [] # P(k) in (Mpc/h)**3
 Pk2 = [] # P(k) in (Mpc/h)**3
@@ -283,16 +290,16 @@ print("~~~~~ready to plot~~~~~")
 #plot
 ax_2.tick_params(axis='both', which='minor', labelsize=12)
 
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.2f$'%epsilon[0])
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.2f$'%epsilon[0])
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.4f$'%epsilon[0])
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.4f$'%epsilon[0])
 #ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
 #ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.2f$'%epsilon[1])
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.2f$'%epsilon[1])
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.4f$'%epsilon[1])
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.4f$'%epsilon[1])
 #ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
 #ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
-ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
-ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
+ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.4f$'%epsilon[2])
+ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.4f$'%epsilon[2])
 #ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
 #ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
 
@@ -306,7 +313,7 @@ ax_1.tick_params(axis="y", labelsize=18)
 
 
 ax_1.text(500, -0.1, r'$\Gamma^{-1} = %.0f \,  \mathrm{Gyrs}$'%tau[0], fontsize =15)
-#ax_1.text(500, -0.1, r'$\varepsilon = %.2f$'%epsilon[0], fontsize =15)
+#ax_1.text(500, -0.1, r'$\varepsilon = %.4f$'%epsilon[0], fontsize =15)
 ax_1.legend(frameon=False,fontsize =15,loc='best',borderaxespad=0.)
 plt.show()
 
@@ -320,9 +327,9 @@ plt.xlim(kk[0],kk[-1])
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
 plt.ylabel(r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', fontsize=20)
 
-plt.plot(kk,map(truediv, list(np.array(Pk2) - np.array(Pk1)), Pk1),'b',label=r'$\varepsilon = %.2f$'%epsilon[0])
-plt.plot(kk,map(truediv, list(np.array(Pk3) - np.array(Pk1)), Pk1),'r', label=r'$\varepsilon = %.2f$'%epsilon[1])
-plt.plot(kk,map(truediv, list(np.array(Pk4) - np.array(Pk1)), Pk1),'g', label = r'$\varepsilon = %.2f$'%epsilon[2])
+plt.plot(kk,map(truediv, list(np.array(Pk2) - np.array(Pk1)), Pk1),'b',label=r'$\varepsilon = %.4f$'%epsilon[0])
+plt.plot(kk,map(truediv, list(np.array(Pk3) - np.array(Pk1)), Pk1),'r', label=r'$\varepsilon = %.4f$'%epsilon[1])
+plt.plot(kk,map(truediv, list(np.array(Pk4) - np.array(Pk1)), Pk1),'g', label = r'$\varepsilon = %.4f$'%epsilon[2])
 
 #plt.plot(kk,map(truediv, list(np.array(Pk2) - np.array(Pk1)), Pk1),'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
 #plt.plot(kk,map(truediv, list(np.array(Pk3) - np.array(Pk1)), Pk1),'r', label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
@@ -344,7 +351,7 @@ plt.tick_params(axis="y", labelsize=18)
 
 plt.text(0.13e-3, -0.2, r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs} $'%tau[0], fontsize =15)
 
-#plt.text(0.13e-3, -0.4,  r'$\varepsilon = %.2f$'%epsilon[0], fontsize =15)
+#plt.text(0.13e-3, -0.4,  r'$\varepsilon = %.4f$'%epsilon[0], fontsize =15)
 
 
 plt.show()
