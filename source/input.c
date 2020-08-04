@@ -895,6 +895,19 @@ int input_read_parameters(
         ppt->switch_off_gamma_in_wdm_perts = _FALSE_;
       }
     }
+
+    class_call(parser_read_string(pfc,"switch_off_shear_wdm",&string1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+
+    if (flag1 == _TRUE_){
+      if((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)){
+        ppt->switch_off_shear_wdm = _TRUE_;
+      }
+      else {
+        ppt->switch_off_shear_wdm = _FALSE_;
+      }
+    }
     /** do we want to insure massive daugther is like DR? */
     /** 0: no; 1: yes in background; 2: yes in background & perts */
     class_read_double("massive_daugther_is_radiation",pba->massive_daugther_is_radiation);
@@ -3494,6 +3507,7 @@ int input_default_params(
 
   ppt->dark_radiation_perturbations = _TRUE_;
   ppt->switch_off_gamma_in_wdm_perts = _FALSE_;
+  ppt->switch_off_shear_wdm = _TRUE_;
   pba->massive_daugther_is_radiation = 0;
   ppt->time_over_tau_dcdm_threshold = 0;
   ppt->massive_daughter_perturbations = _TRUE_;

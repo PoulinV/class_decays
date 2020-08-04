@@ -9,11 +9,11 @@ import time
 start_time = time.time()
 
 #%%
-Gamma_dcdm = 13.5
+Gamma_dcdm = 19.6078
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
-m_dcdm = 0.99
+m_dcdm = 0.989949
 epsilon =0.5*(1.-m_dcdm*m_dcdm)
 epsilon
 
@@ -66,8 +66,8 @@ M.set({
 'N_ncdm': 1,
 'evolver': 0,
 'ncdm_fluid_approximation': 3,
-'Number of momentum bins perturbs': 300,
-'l_max_ncdm':9,
+'Number of momentum bins perturbs': 10000,
+'l_max_ncdm':17,
 'massive_daughter_perturbations': 'yes',
 'dark_radiation_perturbations': 'yes'
 })

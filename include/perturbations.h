@@ -388,6 +388,7 @@ struct perturbs
   short massive_daughter_perturbations;
   short mother_dcdm_perturbations; /* GFA */
   short switch_off_gamma_in_wdm_perts; /* GFA */
+  short switch_off_shear_wdm; /* GFA */
   double time_over_tau_dcdm_threshold;
   //@}
 
