@@ -41,6 +41,7 @@ cdef extern from "class.h":
         int index_bg_f
         short long_info
         short inter_normal
+        short  has_ncdm
         double T_cmb
         double h
         double H0
@@ -52,6 +53,8 @@ cdef extern from "class.h":
         double Omega0_b
         double Omega0_cdm
         double Omega0_dcdm
+        double Omega0_wdm
+        double rho0_wdm_over_rho0_m
         double Omega0_ncdm_tot
         double Omega0_lambda
         double Omega0_fld
@@ -61,8 +64,10 @@ cdef extern from "class.h":
         double Omega0_ur
         double Omega0_dcdmdr
         double Omega0_scf
-
+        double Omega0_k
         int bt_size
+        double k_fss_wdm
+        double z_eq
 
     cdef struct thermo:
         ErrorMsg error_message
@@ -109,7 +114,6 @@ cdef extern from "class.h":
         int number_of_scalar_titles
         int number_of_vector_titles
         int number_of_tensor_titles
-
 
         double * scalar_perturbations_data[_MAX_NUMBER_OF_K_FILES_]
         double * vector_perturbations_data[_MAX_NUMBER_OF_K_FILES_]
@@ -190,6 +194,7 @@ cdef extern from "class.h":
         int index_md_scalars
         double* ln_k
         double sigma8
+        double sigma8_cb
         double alpha_II_2_20
         double alpha_RI_2_20
         double alpha_RR_2_20
@@ -297,7 +302,9 @@ cdef extern from "class.h":
         int mode,
         double z,
         double * output_tot,
-        double * output_ic
+        double * output_ic,
+        double * output_cb_tot,
+        double * output_cb_ic
         )
 
     int spectra_pk_at_k_and_z(
@@ -307,7 +314,9 @@ cdef extern from "class.h":
         double k,
         double z,
         double * pk,
-        double * pk_ic)
+        double * pk_ic,
+        double * pk_cb,
+        double * pk_cb_ic)
 
     int spectra_pk_nl_at_k_and_z(
         void* pba,
@@ -315,16 +324,18 @@ cdef extern from "class.h":
         void * psp,
         double k,
         double z,
-        double * pk)
+        double * pk,
+        double * pk_cb)
 
     int spectra_pk_nl_at_z(
         void * pba,
         void * psp,
         int mode,
         double z,
-        double * output_tot)
+        double * output_tot,
+        double * output_cb_tot)
 
-    int nonlinear_k_nl_at_z(void* pba, void* pnl, double z, double* k_nl)
+    int nonlinear_k_nl_at_z(void* pba, void* pnl, double z, double* k_nl, double* k_nl_cb)
 
     int spectra_firstline_and_ic_suffix(void *ppt, int index_ic, char first_line[_LINE_LENGTH_MAX_], FileName ic_suffix)
 
@@ -335,3 +346,22 @@ cdef extern from "class.h":
                   double R,
                   double z,
                   double * sigma)
+
+    int spectra_sigma_cb(
+                  void * pba,
+                  void * ppm,
+                  void * psp,
+                  double R,
+                  double z,
+                  double * sigma_cb)
+
+    int spectra_fast_pk_at_kvec_and_zvec(
+                  void * pba,
+                  void * psp,
+                  double * kvec,
+                  int kvec_size,
+                  double * zvec,
+                  int zvec_size,
+                  double * pk_tot_out,
+                  double * pk_cb_tot_out,
+                  int nonlinear)
