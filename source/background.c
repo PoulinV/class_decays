@@ -402,9 +402,6 @@ int background_functions(
            to rho_ncdm1 */
         rho_m += rho_ncdm - 3.* p_ncdm;
         // if( 1./a_rel-1.<10000 &&  1./a_rel-1. > 9800) printf("%e %e \n",1./a_rel-1., rho_ncdm - 3.* p_ncdm);
-
-
-
     }
   }
 
@@ -1150,9 +1147,9 @@ int background_ncdm_distribution(
           /*   To deal with the time dependence, we assume H=HLCDM */
           /*   We will correct for it in background_ncdm_momenta   */
           /*********************************************************/
-
-      // PDmax = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // in GeV
-      PDmax = pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2; // in GeV
+      PDmax = (pba->M_dcdm*pba->M_dcdm-pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // in GeV ->GFA: expression for only one massive daughter
+    //   PDmax = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // in GeV ->GFA: expression for two massive daughters of equal mass
+    //  PDmax = pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2; // in GeV
       aq = q/PDmax*pba->T_cmb*8.617343e-05*1e-9; //convert Tcmb to GeV using k_b*1e-9
       // printf("aq %e  PDmax %e q %e qmax %e\n", aq,PDmax,q,PDmax/(pba->T_cmb*8.617343e-05*1e-9));
       Omega_m = pba->Omega0_cdm+pba->Omega0_b+pba->Omega_ini_dcdm;
@@ -1566,8 +1563,9 @@ int background_ncdm_momenta(
   for (index_q=0; index_q<qsize; index_q++) {
 
     if(background_ncdm_distribution == _massive_daughter_){
-      // PDmax = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // convert to GeV
-      PDmax = pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2; // in GeV
+       PDmax = (pba->M_dcdm*pba->M_dcdm-pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // in GeV ->GFA: expression for only one massive daughter
+     //   PDmax = (pba->M_dcdm*pba->M_dcdm-2*pba->m_dcdm*pba->m_dcdm)/(2*pba->M_dcdm); // in GeV ->GFA: expression for two massive daughters of equal mass
+    //  PDmax = pow(pba->M_dcdm*pba->M_dcdm-4*pba->m_dcdm*pba->m_dcdm,0.5)/2; // in GeV
       zq = 1/(qvec[index_q]*pba->T_cmb*8.617e-5*1e-9/PDmax)-1; // in CLASS, q is defined as p/T0. We therefore multiply by T0*8.617e-5*1e-9 to get a result in GeV.
       // printf("%e %e zq %e\n",PDmax,qvec[index_q],zq);
       // printf("z %e zq %e \n",z,zq);
@@ -2447,7 +2445,7 @@ int background_derivs(
       y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm];
   }
 
-  if ((pba->has_dr == _TRUE_)){
+  if (pba->has_dr == _TRUE_){
     /** - Compute dr density \f$ \rho' = -4aH \rho - a \Gamma \rho \f$ */
     dy[pba->index_bi_rho_dr] = -4.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*y[pba->index_bi_rho_dr];
     if(pba->has_dcdm == _TRUE_)

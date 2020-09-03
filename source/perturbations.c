@@ -7351,7 +7351,7 @@ int perturb_derivs(double tau,
 
     /** - ---> dr */
 
-    if ((pba->has_dr == _TRUE_)) {
+    if (pba->has_dr == _TRUE_) {
 
 
       /* f = rho_dr*a^4/rho_crit_today. In CLASS density units

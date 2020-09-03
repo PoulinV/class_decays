@@ -2457,7 +2457,7 @@ int input_read_parameters(
                errmsg,
                errmsg);
 
-    if ((flag1 == _TRUE_)) {
+    if (flag1 == _TRUE_) {
       if ((strstr(string1,"analytic") != NULL))
         ptr->has_nz_analytic = _TRUE_;
       else{
@@ -2474,7 +2474,7 @@ int input_read_parameters(
                errmsg,
                errmsg);
 
-    if ((flag1 == _TRUE_)) {
+    if (flag1 == _TRUE_) {
       if ((strstr(string1,"analytic") != NULL))
         ptr->has_nz_evo_analytic = _TRUE_;
       else{
