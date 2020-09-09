@@ -8148,7 +8148,7 @@ int perturb_derivs(double tau,
                      /** - ----->  ansatz for approximate shear derivative */
 
 
-          if (pba->epsilon_dcdm < 0.49) {
+          if (pba->epsilon_dcdm < 0.499) {
             dy[idx+2] = 0.;
           } else {
             dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau+a*gamma*(1.-eps)*((1.+ca2_ncdm)/(3.+3.*w_ncdm))*ratio_rho)*y[idx+2]
