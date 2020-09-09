@@ -12,18 +12,18 @@ start_time = time.time()
 
 #%%
 
-Log10Gamma_dcdm = 0.89
+Log10Gamma_dcdm = 1.24
 Gamma_dcdm=10**(Log10Gamma_dcdm )
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
 nbins = 300
 
-log10epsilon = -2.09
+log10epsilon = -2.16
 epsilon = 10**(log10epsilon)
 epsilon
 
-M_ncdm=0.27
+M_ncdm=0.23
 m_ncdm=M_ncdm/3.0
 
 
@@ -37,11 +37,11 @@ fsigma8_mNu = [] # f*sigma8
 common_settings = {'output':'tCl,pCl,lCl,mPk',
                    'lensing':'yes',
                    'l_max_scalars':2600,
-                   'n_s':0.9666,
-                   'ln10^{10}A_s':3.047,
-                   'tau_reio':0.0559,
-                   'omega_b':0.02238,
-                   '100*theta_s':1.04187,
+                   'n_s':0.9663,
+                   'ln10^{10}A_s':3.045,
+                   'tau_reio':0.055,
+                   'omega_b':0.02242,
+                   '100*theta_s':1.042059,
                    'P_k_max_1/Mpc':1.0,
                    'z_max_pk' : 5.0
                    }
@@ -56,7 +56,7 @@ print("~~~~~computing reference LCDM~~~~~")
 M.set(common_settings)
 #we consider three massive degenerate neutrinos 
 M.set({
-'omega_cdm': 0.1196, #Omega_cdm 0.2626
+'omega_cdm': 0.1194, #Omega_cdm 0.2626
 'N_ncdm':1,
 'background_ncdm_distribution': 0,
 'N_ur':0.00641,
@@ -85,16 +85,16 @@ print("~~~~~time =%.f s; computing our code~~~~~"%(timeafterref-start_time))
 M.set({'output':'tCl,pCl,lCl,mPk',
                    'lensing':'yes',
                    'l_max_scalars':2600,
-                   'n_s':0.9671,
-                   'ln10^{10}A_s':3.048,
-                   'tau_reio':0.0562,
-                   'omega_b':0.02238,
-                   '100*theta_s':1.042,
+                   'n_s':0.9673,
+                   'ln10^{10}A_s':3.051,
+                   'tau_reio':0.0582,
+                   'omega_b':0.02240,
+                   '100*theta_s':1.042131, #obtained by running class with all these parameters and H0=67.70
                    'P_k_max_1/Mpc':1.0,
                    'z_max_pk' : 2.0})
 M.set({
     'omega_cdm': 0.00001,
-    'omega_ini_dcdm2': 0.1195,
+    'omega_ini_dcdm2': 0.1194,
     'Log10_Gamma_dcdm': Log10Gamma_dcdm,
     'M_dcdm': 1,
     'log10_epsilon_dcdm': log10epsilon,
@@ -132,7 +132,7 @@ M.empty()
 
 M.set(common_settings)
 M.set({
-'omega_cdm': 0.1155,
+'omega_cdm': 0.1160,
 'N_ncdm':1,
 'background_ncdm_distribution': 0,
 'N_ur':0.00641,
@@ -169,9 +169,9 @@ plt.ylim(0.2,0.7)
 plt.xlabel(r'$z$', fontsize=15)
 plt.ylabel(r'$f \, \sigma_8$', fontsize=20)
 
-plt.plot(zz, fsigma8_lcdm, 'k', label=r'$\Lambda$CDM Baseline')
+plt.plot(zz, fsigma8_lcdm, 'k', label=r'$\nu\Lambda$CDM Baseline')
 plt.plot(zz, fsigma8_dcdm, 'k--', label=r'$\Lambda$DDM  Best-fit')
-plt.plot(zz, fsigma8_mNu, 'k:', label=r'$\Lambda\mathrm{CDM}+M_{\nu} =%.2f \, \mathrm{eV} $'%M_ncdm)
+plt.plot(zz, fsigma8_mNu, 'k:', label=r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV}) $'%M_ncdm)
 
 #plot data points
 

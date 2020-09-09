@@ -12,13 +12,14 @@ start_time = time.time()
 #%%
 
 
-Gamma_dcdm = 19.6078
+Gamma_dcdm = 98.0392
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
 kk = np.logspace(-4,np.log10(1),575) # k in h/Mpc
 
 len(kk)
+Pk_0p005_sigYES = [] # P(k) in (Mpc/h)**3
 Pk_0p15_sigYES = [] # P(k) in (Mpc/h)**3
 Pk_0p2_sigYES  = [] # P(k) in (Mpc/h)**3
 Pk_0p25_sigYES = [] # P(k) in (Mpc/h)**3
@@ -28,6 +29,7 @@ Pk_0p499_sigYES = [] # P(k) in (Mpc/h)**3
 Pk_0p49_sigYES = [] # P(k) in (Mpc/h)**3
 
 
+Pk_0p005_sigNOT = [] # P(k) in (Mpc/h)**3
 Pk_0p15_sigNOT = [] # P(k) in (Mpc/h)**3
 Pk_0p2_sigNOT  = [] # P(k) in (Mpc/h)**3
 Pk_0p25_sigNOT = [] # P(k) in (Mpc/h)**3
@@ -107,7 +109,12 @@ data7 = []
 for data_file7 in files7:
     data7.append(np.loadtxt(data_file7))
     
-          
+files8 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p005_tau10gyrs_nofluid_pk.dat']
+data8 = []
+for data_file8 in files8:
+    data8.append(np.loadtxt(data_file8))
+    
+            
     
 pk_ref_0p15  = data1[0]
 pk_ref_0p2   = data2[0]
@@ -116,6 +123,7 @@ pk_ref_0p3   = data4[0]
 pk_ref_0p45  = data5[0]
 pk_ref_0p499 = data6[0]
 pk_ref_0p49  = data7[0]
+pk_ref_0p005  = data8[0]
 
 M = Class()
 #%% EPSILON=0.15 CASE ########################################################
@@ -144,6 +152,13 @@ M = Class()
 
 #M.struct_cleanup()
 #M.empty()
+
+
+#fpk_0p15_full = interp1d(pk_ref_0p15[:,0],pk_ref_0p15[:,1])
+#fpk_0p15_sigYES = interp1d(kk,Pk_0p15_sigYES)
+#fpk_0p15_sigNOT = interp1d(kk,Pk_0p15_sigNOT)
+
+
 
 #print("~~~~~computing fluid wdm (both full shear and zero shear) for epsilon=0.15 in in %.f s~~~~~"%(time.time()-start_time))
 #t_1=time.time()
@@ -182,6 +197,11 @@ M = Class()
 #M.struct_cleanup()
 #M.empty()
 
+#fpk_0p2_full = interp1d(pk_ref_0p2[:,0],pk_ref_0p2[:,1])
+#fpk_0p2_sigYES = interp1d(kk,Pk_0p2_sigYES)
+#fpk_0p2_sigNOT = interp1d(kk,Pk_0p2_sigNOT)
+
+
 #%% EPSILON=0.25 CASE ########################################################
 
 #M.set(common_settings)
@@ -215,6 +235,11 @@ M = Class()
 #M.struct_cleanup()
 #M.empty()
 
+#fpk_0p25_full = interp1d(pk_ref_0p25[:,0],pk_ref_0p25[:,1])
+#fpk_0p25_sigYES = interp1d(kk,Pk_0p25_sigYES)
+#fpk_0p25_sigNOT = interp1d(kk,Pk_0p25_sigNOT)
+
+
 #%% EPSILON=0.3 CASE ########################################################
 
 #M.set(common_settings)
@@ -245,6 +270,10 @@ M = Class()
 
 #M.struct_cleanup()
 #M.empty()
+
+#fpk_0p3_full = interp1d(pk_ref_0p3[:,0],pk_ref_0p3[:,1])
+#fpk_0p3_sigYES = interp1d(kk,Pk_0p3_sigYES)
+#fpk_0p3_sigNOT = interp1d(kk,Pk_0p3_sigNOT)
 
 #%% EPSILON =0.45 CASE ########################################################
 
@@ -280,6 +309,11 @@ M = Class()
 #M.struct_cleanup()
 #M.empty()
 
+#fpk_0p45_full = interp1d(pk_ref_0p45[:,0],pk_ref_0p45[:,1])
+#fpk_0p45_sigYES = interp1d(kk,Pk_0p45_sigYES)
+#fpk_0p45_sigNOT = interp1d(kk,Pk_0p45_sigNOT)
+
+
 
 #%% EPSILON =0.499 CASE ######################################################
 #M.set(common_settings)
@@ -310,6 +344,11 @@ M = Class()
 
 #M.struct_cleanup()
 #M.empty()
+
+#fpk_0p499_full = interp1d(pk_ref_0p499[:,0],pk_ref_0p499[:,1])
+#fpk_0p499_sigYES = interp1d(kk,Pk_0p499_sigYES)
+#fpk_0p499_sigNOT = interp1d(kk,Pk_0p499_sigNOT)
+
 
 #%% EPSILON =0.49 CASE ######################################################
 #M.set(common_settings)
@@ -342,26 +381,68 @@ M = Class()
 #M.empty()
 
 
+#fpk_0p49_full = interp1d(pk_ref_0p49[:,0],pk_ref_0p49[:,1])
+#fpk_0p49_sigYES = interp1d(kk,Pk_0p49_sigYES)
+#fpk_0p49_sigNOT = interp1d(kk,Pk_0p49_sigNOT)
+
+
+#%% EPSILON =0.005 CASE ######################################################
+M.set(common_settings)
+M.set({'epsilon_dcdm': 0.005, 'switch_off_shear_wdm': 'yes'}) 
+
+M.compute()
+
+derived = M.get_current_derived_parameters(['sigma8'])
+print("sigma8 for DCDM (fluid wdm with zero shear) with epsilon=%f and tau= %f Gyrs is %f" %(0.005,tau,derived['sigma8']))
+
+
+#print("~~~~~computing fluid wdm  for epsilon=0.25 in in %.f s~~~~~"%(time.time()-t_2))
+#t_3=time.time()
+
+h = M.h()
+for k in kk:
+    Pk_0p005_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+
+M.struct_cleanup()
+M.empty()
+###########################################################################
+
+M.set(common_settings)
+M.set({'epsilon_dcdm': 0.005, 'switch_off_shear_wdm': 'no'}) 
+
+M.compute()
+
+h = M.h()
+for k in kk:
+    Pk_0p005_sigYES.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+
+M.struct_cleanup()
+M.empty()
+
+fpk_0p005_full   = interp1d(pk_ref_0p005[:,0],pk_ref_0p005[:,1])
+fpk_0p005_sigYES = interp1d(kk,Pk_0p005_sigYES)
+fpk_0p005_sigNOT = interp1d(kk,Pk_0p005_sigNOT)
+
 #%% START TO PLOT
 print("~~~~~ready to plot~~~~~")
 plt.figure(1)
 plt.xscale('log')
-plt.yscale('log')
+#plt.yscale('log')
 plt.xlim(kk[0],kk[-1])
 
 
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
-#plt.ylabel(r'$P_{\mathrm{approx}}/P_{\mathrm{full}}-1$', fontsize=20)
 
-plt.ylabel(r'$P(k) \, [(\mathrm{Mpc}/h)^3]$', fontsize=20)
 
-plt.title(r"$\varepsilon = 0.49, \, \, \, \, \Gamma^{-1} = 50 \, \mathrm{Gyrs}$",fontsize=15)
+plt.ylabel(r'$P_{\mathrm{approx}}/P_{\mathrm{full}}-1$', fontsize=20)
 
-#plt.plot(kk,map(truediv, list(np.array(Pk_0p15_sigNOT) - np.array(pk_ref_0p15[:,1])), pk_ref_0p15[:,1]),'b',label=r'$ \sigma_{\mathrm{wdm}} = 0$')
+#plt.ylabel(r'$P(k) \, [(\mathrm{Mpc}/h)^3]$', fontsize=20)
 
-plt.plot(pk_ref_0p49[:,0],pk_ref_0p49[:,1],'b',label=r'Full hierarchy')
-plt.plot(kk,Pk_0p49_sigYES,'r',label=r'Fluid wdm with full shear')
-plt.plot(kk,Pk_0p49_sigNOT,'g',label=r'Fluid wdm with shear=0')
+plt.title(r"$\varepsilon = 0.005, \, \, \, \, \Gamma^{-1} = 10 \, \mathrm{Gyrs}$",fontsize=15)
+
+#plt.plot(kk,fpk_0p49_full(kk) ,'b',label=r'Full hierarchy')
+plt.plot(kk,fpk_0p005_sigYES(kk)/fpk_0p005_full(kk)-1.0,'r',label=r'Fluid wdm with full shear')
+plt.plot(kk,fpk_0p005_sigNOT(kk)/fpk_0p005_full(kk)-1.0,'g',label=r'Fluid wdm with shear=0')
 
 
 

@@ -8148,13 +8148,13 @@ int perturb_derivs(double tau,
                      /** - ----->  ansatz for approximate shear derivative */
 
 
-          if (pba->epsilon_dcdm < 0.49) {
+          if (pba->epsilon_dcdm < 0.499) {
             dy[idx+2] = 0.;
           } else {
             dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau+a*gamma*(1.-eps)*((1.+ca2_ncdm)/(3.+3.*w_ncdm))*ratio_rho)*y[idx+2]
             +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*(y[idx+1]+metric_ufa_class)
             -2.0/3.0*eps*eps*a*gamma*ratio_rho/(1-eps)*y[pv->index_pt_delta_dcdm]/(1.+w_ncdm);
-           }
+          }
 
           // just for testing
           //   if (ppt->switch_off_shear_wdm == _TRUE_) {

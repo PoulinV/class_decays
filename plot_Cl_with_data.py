@@ -43,8 +43,10 @@ lTE,DlTE_mean,DlTE_error_minus,DlTE_error_plus,DlTE_bestfit= np.loadtxt("error_P
 ax_1 = plt.subplot(211)
 ax_2 = plt.subplot(212, sharex = ax_1)
 plt.subplots_adjust(hspace=0)
-ax_1.set_ylim([-0.07,0.07])
-ax_2.set_ylim([-0.12,0.12])
+#ax_1.set_ylim([-0.07,0.07])
+#ax_2.set_ylim([-0.12,0.12])
+ax_1.set_ylim([-0.5,0.5])
+ax_2.set_ylim([-0.5,0.5])
 ax_1.set_xlim([2,2500])
 ax_2.set_xlim([2,2500])
 # ax_1.set_ylim([30,30000])
@@ -110,42 +112,42 @@ M.struct_cleanup()
 M.empty()
 
 
-#print("~~~~~compute binned cosmic variance based on ref~~~~~")
+print("~~~~~compute binned cosmic variance based on ref~~~~~")
 
-#def binned_cosmic_variance (result,l_ini,width):
-#    central_l = l_ini+width/2
-#    weight_total = 0
-#    result = 0
-#    Clb = 0
-#    for i in range(0,int(width)):
-#        weight_total += (l_ini+i)*(l_ini+i+1)
-#        result += 2/(2*(l_ini+float(i))+1)*(l_ini+float(i))*(l_ini+float(i)+1)*(l_ini+float(i))*(l_ini+float(i)+1)*fTT_ref(l_ini+i)*fTT_ref(l_ini+i)
-#        Clb += (l_ini+float(i))*(l_ini+float(i)+1)*fTT_ref(l_ini+i)
-#    return np.sqrt(result)/Clb
+def binned_cosmic_variance (result,l_ini,width):
+    central_l = l_ini+width/2
+    weight_total = 0
+    result = 0
+    Clb = 0
+    for i in range(0,int(width)):
+        weight_total += (l_ini+i)*(l_ini+i+1)
+        result += 2/(2*(l_ini+float(i))+1)*(l_ini+float(i))*(l_ini+float(i)+1)*(l_ini+float(i))*(l_ini+float(i)+1)*fTT_ref(l_ini+i)*fTT_ref(l_ini+i)
+        Clb += (l_ini+float(i))*(l_ini+float(i)+1)*fTT_ref(l_ini+i)
+    return np.sqrt(result)/Clb
 
 #
-#l_min = 2.;
-#l_max = 2000;
-#n_step = 100.;
-#j=0.
-#step = l_min
-#width= 25
-#while step < l_max:
-#        result = 0.0
-#        if step < 29:
-#            width = 1
-#            step = l_min+j*width
-#            j+=1
-#            if step == 29:
-#                j = 0
-#                l_min = 30
-#        else:
-#            width = 30
-#            step = l_min+j*width
-#            j+=1
+l_min = 2.;
+l_max = 2000;
+n_step = 100.;
+j=0.
+step = l_min
+width= 25
+while step < l_max:
+        result = 0.0
+        if step < 29:
+            width = 1
+            step = l_min+j*width
+            j+=1
+            if step == 29:
+                j = 0
+                l_min = 30
+        else:
+            width = 30
+            step = l_min+j*width
+            j+=1
 
-#        ax_1.add_patch(patches.Rectangle((int(step), -1*binned_cosmic_variance(result,int(step),width)), width, 2*binned_cosmic_variance(result,int(step),width),color='g', alpha=0.1))
-#        ax_2.add_patch(patches.Rectangle((int(step), -1*binned_cosmic_variance(result,int(step),width)), width, 2*binned_cosmic_variance(result,int(step),width),color='g',alpha=0.1))
+        ax_1.add_patch(patches.Rectangle((int(step), -1*binned_cosmic_variance(result,int(step),width)), width, 2*binned_cosmic_variance(result,int(step),width),color='g', alpha=0.1))
+        ax_2.add_patch(patches.Rectangle((int(step), -1*binned_cosmic_variance(result,int(step),width)), width, 2*binned_cosmic_variance(result,int(step),width),color='g',alpha=0.1))
 
 
 print("~~~~~print planck error bar around mean, i.e, residuals are 0 for simplicity~~~~~")
