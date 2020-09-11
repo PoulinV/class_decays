@@ -3302,8 +3302,16 @@ int perturb_vector_init(
         }
         else{
           // In the fluid approximation, hierarchy is cut at lmax = 2 and q dependence is integrated out:
-          ppv->l_max_ncdm[n_ncdm] = 2;
-          ppv->q_size_ncdm[n_ncdm] = 1;
+          // CS2DYN
+        if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+          //  ppv->l_max_ncdm[n_ncdm] = 2;
+            ppv->l_max_ncdm[n_ncdm] = 3; // since we are now also including a dynamical equation for the sound speed
+            ppv->q_size_ncdm[n_ncdm] = 1;
+        } else {
+            ppv->l_max_ncdm[n_ncdm] = 2;
+            ppv->q_size_ncdm[n_ncdm] = 1;
+        }
+
         }
         index_pt += (ppv->l_max_ncdm[n_ncdm]+1)*ppv->q_size_ncdm[n_ncdm];
         // class_alloc(ppv->is_q_initialized_dcdm[n_ncdm],(ppv->l_max_ncdm[n_ncdm]+1)*ppv->q_size_ncdm[n_ncdm]*sizeof(double),ppt->error_message);
@@ -3497,6 +3505,7 @@ int perturb_vector_init(
         for(index_q=0; index_q < ppv->q_size_ncdm[n_ncdm]; index_q++){
           for(l=0; l<=ppv->l_max_ncdm[n_ncdm]; l++){
             if (l>2) ppv->used_in_sources[index_pt]=_FALSE_;
+            // CS2DYN, but I think I dont have to change anything
             index_pt++;
           }
         }
@@ -3747,6 +3756,7 @@ int perturb_vector_init(
             for(index_q=0; index_q < ppv->q_size_ncdm[n_ncdm]; index_q++){
               for(l=0; l<=ppv->l_max_ncdm[n_ncdm];l++){
                 // This is correct with or without ncdmfa, since ppv->lmax_ncdm is set accordingly.
+                // CS2DYN, but I think I don't have to change anything
                 ppv->y[ppv->index_pt_psi0_ncdm1+index_pt] =
                   ppw->pv->y[ppw->pv->index_pt_psi0_ncdm1+index_pt];
                 index_pt++;
@@ -3970,12 +3980,19 @@ int perturb_vector_init(
           index_pt = ppw->pv->index_pt_psi0_ncdm1;
           for(n_ncdm = 0; n_ncdm < ppv->N_ncdm; n_ncdm++){
             // We are in the fluid approximation, so ncdm_l_size is always 3.
+            // CS2DYN (ncdm_l_size is always 4)
             ncdm_l_size = ppv->l_max_ncdm[n_ncdm]+1;
             rho_plus_p_ncdm = ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+
               ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
             for(l=0; l<=2; l++){
               ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+l] = 0.0;
             }
+
+            if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+              ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] = 0.0; //CS2DYN, is this correct?
+            }
+
+
             factor = pba->factor_ncdm[n_ncdm]*pow(pba->a_today/a,4);
             for(index_q=0; index_q < ppw->pv->q_size_ncdm[n_ncdm]; index_q++){
               // Integrate over distributions:
@@ -4002,10 +4019,17 @@ int perturb_vector_init(
                     ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+2] +=
                       pba->w_ncdm[n_ncdm][index_q]*q2*q2/epsilon*
                       ppw->pv->y[index_pt+2];
+
+
+                    ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] +=
+                      pba->w_ncdm[n_ncdm][index_q]*q2*q2/epsilon*
+                      ppw->pv->y[index_pt]; //CS2DYN
                   }
 
 
-                }else{
+                } else {
+
+
                   ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm] +=
                     pba->w_ncdm[n_ncdm][index_q]*q2*epsilon*
                     ppw->pv->y[index_pt];
@@ -4022,9 +4046,15 @@ int perturb_vector_init(
               //Jump to next momentum bin in ppw->pv->y:
               index_pt += (ppw->pv->l_max_ncdm[n_ncdm]+1);
             }
+
+            if(pba->background_ncdm_distribution[n_ncdm] ==_massive_daughter_){
+              ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] = (1./3.)*ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3]/ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm]; //CS2DYN
+            }
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm] *=factor/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+1] *=k*factor/rho_plus_p_ncdm;
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+2] *=2.0/3.0*factor/rho_plus_p_ncdm;
+
+            printf("delta_p_over_delta_rho_ncdm = %e\n",ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] ); /*  GFA */
           }
         }
       }
@@ -4769,6 +4799,7 @@ int perturb_initial_conditions(struct precision * ppr,
           ppw->pv->y[idx] = 0;
           ppw->pv->y[idx+1] =  0;
           ppw->pv->y[idx+2] = 0;
+          // CS2DYN, but I think I dont have to change anything
           for(l=3; l<ppw->pv->l_max_ncdm[n_ncdm]; l++){
              ppw->pv->y[idx+l] = 0;
           }
@@ -5789,8 +5820,19 @@ int perturb_total_stress_energy(
           if ((ppt->has_source_delta_ncdm == _TRUE_) || (ppt->has_source_theta_ncdm == _TRUE_) || (ppt->has_source_delta_m == _TRUE_)) {
             ppw->delta_ncdm[n_ncdm] = y[idx];
             ppw->theta_ncdm[n_ncdm] = y[idx+1];
+        //    if (eps <0.499) { //ZEROSHEAR
+        //    ppw->shear_ncdm[n_ncdm] = 0.0;
+        //    } else {
             ppw->shear_ncdm[n_ncdm] = y[idx+2];
+        //    }
+
+
+          if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+            ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]; // CS2DYN
+          } else {
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
+          }
+
 
             if(pba->massive_daugther_is_radiation == 2 && pba->has_dr == _TRUE_){
               //for debugging massive daugther
@@ -5810,13 +5852,25 @@ int perturb_total_stress_energy(
           ppw->rho_plus_p_theta += rho_plus_p_ncdm*ppw->theta_ncdm[n_ncdm];
           ppw->rho_plus_p_shear += rho_plus_p_ncdm*ppw->shear_ncdm[n_ncdm];
           // ppw->rho_plus_p_shear += 2./3.*rho_dr_over_f*y[ppw->pv->index_pt_F0_dr+2];
-          ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
+         //  ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
+
+         if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+           ppw->delta_p += ppw->delta_p_over_delta_rho_ncdm[n_ncdm]*rho_ncdm_bg*y[idx]; //CS2DYN
+         } else {
+           ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
+         }
+
+
           rho_plus_p_tot += rho_plus_p_ncdm;
 
           idx += ppw->pv->l_max_ncdm[n_ncdm]+1;
         }
 
-      //  printf("THIS SHOULD NEVER HAPPEN\n"); /*  GFA */
+
+        if (isnan(y[idx+3]) || y[idx+3] < 0 ) {
+          printf("delta_p_over_delta_rho_ncdm = %e\n",y[idx+3]); /*  GFA */
+        }
+
       }
       else{
         // We must integrate to find perturbations:
@@ -5932,7 +5986,7 @@ int perturb_total_stress_energy(
             }
 
 
-           if(rho_delta_ncdm!= 0 && delta_p_ncdm !=0) {
+           if(rho_delta_ncdm!= 0 && delta_p_ncdm !=0) { //CS2DYN, but I think I dont have to change anything
              ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = delta_p_ncdm/rho_delta_ncdm;
           //   printf("delta_p_over_delta_rho_ncdm[%d]=%e\n",n_ncdm, ppw->delta_p_over_delta_rho_ncdm[n_ncdm] );
            }
@@ -7081,7 +7135,7 @@ int perturb_print_variables(double tau,
           theta_ncdm[n_ncdm] = ppw->theta_ncdm[n_ncdm];
           shear_ncdm[n_ncdm] = ppw->shear_ncdm[n_ncdm];
           delta_p_over_delta_rho_ncdm[n_ncdm] = ppw->delta_p_over_delta_rho_ncdm[n_ncdm];
-
+          // CS2DYN, but I think I dont have to change anything
 
         // if(rho_delta_ncdm!= 0 && ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm] != 0)  delta_ncdm[n_ncdm] = rho_delta_ncdm/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
         // // printf("a %e rho_delta_ncdm %e ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm] %e \n",a,rho_delta_ncdm,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]);
@@ -8091,7 +8145,8 @@ int perturb_derivs(double tau,
           /* adiabatic sound speed */
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
            ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
-           ceff2_ncdm = ca2_ncdm;
+           // CS2DYN
+          // ceff2_ncdm = ca2_ncdm;
            cvis2_ncdm = 3.*w_ncdm*ca2_ncdm;
 
         //   ca2_ncdm = 1./3.;
@@ -8128,9 +8183,14 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
              /** - -----> exact continuity equation */
-            dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
-              3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
-              +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
+//            dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
+//              3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
+//              +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
+
+              dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
+                3.0*a_prime_over_a*(y[idx+3]-w_ncdm)*y[idx]
+                +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
+
 
             //this is the relativistic limit, for testing
             // dy[idx] = -(4./3.)*(y[idx+1]+metric_continuity)+(1./2.)*a*gamma*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
@@ -8138,9 +8198,19 @@ int perturb_derivs(double tau,
 
 
              // /** - -----> exact euler equation */
-            dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
-              ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
-              + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
+        //     if (pba->epsilon_dcdm < 0.499) { //ZEROSHEAR
+        //       dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
+        //         ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]
+        //         + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
+        //     } else {
+//               dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
+//                 ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
+//                 + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
+
+                 dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
+                   y[idx+3]/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
+                   + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
+        //     }
 
             //this is the relativistic limit, for testing
             // dy[idx+1] = (1./4.)*k2*y[idx]-k2*y[idx+2]+metric_euler-(1./2.)*a*gamma*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
@@ -8155,6 +8225,11 @@ int perturb_derivs(double tau,
             +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*(y[idx+1]+metric_ufa_class)
             -2.0/3.0*eps*eps*a*gamma*ratio_rho/(1-eps)*y[pv->index_pt_delta_dcdm]/(1.+w_ncdm);
            }
+
+           // CS2DYN
+           dy[idx+3] = 3.*a_prime_over_a*y[idx+3]*(w_ncdm+y[idx+3]-(2./3.))+(1.+w_ncdm)*y[idx+1]*(y[idx+3]-w_ncdm)/y[idx]
+           +(metric_continuity/3.)*(3.*(1.+w_ncdm)*y[idx+3]-w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg) ))/y[idx]
+           +(a*gamma/3.)*ratio_rho*(y[pv->index_pt_delta_dcdm]/y[idx])*((pow(eps,2)/(1-eps))-3.*y[idx+3]*(1.-eps));
 
           // just for testing
           //   if (ppt->switch_off_shear_wdm == _TRUE_) {
