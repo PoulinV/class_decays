@@ -12,7 +12,7 @@ start_time = time.time()
 #%%
 
 
-Gamma_dcdm = 98.0392
+Gamma_dcdm = 19.6078
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
@@ -30,7 +30,7 @@ Pk_0p49_sigNOT = [] # P(k) in (Mpc/h)**3
 
 #set general configuration
 common_settings = {'output':'tCl,pCl,lCl,mPk',
-#                   'lensing':'yes',
+                   'lensing':'yes',
                    'l_max_scalars':2600,
                    'P_k_max_1/Mpc':1.0,
                    'omega_ini_dcdm2':0.1195,
@@ -58,101 +58,109 @@ common_settings = {'output':'tCl,pCl,lCl,mPk',
 
 #%% read data files
 
-#files1 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p15_tau50gyrs_nofluid_pk.dat']
-files1 = ['/Users/gfranco/cloud/output/dcdm_eps0p15_tau50gyrs_nofluid_pk.dat']
+files1 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p15_tau50gyrs_nofluid_pk.dat']
+#files1 = ['/Users/gfranco/cloud/output/dcdm_eps0p15_tau50gyrs_nofluid_pk.dat']
 
 data1 = []
 for data_file1 in files1:
     data1.append(np.loadtxt(data_file1))
 
-files1b = ['/Users/gfranco/cloud/output/dcdm_eps0p15_tau50gyrs_nofluid_cl.dat']
+files1b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p15_tau50gyrs_nofluid_cl_lensed.dat']
+#files1b = ['/Users/gfranco/cloud/output/dcdm_eps0p15_tau50gyrs_nofluid_cl.dat']
 
 data1b = []
 for data_file1b in files1b:
     data1b.append(np.loadtxt(data_file1b))
 
+
 #files2 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p2_tau50gyrs_nofluid_pk.dat']
-files2 = ['/Users/gfranco/cloud/output/dcdm_eps0p2_tau50gyrs_nofluid_pk.dat']
+#files2 = ['/Users/gfranco/cloud/output/dcdm_eps0p2_tau50gyrs_nofluid_pk.dat']
 
-data2 = []
-for data_file2 in files2:
-    data2.append(np.loadtxt(data_file2))
+#data2 = []
+#for data_file2 in files2:
+#    data2.append(np.loadtxt(data_file2))
 
-files2b = ['/Users/gfranco/cloud/output/dcdm_eps0p2_tau50gyrs_nofluid_cl.dat']
+#files2b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p2_tau50gyrs_nofluid_cl_lensed.dat']
+#files2b = ['/Users/gfranco/cloud/output/dcdm_eps0p2_tau50gyrs_nofluid_cl.dat']
 
-data2b = []
-for data_file2b in files2b:
-    data2b.append(np.loadtxt(data_file2b))
+#data2b = []
+#for data_file2b in files2b:
+#    data2b.append(np.loadtxt(data_file2b))
 
 
 #files3 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p25_tau50gyrs_nofluid_pk.dat']
-files3 = ['/Users/gfranco/cloud/output/dcdm_eps0p25_tau50gyrs_nofluid_pk.dat']
+#files3 = ['/Users/gfranco/cloud/output/dcdm_eps0p25_tau50gyrs_nofluid_pk.dat']
 
-data3 = []
-for data_file3 in files3:
-    data3.append(np.loadtxt(data_file3))
+#data3 = []
+#for data_file3 in files3:
+#    data3.append(np.loadtxt(data_file3))
 
-files3b = ['/Users/gfranco/cloud/output/dcdm_eps0p25_tau50gyrs_nofluid_cl.dat']
+#files3b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p25_tau50gyrs_nofluid_cl_lensed.dat']
+#files3b = ['/Users/gfranco/cloud/output/dcdm_eps0p25_tau50gyrs_nofluid_cl.dat']
 
-data3b = []
-for data_file3b in files3b:
-    data3b.append(np.loadtxt(data_file3b))
+#data3b = []
+#for data_file3b in files3b:
+#    data3b.append(np.loadtxt(data_file3b))
 
 #files4 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p3_tau50gyrs_nofluid_pk.dat']
-files4 = ['/Users/gfranco/cloud/output/dcdm_eps0p3_tau50gyrs_nofluid_pk.dat']
+#files4 = ['/Users/gfranco/cloud/output/dcdm_eps0p3_tau50gyrs_nofluid_pk.dat']
 
-data4 = []
-for data_file4 in files4:
-    data4.append(np.loadtxt(data_file4))
+#data4 = []
+#for data_file4 in files4:
+#    data4.append(np.loadtxt(data_file4))
 
-files4b = ['/Users/gfranco/cloud/output/dcdm_eps0p3_tau50gyrs_nofluid_cl.dat']
+#files4b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p3_tau50gyrs_nofluid_cl_lensed.dat']
+#files4b = ['/Users/gfranco/cloud/output/dcdm_eps0p3_tau50gyrs_nofluid_cl.dat']
 
-data4b = []
-for data_file4b in files4b:
-    data4b.append(np.loadtxt(data_file4b))
+#data4b = []
+#for data_file4b in files4b:
+#    data4b.append(np.loadtxt(data_file4b))
 
 
 #files5 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p45_tau50gyrs_nofluid_pk.dat']
-files5 = ['/Users/gfranco/cloud/output/dcdm_eps0p45_tau50gyrs_nofluid_pk.dat']
+#files5 = ['/Users/gfranco/cloud/output/dcdm_eps0p45_tau50gyrs_nofluid_pk.dat']
 
-data5 = []
-for data_file5 in files5:
-    data5.append(np.loadtxt(data_file5))
+#data5 = []
+#for data_file5 in files5:
+#    data5.append(np.loadtxt(data_file5))
 
-files5b = ['/Users/gfranco/cloud/output/dcdm_eps0p45_tau50gyrs_nofluid_cl.dat']
+#files5b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p45_tau50gyrs_nofluid_cl_lensed.dat']
+#files5b = ['/Users/gfranco/cloud/output/dcdm_eps0p45_tau50gyrs_nofluid_cl.dat']
 
-data5b = []
-for data_file5b in files5b:
-    data5b.append(np.loadtxt(data_file5b))
+#data5b = []
+#for data_file5b in files5b:
+#    data5b.append(np.loadtxt(data_file5b))
 
 
 #files6 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p499_tau50gyrs_nofluid_pk.dat']
-files6 = ['/Users/gfranco/cloud/output/dcdm_eps0p499_tau50gyrs_nofluid_pk.dat']
+#files6 = ['/Users/gfranco/cloud/output/dcdm_eps0p499_tau50gyrs_nofluid_pk.dat']
 
-data6 = []
-for data_file6 in files6:
-    data6.append(np.loadtxt(data_file6))
+#data6 = []
+#for data_file6 in files6:
+#    data6.append(np.loadtxt(data_file6))
 
-files6b = ['/Users/gfranco/cloud/output/dcdm_eps0p499_tau50gyrs_nofluid_cl.dat']
+#files6b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p499_tau50gyrs_nofluid_cl_lensed.dat']
+#files6b = ['/Users/gfranco/cloud/output/dcdm_eps0p499_tau50gyrs_nofluid_cl.dat']
 
-data6b = []
-for data_file6b in files6b:
-    data6b.append(np.loadtxt(data_file6b))
+#data6b = []
+#for data_file6b in files6b:
+#    data6b.append(np.loadtxt(data_file6b))
 
 
 
 #files7 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p49_tau50gyrs_nofluid_pk.dat']
-files7 = ['/Users/gfranco/cloud/output/dcdm_eps0p49_tau50gyrs_nofluid_pk.dat']
+#files7 = ['/Users/gfranco/cloud/output/dcdm_eps0p49_tau50gyrs_nofluid_pk.dat']
 
-data7 = []
-for data_file7 in files7:
-    data7.append(np.loadtxt(data_file7))
+#data7 = []
+#for data_file7 in files7:
+#    data7.append(np.loadtxt(data_file7))
 
-files7b = ['/Users/gfranco/cloud/output/dcdm_eps0p49_tau50gyrs_nofluid_cl.dat']
+#files7b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p49_tau50gyrs_nofluid_cl_lensed.dat']
+#files7b = ['/Users/gfranco/cloud/output/dcdm_eps0p49_tau50gyrs_nofluid_cl.dat']
 
-data7b = []
-for data_file7b in files7b:
-    data7b.append(np.loadtxt(data_file7b))
+#data7b = []
+#for data_file7b in files7b:
+#    data7b.append(np.loadtxt(data_file7b))
 
 
 
@@ -162,69 +170,69 @@ cl_ref_0p15  = data1b[0]
 f_clTT_ref_0p15 = interp1d(cl_ref_0p15[:,0], cl_ref_0p15[:,1])
 f_clEE_ref_0p15 = interp1d(cl_ref_0p15[:,0], cl_ref_0p15[:,2])
 
-pk_ref_0p2   = data2[0]
-f_pk_ref_0p2 = interp1d(pk_ref_0p2[:,0], pk_ref_0p2[:,1])
-cl_ref_0p2  = data2b[0]
-f_clTT_ref_0p2 = interp1d(cl_ref_0p2[:,0], cl_ref_0p2[:,1])
-f_clEE_ref_0p2 = interp1d(cl_ref_0p2[:,0], cl_ref_0p2[:,2])
+#pk_ref_0p2   = data2[0]
+#f_pk_ref_0p2 = interp1d(pk_ref_0p2[:,0], pk_ref_0p2[:,1])
+#cl_ref_0p2  = data2b[0]
+#f_clTT_ref_0p2 = interp1d(cl_ref_0p2[:,0], cl_ref_0p2[:,1])
+#f_clEE_ref_0p2 = interp1d(cl_ref_0p2[:,0], cl_ref_0p2[:,2])
 
-pk_ref_0p25  = data3[0]
-f_pk_ref_0p25 = interp1d(pk_ref_0p25[:,0], pk_ref_0p25[:,1])
-cl_ref_0p25  = data3b[0]
-f_clTT_ref_0p25 = interp1d(cl_ref_0p25[:,0], cl_ref_0p25[:,1])
-f_clEE_ref_0p25 = interp1d(cl_ref_0p25[:,0], cl_ref_0p25[:,2])
+#pk_ref_0p25  = data3[0]
+#f_pk_ref_0p25 = interp1d(pk_ref_0p25[:,0], pk_ref_0p25[:,1])
+#cl_ref_0p25  = data3b[0]
+#f_clTT_ref_0p25 = interp1d(cl_ref_0p25[:,0], cl_ref_0p25[:,1])
+#f_clEE_ref_0p25 = interp1d(cl_ref_0p25[:,0], cl_ref_0p25[:,2])
 
-pk_ref_0p3   = data4[0]
-f_pk_ref_0p3 = interp1d(pk_ref_0p3[:,0], pk_ref_0p3[:,1])
-cl_ref_0p3  = data4b[0]
-f_clTT_ref_0p3 = interp1d(cl_ref_0p3[:,0], cl_ref_0p3[:,1])
-f_clEE_ref_0p3 = interp1d(cl_ref_0p3[:,0], cl_ref_0p3[:,2])
+#pk_ref_0p3   = data4[0]
+#f_pk_ref_0p3 = interp1d(pk_ref_0p3[:,0], pk_ref_0p3[:,1])
+#cl_ref_0p3  = data4b[0]
+#f_clTT_ref_0p3 = interp1d(cl_ref_0p3[:,0], cl_ref_0p3[:,1])
+#f_clEE_ref_0p3 = interp1d(cl_ref_0p3[:,0], cl_ref_0p3[:,2])
 
-pk_ref_0p45  = data5[0]
-f_pk_ref_0p45 = interp1d(pk_ref_0p45[:,0], pk_ref_0p45[:,1])
-cl_ref_0p45  = data5b[0]
-f_clTT_ref_0p45 = interp1d(cl_ref_0p45[:,0], cl_ref_0p45[:,1])
-f_clEE_ref_0p45 = interp1d(cl_ref_0p45[:,0], cl_ref_0p45[:,2])
+#pk_ref_0p45  = data5[0]
+#f_pk_ref_0p45 = interp1d(pk_ref_0p45[:,0], pk_ref_0p45[:,1])
+#cl_ref_0p45  = data5b[0]
+#f_clTT_ref_0p45 = interp1d(cl_ref_0p45[:,0], cl_ref_0p45[:,1])
+#f_clEE_ref_0p45 = interp1d(cl_ref_0p45[:,0], cl_ref_0p45[:,2])
 
-pk_ref_0p499 = data6[0]
-f_pk_ref_0p499 = interp1d(pk_ref_0p499[:,0], pk_ref_0p499[:,1])
-cl_ref_0p499  = data6b[0]
-f_clTT_ref_0p499 = interp1d(cl_ref_0p499[:,0], cl_ref_0p499[:,1])
-f_clEE_ref_0p499 = interp1d(cl_ref_0p499[:,0], cl_ref_0p499[:,2])
+#pk_ref_0p499 = data6[0]
+#f_pk_ref_0p499 = interp1d(pk_ref_0p499[:,0], pk_ref_0p499[:,1])
+#cl_ref_0p499  = data6b[0]
+#f_clTT_ref_0p499 = interp1d(cl_ref_0p499[:,0], cl_ref_0p499[:,1])
+#f_clEE_ref_0p499 = interp1d(cl_ref_0p499[:,0], cl_ref_0p499[:,2])
 
 
-pk_ref_0p49  = data7[0]
-f_pk_ref_0p49 = interp1d(pk_ref_0p49[:,0], pk_ref_0p49[:,1])
-cl_ref_0p49  = data7b[0]
-f_clTT_ref_0p49 = interp1d(cl_ref_0p49[:,0], cl_ref_0p49[:,1])
-f_clEE_ref_0p49 = interp1d(cl_ref_0p49[:,0], cl_ref_0p49[:,2])
+#pk_ref_0p49  = data7[0]
+#f_pk_ref_0p49 = interp1d(pk_ref_0p49[:,0], pk_ref_0p49[:,1])
+#cl_ref_0p49  = data7b[0]
+#f_clTT_ref_0p49 = interp1d(cl_ref_0p49[:,0], cl_ref_0p49[:,1])
+#f_clEE_ref_0p49 = interp1d(cl_ref_0p49[:,0], cl_ref_0p49[:,2])
 
 
 
 M = Class()
 #%% EPSILON=0.15 CASE ########################################################
 
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.15})
+M.set(common_settings)
+M.set({'epsilon_dcdm': 0.15})
 
-#M.compute()
+M.compute()
 
-#h = M.h()
-#for k in kk:
-#    Pk_0p15_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+h = M.h()
+for k in kk:
+    Pk_0p15_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
 
-#clM_0p15 = M.raw_cl(2600)
-#ll = clM_0p15['ell'][2:]
-#clTT_0p15 = clM_0p15['tt'][2:]
-#clEE_0p15 = clM_0p15['ee'][2:]
+clM_0p15 = M.lensed_cl(2600)
+ll = clM_0p15['ell'][2:]
+clTT_0p15 = clM_0p15['tt'][2:]
+clEE_0p15 = clM_0p15['ee'][2:]
 
-#M.struct_cleanup()
-#M.empty()
+M.struct_cleanup()
+M.empty()
 
-#f_Pk_0p15_sigNOT=interp1d(kk,Pk_0p15_sigNOT)
-#f_clTT_0p15 = interp1d(ll,ll*(ll+1.0)*clTT_0p15/(2.0*np.pi))
-#f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
+f_Pk_0p15_sigNOT=interp1d(kk,Pk_0p15_sigNOT)
+f_clTT_0p15 = interp1d(ll,ll*(ll+1.0)*clTT_0p15/(2.0*np.pi))
+f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
 
 #%% EPSILON=0.2 CASE ########################################################
 
@@ -358,26 +366,26 @@ M = Class()
 
 
 #%% EPSILON =0.49 CASE ######################################################
-M.set(common_settings)
-M.set({'epsilon_dcdm': 0.49})
+#M.set(common_settings)
+#M.set({'epsilon_dcdm': 0.49})
 
-M.compute()
+#M.compute()
 
-h = M.h()
-for k in kk:
-    Pk_0p49_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+#h = M.h()
+#for k in kk:
+#    Pk_0p49_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
-clM_0p49 = M.raw_cl(2600)
-ll = clM_0p49['ell'][2:]
-clTT_0p49 = clM_0p49['tt'][2:]
-clEE_0p49 = clM_0p49['ee'][2:]
+#clM_0p49 = M.raw_cl(2600)
+#ll = clM_0p49['ell'][2:]
+#clTT_0p49 = clM_0p49['tt'][2:]
+#clEE_0p49 = clM_0p49['ee'][2:]
 
-M.struct_cleanup()
-M.empty()
+#M.struct_cleanup()
+#M.empty()
 
-f_Pk_0p49_sigNOT=interp1d(kk,Pk_0p49_sigNOT)
-f_clTT_0p49 = interp1d(ll,ll*(ll+1.0)*clTT_0p49/(2.0*np.pi))
-f_clEE_0p49 = interp1d(ll,ll*(ll+1.0)*clEE_0p49/(2.0*np.pi))
+#f_Pk_0p49_sigNOT=interp1d(kk,Pk_0p49_sigNOT)
+#f_clTT_0p49 = interp1d(ll,ll*(ll+1.0)*clTT_0p49/(2.0*np.pi))
+#f_clEE_0p49 = interp1d(ll,ll*(ll+1.0)*clEE_0p49/(2.0*np.pi))
 
 
 #fpk_0p49_full = interp1d(pk_ref_0p49[:,0],pk_ref_0p49[:,1])
@@ -386,41 +394,26 @@ f_clEE_0p49 = interp1d(ll,ll*(ll+1.0)*clEE_0p49/(2.0*np.pi))
 
 
 #%% EPSILON =0.005 CASE ######################################################
-M.set(common_settings)
-M.set({'epsilon_dcdm': 0.005, 'switch_off_shear_wdm': 'yes'})
+#M.set(common_settings)
+#M.set({'epsilon_dcdm': 0.005})
 
-M.compute()
+#M.compute()
 
-derived = M.get_current_derived_parameters(['sigma8'])
-print("sigma8 for DCDM (fluid wdm with zero shear) with epsilon=%f and tau= %f Gyrs is %f" %(0.005,tau,derived['sigma8']))
+#derived = M.get_current_derived_parameters(['sigma8'])
+#print("sigma8 for DCDM (fluid wdm with zero shear) with epsilon=%f and tau= %f Gyrs is %f" %(0.005,tau,derived['sigma8']))
 
 
-#print("~~~~~computing fluid wdm  for epsilon=0.25 in in %.f s~~~~~"%(time.time()-t_2))
-#t_3=time.time()
+#h = M.h()
+#for k in kk:
+#    Pk_0p005_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
-h = M.h()
-for k in kk:
-    Pk_0p005_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-
-M.struct_cleanup()
-M.empty()
+#M.struct_cleanup()
+#M.empty()
 ###########################################################################
 
-M.set(common_settings)
-M.set({'epsilon_dcdm': 0.005, 'switch_off_shear_wdm': 'no'})
 
-M.compute()
-
-h = M.h()
-for k in kk:
-    Pk_0p005_sigYES.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-
-M.struct_cleanup()
-M.empty()
-
-fpk_0p005_full   = interp1d(pk_ref_0p005[:,0],pk_ref_0p005[:,1])
-fpk_0p005_sigYES = interp1d(kk,Pk_0p005_sigYES)
-fpk_0p005_sigNOT = interp1d(kk,Pk_0p005_sigNOT)
+#fpk_0p005_full   = interp1d(pk_ref_0p005[:,0],pk_ref_0p005[:,1])
+#fpk_0p005_sigNOT = interp1d(kk,Pk_0p005_sigNOT)
 
 #%% START TO PLOT
 plt.figure(1)
@@ -433,7 +426,7 @@ plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
 plt.ylabel(r'$P(k)_{\mathrm{approx}}/P(k)_{\mathrm{full}}-1$', fontsize=20)
 
 
-plt.plot(kk,f_Pk_0p49_sigNOT(kk)/f_pk_ref_0p49(kk)-1.0,'b',label=r'$\varepsilon = 0.49, \, \, \, \, \Gamma^{-1} = 50 \, \mathrm{Gyrs}$')
+plt.plot(kk,f_Pk_0p15_sigNOT(kk)/f_pk_ref_0p15(kk)-1.0,'b',label=r'$\varepsilon = 0.15, \, \, \, \, \Gamma^{-1} = 50 \, \mathrm{Gyrs}$')
 
 
 #plt.ylabel(r'$P(k) \, [(\mathrm{Mpc}/h)^3]$', fontsize=20)
@@ -458,8 +451,8 @@ ax_2.set_xlim([2,2500])
 
 ax_2.tick_params(axis='both', which='minor', labelsize=12)
 
-ax_1.semilogx(ll,f_clTT_0p49(ll)/f_clTT_ref_0p49(ll)-1.0,'r',label=r'$\varepsilon = 0.49, \, \, \, \, \Gamma^{-1} = 50 \, \mathrm{Gyrs}$')
-ax_2.semilogx(ll,f_clEE_0p49(ll)/f_clEE_ref_0p49(ll)-1.0,'r',label=r'$\varepsilon = 0.49, \, \, \, \, \Gamma^{-1} = 50 \, \mathrm{Gyrs}$')
+ax_1.semilogx(ll,f_clTT_0p15(ll)/f_clTT_ref_0p15(ll)-1.0,'r',label=r'$\varepsilon = 0.15, \, \, \, \, \Gamma^{-1} = 50 \, \mathrm{Gyrs}$')
+ax_2.semilogx(ll,f_clEE_0p15(ll)/f_clEE_ref_0p15(ll)-1.0,'r',label=r'$\varepsilon = 0.15, \, \, \, \, \Gamma^{-1} = 50 \, \mathrm{Gyrs}$')
 
 ax_2.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=15)
 ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\mathrm{approx} )}{C_\ell^\mathrm{TT}(\mathrm{full} )} -1$',fontsize=20)
