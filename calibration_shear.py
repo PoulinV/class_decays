@@ -3,15 +3,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from classy import Class
-from operator import truediv
 from scipy.interpolate import interp1d
 
 import time
 start_time = time.time()
 
 #%%
-
-
 Gamma_dcdm = 19.6078
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
@@ -73,48 +70,18 @@ for data_file1b in files1b:
     data1b.append(np.loadtxt(data_file1b))
 
 
-#files2 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p2_tau50gyrs_nofluid_pk.dat']
-#files2 = ['/Users/gfranco/cloud/output/dcdm_eps0p2_tau50gyrs_nofluid_pk.dat']
-
-#data2 = []
-#for data_file2 in files2:
-#    data2.append(np.loadtxt(data_file2))
-
-#files2b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p2_tau50gyrs_nofluid_cl_lensed.dat']
-#files2b = ['/Users/gfranco/cloud/output/dcdm_eps0p2_tau50gyrs_nofluid_cl.dat']
-
-#data2b = []
-#for data_file2b in files2b:
-#    data2b.append(np.loadtxt(data_file2b))
-
-
-#files3 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p25_tau50gyrs_nofluid_pk.dat']
-#files3 = ['/Users/gfranco/cloud/output/dcdm_eps0p25_tau50gyrs_nofluid_pk.dat']
-
-#data3 = []
-#for data_file3 in files3:
-#    data3.append(np.loadtxt(data_file3))
-
-#files3b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p25_tau50gyrs_nofluid_cl_lensed.dat']
-#files3b = ['/Users/gfranco/cloud/output/dcdm_eps0p25_tau50gyrs_nofluid_cl.dat']
-
-#data3b = []
-#for data_file3b in files3b:
-#    data3b.append(np.loadtxt(data_file3b))
-
 #files4 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p3_tau50gyrs_nofluid_pk.dat']
-#files4 = ['/Users/gfranco/cloud/output/dcdm_eps0p3_tau50gyrs_nofluid_pk.dat']
+files4 = ['/Users/gfranco/cloud/output/dcdm_eps0p3_tau50gyrs_nofluid_pk.dat']
 
-#data4 = []
-#for data_file4 in files4:
-#    data4.append(np.loadtxt(data_file4))
+data4 = []
+for data_file4 in files4:
+    data4.append(np.loadtxt(data_file4))
 
-#files4b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p3_tau50gyrs_nofluid_cl_lensed.dat']
-#files4b = ['/Users/gfranco/cloud/output/dcdm_eps0p3_tau50gyrs_nofluid_cl.dat']
+files4b = ['/Users/gfranco/cloud/output/dcdm_eps0p3_tau50gyrs_nofluid_cl_lensed.dat']
 
-#data4b = []
-#for data_file4b in files4b:
-#    data4b.append(np.loadtxt(data_file4b))
+data4b = []
+for data_file4b in files4b:
+    data4b.append(np.loadtxt(data_file4b))
 
 
 #files5 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p45_tau50gyrs_nofluid_pk.dat']
@@ -132,37 +99,6 @@ for data_file1b in files1b:
 #    data5b.append(np.loadtxt(data_file5b))
 
 
-#files6 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p499_tau50gyrs_nofluid_pk.dat']
-#files6 = ['/Users/gfranco/cloud/output/dcdm_eps0p499_tau50gyrs_nofluid_pk.dat']
-
-#data6 = []
-#for data_file6 in files6:
-#    data6.append(np.loadtxt(data_file6))
-
-#files6b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p499_tau50gyrs_nofluid_cl_lensed.dat']
-#files6b = ['/Users/gfranco/cloud/output/dcdm_eps0p499_tau50gyrs_nofluid_cl.dat']
-
-#data6b = []
-#for data_file6b in files6b:
-#    data6b.append(np.loadtxt(data_file6b))
-
-
-
-#files7 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p49_tau50gyrs_nofluid_pk.dat']
-#files7 = ['/Users/gfranco/cloud/output/dcdm_eps0p49_tau50gyrs_nofluid_pk.dat']
-
-#data7 = []
-#for data_file7 in files7:
-#    data7.append(np.loadtxt(data_file7))
-
-#files7b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p49_tau50gyrs_nofluid_cl_lensed.dat']
-#files7b = ['/Users/gfranco/cloud/output/dcdm_eps0p49_tau50gyrs_nofluid_cl.dat']
-
-#data7b = []
-#for data_file7b in files7b:
-#    data7b.append(np.loadtxt(data_file7b))
-
-
 
 pk_ref_0p15  = data1[0]
 f_pk_ref_0p15 = interp1d(pk_ref_0p15[:,0], pk_ref_0p15[:,1])
@@ -170,42 +106,17 @@ cl_ref_0p15  = data1b[0]
 f_clTT_ref_0p15 = interp1d(cl_ref_0p15[:,0], cl_ref_0p15[:,1])
 f_clEE_ref_0p15 = interp1d(cl_ref_0p15[:,0], cl_ref_0p15[:,2])
 
-#pk_ref_0p2   = data2[0]
-#f_pk_ref_0p2 = interp1d(pk_ref_0p2[:,0], pk_ref_0p2[:,1])
-#cl_ref_0p2  = data2b[0]
-#f_clTT_ref_0p2 = interp1d(cl_ref_0p2[:,0], cl_ref_0p2[:,1])
-#f_clEE_ref_0p2 = interp1d(cl_ref_0p2[:,0], cl_ref_0p2[:,2])
-
-#pk_ref_0p25  = data3[0]
-#f_pk_ref_0p25 = interp1d(pk_ref_0p25[:,0], pk_ref_0p25[:,1])
-#cl_ref_0p25  = data3b[0]
-#f_clTT_ref_0p25 = interp1d(cl_ref_0p25[:,0], cl_ref_0p25[:,1])
-#f_clEE_ref_0p25 = interp1d(cl_ref_0p25[:,0], cl_ref_0p25[:,2])
-
-#pk_ref_0p3   = data4[0]
-#f_pk_ref_0p3 = interp1d(pk_ref_0p3[:,0], pk_ref_0p3[:,1])
-#cl_ref_0p3  = data4b[0]
-#f_clTT_ref_0p3 = interp1d(cl_ref_0p3[:,0], cl_ref_0p3[:,1])
-#f_clEE_ref_0p3 = interp1d(cl_ref_0p3[:,0], cl_ref_0p3[:,2])
+pk_ref_0p3   = data4[0]
+f_pk_ref_0p3 = interp1d(pk_ref_0p3[:,0], pk_ref_0p3[:,1])
+cl_ref_0p3  = data4b[0]
+f_clTT_ref_0p3 = interp1d(cl_ref_0p3[:,0], cl_ref_0p3[:,1])
+f_clEE_ref_0p3 = interp1d(cl_ref_0p3[:,0], cl_ref_0p3[:,2])
 
 #pk_ref_0p45  = data5[0]
 #f_pk_ref_0p45 = interp1d(pk_ref_0p45[:,0], pk_ref_0p45[:,1])
 #cl_ref_0p45  = data5b[0]
 #f_clTT_ref_0p45 = interp1d(cl_ref_0p45[:,0], cl_ref_0p45[:,1])
 #f_clEE_ref_0p45 = interp1d(cl_ref_0p45[:,0], cl_ref_0p45[:,2])
-
-#pk_ref_0p499 = data6[0]
-#f_pk_ref_0p499 = interp1d(pk_ref_0p499[:,0], pk_ref_0p499[:,1])
-#cl_ref_0p499  = data6b[0]
-#f_clTT_ref_0p499 = interp1d(cl_ref_0p499[:,0], cl_ref_0p499[:,1])
-#f_clEE_ref_0p499 = interp1d(cl_ref_0p499[:,0], cl_ref_0p499[:,2])
-
-
-#pk_ref_0p49  = data7[0]
-#f_pk_ref_0p49 = interp1d(pk_ref_0p49[:,0], pk_ref_0p49[:,1])
-#cl_ref_0p49  = data7b[0]
-#f_clTT_ref_0p49 = interp1d(cl_ref_0p49[:,0], cl_ref_0p49[:,1])
-#f_clEE_ref_0p49 = interp1d(cl_ref_0p49[:,0], cl_ref_0p49[:,2])
 
 
 
@@ -234,54 +145,6 @@ f_Pk_0p15_sigNOT=interp1d(kk,Pk_0p15_sigNOT)
 f_clTT_0p15 = interp1d(ll,ll*(ll+1.0)*clTT_0p15/(2.0*np.pi))
 f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
 
-#%% EPSILON=0.2 CASE ########################################################
-
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.2})
-
-#M.compute()
-
-#h = M.h()
-#for k in kk:
-#    Pk_0p2_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-
-
-#clM_0p2 = M.raw_cl(2600)
-#ll = clM_0p2['ell'][2:]
-#clTT_0p2 = clM_0p2['tt'][2:]
-#clEE_0p2 = clM_0p2['ee'][2:]
-
-
-#M.struct_cleanup()
-#M.empty()
-
-#f_Pk_0p2_sigNOT=interp1d(kk,Pk_0p2_sigNOT)
-#f_clTT_0p2 = interp1d(ll,ll*(ll+1.0)*clTT_0p2/(2.0*np.pi))
-#f_clEE_0p2 = interp1d(ll,ll*(ll+1.0)*clEE_0p2/(2.0*np.pi))
-
-#%% EPSILON=0.25 CASE ########################################################
-
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.25})
-
-#M.compute()
-
-#h = M.h()
-#for k in kk:
-#    Pk_0p25_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-
-#clM_0p25 = M.raw_cl(2600)
-#ll = clM_0p25['ell'][2:]
-#clTT_0p25 = clM_0p25['tt'][2:]
-#clEE_0p25 = clM_0p25['ee'][2:]
-
-#M.struct_cleanup()
-#M.empty()
-
-#f_Pk_0p25_sigNOT=interp1d(kk,Pk_0p25_sigNOT)
-#f_clTT_0p25 = interp1d(ll,ll*(ll+1.0)*clTT_0p25/(2.0*np.pi))
-#f_clEE_0p25 = interp1d(ll,ll*(ll+1.0)*clEE_0p25/(2.0*np.pi))
-
 
 #fpk_0p25_full = interp1d(pk_ref_0p25[:,0],pk_ref_0p25[:,1])
 #fpk_0p25_sigYES = interp1d(kk,Pk_0p25_sigYES)
@@ -299,7 +162,7 @@ f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
 #for k in kk:
 #    Pk_0p3_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
-#clM_0p3 = M.raw_cl(2600)
+#clM_0p3 = M.lensed_cl(2600)
 #ll = clM_0p3['ell'][2:]
 #clTT_0p3 = clM_0p3['tt'][2:]
 #clEE_0p3 = clM_0p3['ee'][2:]
@@ -325,7 +188,7 @@ f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
 #for k in kk:
 #    Pk_0p45_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
-#clM_0p45 = M.raw_cl(2600)
+#clM_0p45 = M.lensed_cl(2600)
 #ll = clM_0p45['ell'][2:]
 #clTT_0p45 = clM_0p45['tt'][2:]
 #clEE_0p45 = clM_0p45['ee'][2:]
@@ -338,59 +201,6 @@ f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
 #f_clTT_0p45 = interp1d(ll,ll*(ll+1.0)*clTT_0p45/(2.0*np.pi))
 #f_clEE_0p45 = interp1d(ll,ll*(ll+1.0)*clEE_0p45/(2.0*np.pi))
 
-
-#%% EPSILON =0.499 CASE ######################################################
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.499})
-
-#M.compute()
-
-
-#h = M.h()
-#for k in kk:
-#    Pk_0p499_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-
-
-#clM_0p499 = M.raw_cl(2600)
-#ll = clM_0p499['ell'][2:]
-#clTT_0p499 = clM_0p499['tt'][2:]
-#clEE_0p499 = clM_0p499['ee'][2:]
-
-
-#M.struct_cleanup()
-#M.empty()
-
-#f_Pk_0p499_sigNOT=interp1d(kk,Pk_0p499_sigNOT)
-#f_clTT_0p499 = interp1d(ll,ll*(ll+1.0)*clTT_0p499/(2.0*np.pi))
-#f_clEE_0p499 = interp1d(ll,ll*(ll+1.0)*clEE_0p499/(2.0*np.pi))
-
-
-#%% EPSILON =0.49 CASE ######################################################
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.49})
-
-#M.compute()
-
-#h = M.h()
-#for k in kk:
-#    Pk_0p49_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-
-#clM_0p49 = M.raw_cl(2600)
-#ll = clM_0p49['ell'][2:]
-#clTT_0p49 = clM_0p49['tt'][2:]
-#clEE_0p49 = clM_0p49['ee'][2:]
-
-#M.struct_cleanup()
-#M.empty()
-
-#f_Pk_0p49_sigNOT=interp1d(kk,Pk_0p49_sigNOT)
-#f_clTT_0p49 = interp1d(ll,ll*(ll+1.0)*clTT_0p49/(2.0*np.pi))
-#f_clEE_0p49 = interp1d(ll,ll*(ll+1.0)*clEE_0p49/(2.0*np.pi))
-
-
-#fpk_0p49_full = interp1d(pk_ref_0p49[:,0],pk_ref_0p49[:,1])
-#fpk_0p49_sigYES = interp1d(kk,Pk_0p49_sigYES)
-#fpk_0p49_sigNOT = interp1d(kk,Pk_0p49_sigNOT)
 
 
 #%% EPSILON =0.005 CASE ######################################################
