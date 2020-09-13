@@ -7,12 +7,12 @@ from scipy.interpolate import interp1d
 
 #%%
 
-Log10Gamma_dcdm = 2.991
+Log10Gamma_dcdm = 0.991
 Gamma_dcdm=10**(Log10Gamma_dcdm)
+Gamma_dcdm
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
-nbins = 300
 
 log10epsilon = -0.30103
 epsilon = 10**(log10epsilon)
@@ -196,7 +196,7 @@ plt.tick_params(axis="y", labelsize=18)
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=20)
 plt.ylabel(r'$P(k)_{\mathrm{approx}}/P(k)_{\mathrm{ref}}-1$', fontsize=20)
 
-plt.title(r'$ \varepsilon=0.5 \, \, \, \, \, \, \, \Gamma^{-1}= 1 \ \mathrm{Gyr}$',fontsize=20)
+plt.title(r'$ \varepsilon=0.5 \, \, \, \, \, \, \, \Gamma^{-1}= %0.f \ \mathrm{Gyr}$'%tau,fontsize=20)
 
 plt.plot(kk,fPk_sigYES(kk)/fPk_ref(kk)-1.0,'b',label=r'$\dot{\sigma}_{\mathrm{wdm}} \neq 0$')
 plt.plot(kk,fPk_sigNOT(kk)/fPk_ref(kk)-1.0,'r',label=r'$\dot{\sigma}_{\mathrm{wdm}} =  0$')
