@@ -3303,13 +3303,13 @@ int perturb_vector_init(
         else{
           // In the fluid approximation, hierarchy is cut at lmax = 2 and q dependence is integrated out:
           // CS2DYN
-    //    if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
-    //        ppv->l_max_ncdm[n_ncdm] = 3; // since we are now also including a dynamical equation for the sound speed
-    //        ppv->q_size_ncdm[n_ncdm] = 1;
-    //    } else {
+      //  if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+      //      ppv->l_max_ncdm[n_ncdm] = 3; // since we are now also including a dynamical equation for the pressure perturbation
+      //      ppv->q_size_ncdm[n_ncdm] = 1;
+      //  } else {
             ppv->l_max_ncdm[n_ncdm] = 2;
             ppv->q_size_ncdm[n_ncdm] = 1;
-    //    }
+      //  }
 
         }
         index_pt += (ppv->l_max_ncdm[n_ncdm]+1)*ppv->q_size_ncdm[n_ncdm];
@@ -4046,9 +4046,9 @@ int perturb_vector_init(
               index_pt += (ppw->pv->l_max_ncdm[n_ncdm]+1);
             }
 
-          //  if(pba->background_ncdm_distribution[n_ncdm] ==_massive_daughter_){
-          //    ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] = (1./3.)*ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3]/ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm]; //CS2DYN
-          //  }
+        //    if(pba->background_ncdm_distribution[n_ncdm] ==_massive_daughter_){
+        //      ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] *= (1./3.)*factor; //CS2DYN
+        //    }
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm] *=factor/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+1] *=k*factor/rho_plus_p_ncdm;
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+2] *=2.0/3.0*factor/rho_plus_p_ncdm;
@@ -5828,7 +5828,7 @@ int perturb_total_stress_energy(
 
 
       //    if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ ) {
-      //      ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]; // CS2DYN
+      //      ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]/(y[idx]*rho_ncdm_bg); // CS2DYN
       //    } else {
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
       //    }
@@ -5843,11 +5843,11 @@ int perturb_total_stress_energy(
           // ppw->rho_plus_p_shear += 2./3.*rho_dr_over_f*y[ppw->pv->index_pt_F0_dr+2];
          //  ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
 
-      //   if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
-      //     ppw->delta_p += ppw->delta_p_over_delta_rho_ncdm[n_ncdm]*rho_ncdm_bg*y[idx]; //CS2DYN
-      //   } else {
+    //     if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+    //       ppw->delta_p += y[idx+3]; //CS2DYN
+    //     } else {
            ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
-      //   }
+    //     }
 
 
           rho_plus_p_tot += rho_plus_p_ncdm;
@@ -8188,12 +8188,12 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
              /** - -----> exact continuity equation */
-            dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
-              3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
+            dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
+              -3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
               +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
 
-//              dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)-
-//                3.0*a_prime_over_a*(y[idx+3]-w_ncdm)*y[idx]
+//              dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
+//                -3.0*a_prime_over_a*(y[idx+3]/rho_ncdm_bg)+3.0*w_ncdm*a_prime_over_a*y[idx]
 //                +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
 
 
@@ -8208,12 +8208,12 @@ int perturb_derivs(double tau,
         //         ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]
         //         + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
         //     } else {
-               dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
-                 ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
+               dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
+                 +ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
                  + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
 
-//                 dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
-//                   y[idx+3]/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
+//                 dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
+//                   +(k2/(1.0+w_ncdm))*(y[idx+3]/rho_ncdm_bg)-k2*y[idx+2]
 //                   + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
         //     }
 
@@ -8247,11 +8247,9 @@ int perturb_derivs(double tau,
 
 
            // CS2DYN
-      //     dy[idx+3] = 3.*a_prime_over_a*y[idx+3]*(w_ncdm+y[idx+3]-(2./3.))
-      //     +(1.+w_ncdm)*y[idx+1]*(y[idx+3]-w_ncdm)/y[idx]
-      //     +(metric_continuity/3.)*(3.*(1.+w_ncdm)*y[idx+3]-w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg) ))/y[idx]
-          // +(a*gamma/3.)*ratio_rho*(y[pv->index_pt_delta_dcdm]/y[idx])*((pow(eps,2)/(1-eps))-3.*y[idx+3]*(1.-eps));
-
+        //   dy[idx+3] = -a_prime_over_a*y[idx+3]*(5.0-3.0*w_ncdm)-rho_ncdm_bg*w_ncdm*(1.0+w_ncdm)*y[idx+1]
+        //            +(metric_ufa_class/3)*(pseudo_p_ncdm-5.0*p_ncdm_bg)
+        //           +(a*gamma/3.0)*(pow(eps,2)/(1-eps))*y[pv->index_pt_delta_dcdm]*rho_dcdm_bg;
 
           } else {
             /** - -----> exact continuity equation */

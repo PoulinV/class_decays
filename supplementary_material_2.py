@@ -16,8 +16,8 @@ ax_1 = plt.subplot(211)
 ax_2 = plt.subplot(212, sharex = ax_1)
 plt.subplots_adjust(hspace=0)
 
-ax_1.set_ylim([-0.008,0.008])
-ax_2.set_ylim([-0.008,0.008])
+ax_1.set_ylim([-0.011,0.011])
+ax_2.set_ylim([-0.022,0.022])
 ax_1.set_xlim([2,2500])
 ax_2.set_xlim([2,2500])
 
@@ -48,17 +48,23 @@ lTE,DlTE_mean,DlTE_error_minus,DlTE_error_plus,DlTE_bestfit= np.loadtxt("error_P
 
 #%% read data files from reference model
 
-files1 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_cl_lensed.dat']
+#files1 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_cl_lensed.dat']
+files1 = ['/Users/gfranco/cloud/output/dcdm_bestfit_nofluid_cl_lensed.dat']
+
 data1 = []
 for data_file1 in files1:
     data1.append(np.loadtxt(data_file1))
     
-files2 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_z1_pk.dat']
+#files2 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_z1_pk.dat']
+files2 = ['/Users/gfranco/cloud/output/dcdm_bestfit_nofluid_z1_pk.dat']
+
 data2 = []
 for data_file2 in files2:
     data2.append(np.loadtxt(data_file2))
 
-files3 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_z2_pk.dat']
+#files3 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_z2_pk.dat']
+files3 = ['/Users/gfranco/cloud/output/dcdm_bestfit_nofluid_z2_pk.dat']
+
 data3 = []
 for data_file3 in files3:
     data3.append(np.loadtxt(data_file3))   
@@ -177,7 +183,7 @@ plt.clf()
 
 plt.xscale('log')
 plt.xlim(kk[0],kk[-1])
-#axes.set_ylim(-0.77,0.05)
+plt.ylim(-0.09,0.09)
 
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
 plt.ylabel(r'$\frac{P_{\mathrm{approx}}(k)}{P_{\mathrm{full}}(k)}-1$', fontsize=20)
@@ -186,9 +192,9 @@ plt.plot(kk,fpkz0_DCDM(kk)/fpk_z0_dcdm_full(kk)-1.0,'r', label=r'$\Lambda$DDM  B
 plt.plot(kk,fpkz3_DCDM(kk)/fpk_z3_dcdm_full(kk)-1.0,'b', label=r'$\Lambda$DDM  Best-fit (z = 3) ')
 
 k_range_sigma8 = np.linspace(0.1,0.9,1000) #which are the exact wavenumbers probed by DES-Y1?
-plt.fill_between(k_range_sigma8, -0.09,0.09, color='lightgray' )
+plt.fill_between(k_range_sigma8, -0.1,0.1, color='lightgray' )
 
-plt.legend(loc='best', fontsize=13)
+plt.legend(loc='upper left', fontsize=13)
 
 
 plt.tick_params(axis="x", labelsize=18)
