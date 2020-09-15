@@ -124,85 +124,86 @@ f_clEE_ref_0p45 = interp1d(cl_ref_0p45[:,0], cl_ref_0p45[:,2])
 M = Class()
 #%% EPSILON=0.15 CASE ########################################################
 
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.15})
+'''
+M.set(common_settings)
+M.set({'epsilon_dcdm': 0.15})
 
-#M.compute()
+M.compute()
 
-#h = M.h()
-#for k in kk:
-#    Pk_0p15_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+h = M.h()
+for k in kk:
+    Pk_0p15_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
 
-#clM_0p15 = M.lensed_cl(2600)
-#ll = clM_0p15['ell'][2:]
-#clTT_0p15 = clM_0p15['tt'][2:]
-#clEE_0p15 = clM_0p15['ee'][2:]
+clM_0p15 = M.lensed_cl(2600)
+ll = clM_0p15['ell'][2:]
+clTT_0p15 = clM_0p15['tt'][2:]
+clEE_0p15 = clM_0p15['ee'][2:]
 
-#M.struct_cleanup()
-#M.empty()
+M.struct_cleanup()
+M.empty()
 
-#f_Pk_0p15_sigNOT=interp1d(kk,Pk_0p15_sigNOT)
-#f_clTT_0p15 = interp1d(ll,ll*(ll+1.0)*clTT_0p15/(2.0*np.pi))
-#f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
-
+f_Pk_0p15_sigNOT=interp1d(kk,Pk_0p15_sigNOT)
+f_clTT_0p15 = interp1d(ll,ll*(ll+1.0)*clTT_0p15/(2.0*np.pi))
+f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
+'''
 
 #%% EPSILON=0.3 CASE ########################################################
 
 # NON-ZERO SHEAR EQUATION
 
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.3, 'switch_off_shear_wdm': 'no'})
+M.set(common_settings)
+M.set({'epsilon_dcdm': 0.3, 'switch_off_shear_wdm': 'no'})
 
-#M.compute()
+M.compute()
 
-#h = M.h()
-#for k in kk:
-#    Pk_0p3_sigYES.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+h = M.h()
+for k in kk:
+    Pk_0p3_sigYES.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
-#clM_0p3_sigYES = M.lensed_cl(2600)
-#ll = clM_0p3_sigYES['ell'][2:]
-#clTT_0p3_sigYES = clM_0p3_sigYES['tt'][2:]
-#clEE_0p3_sigYES = clM_0p3_sigYES['ee'][2:]
+clM_0p3_sigYES = M.lensed_cl(2600)
+ll = clM_0p3_sigYES['ell'][2:]
+clTT_0p3_sigYES = clM_0p3_sigYES['tt'][2:]
+clEE_0p3_sigYES = clM_0p3_sigYES['ee'][2:]
 
 
-#M.struct_cleanup()
-#M.empty()
+M.struct_cleanup()
+M.empty()
 
-#f_Pk_0p3_sigYES = interp1d(kk,Pk_0p3_sigYES)
-#f_clTT_0p3_sigYES = interp1d(ll,ll*(ll+1.0)*clTT_0p3_sigYES/(2.0*np.pi))
-#f_clEE_0p3_sigYES = interp1d(ll,ll*(ll+1.0)*clEE_0p3_sigYES/(2.0*np.pi))
+f_Pk_0p3_sigYES = interp1d(kk,Pk_0p3_sigYES)
+f_clTT_0p3_sigYES = interp1d(ll,ll*(ll+1.0)*clTT_0p3_sigYES/(2.0*np.pi))
+f_clEE_0p3_sigYES = interp1d(ll,ll*(ll+1.0)*clEE_0p3_sigYES/(2.0*np.pi))
 
 ###############################################################################
 # ZERO SHEAR EQUATION
 
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.3, 'switch_off_shear_wdm': 'yes'})
+M.set(common_settings)
+M.set({'epsilon_dcdm': 0.3, 'switch_off_shear_wdm': 'yes'})
 
-#M.compute()
+M.compute()
 
-#h = M.h()
-#for k in kk:
-#    Pk_0p3_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
+h = M.h()
+for k in kk:
+    Pk_0p3_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
 
-#clM_0p3_sigNOT = M.lensed_cl(2600)
-#ll = clM_0p3_sigNOT['ell'][2:]
-#clTT_0p3_sigNOT = clM_0p3_sigNOT['tt'][2:]
-#clEE_0p3_sigNOT = clM_0p3_sigNOT['ee'][2:]
+clM_0p3_sigNOT = M.lensed_cl(2600)
+ll = clM_0p3_sigNOT['ell'][2:]
+clTT_0p3_sigNOT = clM_0p3_sigNOT['tt'][2:]
+clEE_0p3_sigNOT = clM_0p3_sigNOT['ee'][2:]
 
 
-#M.struct_cleanup()
-#M.empty()
+M.struct_cleanup()
+M.empty()
 
-#f_Pk_0p3_sigNOT = interp1d(kk,Pk_0p3_sigNOT)
-#f_clTT_0p3_sigNOT = interp1d(ll,ll*(ll+1.0)*clTT_0p3_sigNOT/(2.0*np.pi))
-#f_clEE_0p3_sigNOT = interp1d(ll,ll*(ll+1.0)*clEE_0p3_sigNOT/(2.0*np.pi))
+f_Pk_0p3_sigNOT = interp1d(kk,Pk_0p3_sigNOT)
+f_clTT_0p3_sigNOT = interp1d(ll,ll*(ll+1.0)*clTT_0p3_sigNOT/(2.0*np.pi))
+f_clEE_0p3_sigNOT = interp1d(ll,ll*(ll+1.0)*clEE_0p3_sigNOT/(2.0*np.pi))
 
 #%% EPSILON =0.45 CASE ########################################################
 
 
 # NON-ZERO SHEAR EQUATION
-
+'''
 M.set(common_settings)
 M.set({'epsilon_dcdm': 0.45, 'switch_off_shear_wdm': 'no'})
 
@@ -250,29 +251,7 @@ f_Pk_0p45_sigNOT = interp1d(kk,Pk_0p45_sigNOT)
 f_clTT_0p45_sigNOT = interp1d(ll,ll*(ll+1.0)*clTT_0p45_sigNOT/(2.0*np.pi))
 f_clEE_0p45_sigNOT = interp1d(ll,ll*(ll+1.0)*clEE_0p45_sigNOT/(2.0*np.pi))
 
-
-
-#%% EPSILON =0.005 CASE ######################################################
-#M.set(common_settings)
-#M.set({'epsilon_dcdm': 0.005})
-
-#M.compute()
-
-#derived = M.get_current_derived_parameters(['sigma8'])
-#print("sigma8 for DCDM (fluid wdm with zero shear) with epsilon=%f and tau= %f Gyrs is %f" %(0.005,tau,derived['sigma8']))
-
-
-#h = M.h()
-#for k in kk:
-#    Pk_0p005_sigNOT.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-
-#M.struct_cleanup()
-#M.empty()
-###########################################################################
-
-
-#fpk_0p005_full   = interp1d(pk_ref_0p005[:,0],pk_ref_0p005[:,1])
-#fpk_0p005_sigNOT = interp1d(kk,Pk_0p005_sigNOT)
+''' 
 
 #%% START TO PLOT
 plt.figure(1)
@@ -283,10 +262,10 @@ plt.xlim(kk[0],kk[-1])
 
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
 plt.ylabel(r'$P(k)_{\mathrm{approx}}/P(k)_{\mathrm{full}}-1$', fontsize=20)
-plt.title(r'$\varepsilon = 0.45, \, \, \, \, \Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau, fontsize = 20)
+plt.title(r'$\varepsilon = 0.3, \, \, \, \, \Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau, fontsize = 20)
 
-plt.plot(kk,f_Pk_0p45_sigYES(kk)/f_pk_ref_0p45(kk)-1.0,'b',label=r'$\dot{\sigma}_{\mathrm{wdm}} \neq 0$')
-plt.plot(kk,f_Pk_0p45_sigNOT(kk)/f_pk_ref_0p45(kk)-1.0,'r',label=r'$\dot{\sigma}_{\mathrm{wdm}} = 0$')
+plt.plot(kk,f_Pk_0p3_sigYES(kk)/f_pk_ref_0p3(kk)-1.0,'b',label=r'$\dot{\sigma}_{\mathrm{wdm}} \neq 0$')
+plt.plot(kk,f_Pk_0p3_sigNOT(kk)/f_pk_ref_0p3(kk)-1.0,'r',label=r'$\dot{\sigma}_{\mathrm{wdm}} = 0$')
 
 
 #plt.ylabel(r'$P(k) \, [(\mathrm{Mpc}/h)^3]$', fontsize=20)
