@@ -93,7 +93,17 @@ M.set({'output':'tCl,pCl,lCl,mPk',
                    'omega_b':0.0224,
                    'H0':67.70,
                    'P_k_max_h/Mpc':1.0,
-                   'z_max_pk' : 4.0
+                   'z_max_pk' : 4.0,
+                   'input_verbose': 1,
+                   'background_verbose':1,
+                   'thermodynamics_verbose': 1,
+                   'perturbations_verbose': 1,
+                   'transfer_verbose':1,
+                   'primordial_verbose': 1,
+                   'spectra_verbose': 1,
+                   'nonlinear_verbose' : 1,
+                   'lensing_verbose': 1,
+                   'output_verbose': 1
                    })
     
 M.set({
@@ -117,7 +127,7 @@ M.set({
     
 M.compute()
 h = M.h()
-derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
+#derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
 
 
 clM_0 = M.lensed_cl(2500)
@@ -131,10 +141,10 @@ for k in kk:
 for k in kk:
     Pk2.append(M.pk(k*h,3.)*h**3) # function .pk(k,z)
     
-S8 = derived['sigma8']*np.sqrt(derived['Omega_m']/0.3)
+#S8 = derived['sigma8']*np.sqrt(derived['Omega_m']/0.3)
 
-print("sigma8 for DCDM with epsilon=%.3f and tau= %.0f Gyrs is %f" %(epsilon,tau,derived['sigma8']))
-print("and Omega_m is %f, so that S8=%f "%(derived['Omega_m'],S8))
+#print("sigma8 for DCDM with epsilon=%.3f and tau= %.0f Gyrs is %f" %(epsilon,tau,derived['sigma8']))
+#print("and Omega_m is %f, so that S8=%f "%(derived['Omega_m'],S8))
 
 M.struct_cleanup()
 M.empty()

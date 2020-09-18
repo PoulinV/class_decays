@@ -5833,7 +5833,8 @@ int perturb_total_stress_energy(
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_ ) {
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]/y[idx]; // CS2DYN
           } else {
-            ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
+          //  ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
+            ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = 1.14*cg2_ncdm;
           }
 
 
@@ -5849,7 +5850,8 @@ int perturb_total_stress_energy(
          if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
            ppw->delta_p += y[idx+3]*rho_ncdm_bg; //CS2DYN
          } else {
-           ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
+          // ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
+           ppw->delta_p += 1.14*cg2_ncdm*rho_ncdm_bg*y[idx];
          }
 
 
@@ -8155,7 +8157,8 @@ int perturb_derivs(double tau,
            ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
            // CS2DYN
            if (ppt->switch_on_eq_delta_p_wdm == _FALSE_) {
-            ceff2_ncdm = ca2_ncdm;
+            ceff2_ncdm = 1.14*ca2_ncdm;
+          //  ceff2_ncdm = ca2_ncdm;
            }
 
 
@@ -8223,7 +8226,7 @@ int perturb_derivs(double tau,
                 + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
 
             } else {
-              
+
               dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
                 +ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
                 + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
