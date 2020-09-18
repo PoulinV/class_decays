@@ -3216,6 +3216,8 @@ int spectra_pk(
             psp->sigma8,
             exp(psp->ln_k[psp->ln_k_size-1])/pba->h);
 
+    fprintf(stdout," -> and Omega_m =%g, so that S_8 = %g\n",pba->Omega0_m,psp->sigma8*sqrt(pba->Omega0_m/0.3));
+
   if(pba->has_ncdm){
     class_call(spectra_sigma_cb(pba,ppm,psp,8./pba->h,0.,&(psp->sigma8_cb)),
                psp->error_message,

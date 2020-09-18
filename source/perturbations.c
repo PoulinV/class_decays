@@ -3303,7 +3303,7 @@ int perturb_vector_init(
         else{
           // In the fluid approximation, hierarchy is cut at lmax = 2 and q dependence is integrated out:
           // CS2DYN
-        if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+        if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_ ) {
             ppv->l_max_ncdm[n_ncdm] = 3; // since we are now also including a dynamical equation for the pressure perturbation
             ppv->q_size_ncdm[n_ncdm] = 1;
         } else {
@@ -3987,7 +3987,7 @@ int perturb_vector_init(
               ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+l] = 0.0;
             }
 
-            if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+            if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_){
               ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] = 0.0; //CS2DYN, is this correct?
             }
 
@@ -4019,10 +4019,13 @@ int perturb_vector_init(
                       pba->w_ncdm[n_ncdm][index_q]*q2*q2/epsilon*
                       ppw->pv->y[index_pt+2];
 
-
+                  if (ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
                     ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] +=
                       pba->w_ncdm[n_ncdm][index_q]*q2*q2/epsilon*
                       ppw->pv->y[index_pt]; //CS2DYN
+                  }
+
+
                   }
 
 
@@ -4046,7 +4049,7 @@ int perturb_vector_init(
               index_pt += (ppw->pv->l_max_ncdm[n_ncdm]+1);
             }
 
-            if(pba->background_ncdm_distribution[n_ncdm] ==_massive_daughter_){
+            if(pba->background_ncdm_distribution[n_ncdm] ==_massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_){
               ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm+3] *= (1./3.)*factor/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]; //CS2DYN
             }
             ppv->y[ppv->index_pt_psi0_ncdm1+ncdm_l_size*n_ncdm] *=factor/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
@@ -5827,7 +5830,7 @@ int perturb_total_stress_energy(
         //    }
 
 
-          if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ ) {
+          if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_ ) {
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]/y[idx]; // CS2DYN
           } else {
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
@@ -5843,7 +5846,7 @@ int perturb_total_stress_energy(
           // ppw->rho_plus_p_shear += 2./3.*rho_dr_over_f*y[ppw->pv->index_pt_F0_dr+2];
          //  ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
 
-         if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+         if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
            ppw->delta_p += y[idx+3]*rho_ncdm_bg; //CS2DYN
          } else {
            ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
@@ -8151,7 +8154,11 @@ int perturb_derivs(double tau,
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
            ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
            // CS2DYN
-        //   ceff2_ncdm = ca2_ncdm;
+           if (ppt->switch_on_eq_delta_p_wdm == _FALSE_) {
+            ceff2_ncdm = ca2_ncdm;
+           }
+
+
            cvis2_ncdm = 3.*w_ncdm*ca2_ncdm;
 
         //   ca2_ncdm = 1./3.;
@@ -8188,13 +8195,19 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
              /** - -----> exact continuity equation */
-//            dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
-//              -3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
-//              +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
 
-              dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
-                -3.0*a_prime_over_a*y[idx+3]+3.0*w_ncdm*a_prime_over_a*y[idx]
-                +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
+             if (ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
+
+               dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
+                 -3.0*a_prime_over_a*y[idx+3]+3.0*a_prime_over_a*w_ncdm*y[idx]
+                 +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
+
+             } else {
+
+               dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
+                 -3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
+                 +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
+             }
 
 
             //this is the relativistic limit, for testing
@@ -8203,19 +8216,21 @@ int perturb_derivs(double tau,
 
 
              // /** - -----> exact euler equation */
-        //     if (pba->epsilon_dcdm < 0.499) { //ZEROSHEAR
-        //       dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
-        //         ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]
-        //         + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
-        //     } else {
-//               dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
-//                 +ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
-//                 + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
+            if (ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
 
-                 dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
-                   + k2*y[idx+3]/(1.0+w_ncdm)-k2*y[idx+2]
-                   + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
-        //     }
+              dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
+                + k2*y[idx+3]/(1.0+w_ncdm)-k2*y[idx+2]
+                + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
+
+            } else {
+              
+              dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
+                +ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
+                + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
+            }
+
+
+
 
             //this is the relativistic limit, for testing
             // dy[idx+1] = (1./4.)*k2*y[idx]-k2*y[idx+2]+metric_euler-(1./2.)*a*gamma*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
@@ -8247,9 +8262,12 @@ int perturb_derivs(double tau,
 
 
            // CS2DYN
-           dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-2.*w_ncdm)-ca2_ncdm*(1.+w_ncdm)*y[idx+1]
-                     +(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
-                     +a*gamma*ratio_rho*((pow(eps,2)/(1-eps))*(y[pv->index_pt_delta_dcdm]/3.)-(1.-eps)*y[idx+3]);
+           if (ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
+             dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-ca2_ncdm)-ca2_ncdm*(1.+w_ncdm)*y[idx+1]
+                       +(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
+                       +a*gamma*ratio_rho*((pow(eps,2)/(1-eps))*(y[pv->index_pt_delta_dcdm]/3.)-(1.-eps)*y[idx+3]);
+           }
+
 
 
           } else {

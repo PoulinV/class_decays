@@ -162,6 +162,7 @@ struct background
   double Omega0_dcdm; /**< \f$ \Omega_{0 dcdm} \f$: decaying cold dark matter */
   double Omega0_wdm; /**< GFA \f$ \Omega_{0 wdm} \f$:  wdm daughter */
   double Omega0_dr; /**< \f$ \Omega_{0 dr} \f$: decay radiation */
+  double Omega0_m; /* total matter today */
   double rho0_wdm_over_rho0_m; /**< GFA  fraction of wdm density compared to the total matter density (evaluated today)*/
   double a_eq;      /**< scale factor at radiation/matter equality */
   double H_eq;      /**< Hubble rate at radiation/matter equality [Mpc^-1] */

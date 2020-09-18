@@ -9,8 +9,8 @@ import time
 start_time = time.time()
 
 #%%
-Gamma_dcdm = 19.6078
-#Gamma_dcdm = 979.48
+#Gamma_dcdm = 19.6078
+Gamma_dcdm = 979.48
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
@@ -86,14 +86,14 @@ for data_file4b in files4b:
 
 
 #files5 = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p45_tau50gyrs_nofluid_pk.dat']
-files5 = ['/Users/gfranco/cloud/output/dcdm_eps0p45_tau50gyrs_nofluid_pk.dat']
+files5 = ['/Users/gfranco/cloud/output/dcdm_eps0p45_tau1gyrs_nofluid_pk.dat']
 
 data5 = []
 for data_file5 in files5:
     data5.append(np.loadtxt(data_file5))
 
 #files5b = ['/home/guillermo/class_MAJORON/output/dcdm_eps0p45_tau50gyrs_nofluid_cl_lensed.dat']
-files5b = ['/Users/gfranco/cloud/output/dcdm_eps0p45_tau50gyrs_nofluid_cl.dat']
+files5b = ['/Users/gfranco/cloud/output/dcdm_eps0p45_tau1gyrs_nofluid_cl.dat']
 
 data5b = []
 for data_file5b in files5b:
@@ -151,7 +151,7 @@ f_clEE_0p15 = interp1d(ll,ll*(ll+1.0)*clEE_0p15/(2.0*np.pi))
 #%% EPSILON=0.3 CASE ########################################################
 
 # NON-ZERO SHEAR EQUATION
-
+'''
 M.set(common_settings)
 M.set({'epsilon_dcdm': 0.3, 'switch_off_shear_wdm': 'no'})
 
@@ -198,12 +198,13 @@ M.empty()
 f_Pk_0p3_sigNOT = interp1d(kk,Pk_0p3_sigNOT)
 f_clTT_0p3_sigNOT = interp1d(ll,ll*(ll+1.0)*clTT_0p3_sigNOT/(2.0*np.pi))
 f_clEE_0p3_sigNOT = interp1d(ll,ll*(ll+1.0)*clEE_0p3_sigNOT/(2.0*np.pi))
+'''
 
 #%% EPSILON =0.45 CASE ########################################################
 
 
 # NON-ZERO SHEAR EQUATION
-'''
+
 M.set(common_settings)
 M.set({'epsilon_dcdm': 0.45, 'switch_off_shear_wdm': 'no'})
 
@@ -251,7 +252,7 @@ f_Pk_0p45_sigNOT = interp1d(kk,Pk_0p45_sigNOT)
 f_clTT_0p45_sigNOT = interp1d(ll,ll*(ll+1.0)*clTT_0p45_sigNOT/(2.0*np.pi))
 f_clEE_0p45_sigNOT = interp1d(ll,ll*(ll+1.0)*clEE_0p45_sigNOT/(2.0*np.pi))
 
-''' 
+ 
 
 #%% START TO PLOT
 plt.figure(1)
@@ -262,10 +263,10 @@ plt.xlim(kk[0],kk[-1])
 
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
 plt.ylabel(r'$P(k)_{\mathrm{approx}}/P(k)_{\mathrm{full}}-1$', fontsize=20)
-plt.title(r'$\varepsilon = 0.3, \, \, \, \, \Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau, fontsize = 20)
+plt.title(r'$\varepsilon = 0.45, \, \, \, \, \Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau, fontsize = 20)
 
-plt.plot(kk,f_Pk_0p3_sigYES(kk)/f_pk_ref_0p3(kk)-1.0,'b',label=r'$\dot{\sigma}_{\mathrm{wdm}} \neq 0$')
-plt.plot(kk,f_Pk_0p3_sigNOT(kk)/f_pk_ref_0p3(kk)-1.0,'r',label=r'$\dot{\sigma}_{\mathrm{wdm}} = 0$')
+plt.plot(kk,f_Pk_0p45_sigYES(kk)/f_pk_ref_0p45(kk)-1.0,'b',label=r'$\dot{\sigma}_{\mathrm{wdm}} \neq 0$')
+plt.plot(kk,f_Pk_0p45_sigNOT(kk)/f_pk_ref_0p45(kk)-1.0,'r',label=r'$\dot{\sigma}_{\mathrm{wdm}} = 0$')
 
 
 #plt.ylabel(r'$P(k) \, [(\mathrm{Mpc}/h)^3]$', fontsize=20)

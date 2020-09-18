@@ -387,8 +387,9 @@ struct perturbs
   short dark_radiation_perturbations;
   short massive_daughter_perturbations;
   short mother_dcdm_perturbations; /* GFA */
-  short switch_off_gamma_in_wdm_perts; /* GFA */
-  short switch_off_shear_wdm; /* GFA */
+  short switch_off_gamma_in_wdm_perts; /* GFA, just for testing*/
+  short switch_off_shear_wdm; /* GFA, just for testing */
+  short switch_on_eq_delta_p_wdm; /* GFA, just for testing  */
   double time_over_tau_dcdm_threshold;
   //@}
 
