@@ -5833,8 +5833,8 @@ int perturb_total_stress_energy(
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_ ) {
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]/y[idx]; // CS2DYN
           } else {
-          //  ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
-            ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = 1.14*cg2_ncdm;
+            ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
+          //  ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = 1.14*cg2_ncdm;
           }
 
 
@@ -5850,8 +5850,8 @@ int perturb_total_stress_energy(
          if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
            ppw->delta_p += y[idx+3]*rho_ncdm_bg; //CS2DYN
          } else {
-          // ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
-           ppw->delta_p += 1.14*cg2_ncdm*rho_ncdm_bg*y[idx];
+           ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
+          // ppw->delta_p += 1.14*cg2_ncdm*rho_ncdm_bg*y[idx];
          }
 
 
@@ -7539,6 +7539,7 @@ int perturb_derivs(double tau,
   double t, exp_factor;
   double rho_ncdm_bg,p_ncdm_bg,pseudo_p_ncdm,w_ncdm,ca2_ncdm,ceff2_ncdm=0.,cvis2_ncdm=0.,rho_dcdm,n_dcdm,FD_ncdm,qcube;
   double ratio_rho, rho_dcdm_bg, H, eps, gamma; /* GFA */
+  double w_delta_p, w_theta; /* GFA */
   double _eV_to_invMpc_ = 2.4688e+28, aq;
   /* for use with curvature */
   double cotKgen, sqrt_absK;
@@ -8157,8 +8158,8 @@ int perturb_derivs(double tau,
            ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
            // CS2DYN
            if (ppt->switch_on_eq_delta_p_wdm == _FALSE_) {
-            ceff2_ncdm = 1.14*ca2_ncdm;
-          //  ceff2_ncdm = ca2_ncdm;
+            ceff2_ncdm = ca2_ncdm;
+          //  ceff2_ncdm =1.14*ca2_ncdm;
            }
 
 
@@ -8250,6 +8251,7 @@ int perturb_derivs(double tau,
       //    }
 
           // just for testing
+
              if (ppt->switch_off_shear_wdm == _TRUE_) {
                dy[idx+2] = 0.;
              } else {
@@ -8266,7 +8268,15 @@ int perturb_derivs(double tau,
 
            // CS2DYN
            if (ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
-             dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-ca2_ncdm)-ca2_ncdm*(1.+w_ncdm)*y[idx+1]
+             // several prescriptions for approximating the higher-weight integrals appearing in equation for delta_p
+             // for the moment, it doesnt give good results
+             // I already tried w_delta_p and w_theta both equal to w_ncdm,
+             // both equal to pseudo_p_ncdm/(3.*p_ncdm_bg),
+             // also one equal to w_ncdm and the other to pseudo_p_ncdm/(3.*p_ncdm_bg)
+             // also both equal to ca2_ncdm   
+             w_delta_p = ca2_ncdm;
+             w_theta = ca2_ncdm;
+             dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-w_delta_p)-w_theta*(1.+w_ncdm)*y[idx+1]
                        +(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
                        +a*gamma*ratio_rho*((pow(eps,2)/(1-eps))*(y[pv->index_pt_delta_dcdm]/3.)-(1.-eps)*y[idx+3]);
            }
