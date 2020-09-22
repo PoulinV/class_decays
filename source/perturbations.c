@@ -6203,8 +6203,8 @@ int perturb_total_stress_energy(
       if (pba->has_ncdm == _TRUE_) {
         for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
               if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ ) { /* GFA */
-                rho_plus_p_theta_m += rho_ncdm_bg_m*ppw->theta_ncdm[n_ncdm];
-                rho_plus_p_m += rho_ncdm_bg_m;
+                rho_plus_p_theta_m += (rho_ncdm_bg_m+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])*ppw->theta_ncdm[n_ncdm];
+                rho_plus_p_m += (rho_ncdm_bg_m+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
               } else {
                 rho_plus_p_theta_m += (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])*ppw->theta_ncdm[n_ncdm];
                 rho_plus_p_m += (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
@@ -8273,7 +8273,7 @@ int perturb_derivs(double tau,
              // I already tried w_delta_p and w_theta both equal to w_ncdm,
              // both equal to pseudo_p_ncdm/(3.*p_ncdm_bg),
              // also one equal to w_ncdm and the other to pseudo_p_ncdm/(3.*p_ncdm_bg)
-             // also both equal to ca2_ncdm   
+             // also both equal to ca2_ncdm
              w_delta_p = ca2_ncdm;
              w_theta = ca2_ncdm;
              dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-w_delta_p)-w_theta*(1.+w_ncdm)*y[idx+1]
