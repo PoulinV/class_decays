@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 
 #%%
 
-Log10Gamma_dcdm = 0.991
+Log10Gamma_dcdm = 2.991
 Gamma_dcdm=10**(Log10Gamma_dcdm)
 Gamma_dcdm
 tau =1./(Gamma_dcdm*1.02e-3)

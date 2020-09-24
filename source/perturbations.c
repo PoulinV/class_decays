@@ -6203,8 +6203,11 @@ int perturb_total_stress_energy(
       if (pba->has_ncdm == _TRUE_) {
         for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
               if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ ) { /* GFA */
-                rho_plus_p_theta_m += (rho_ncdm_bg_m+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])*ppw->theta_ncdm[n_ncdm];
-                rho_plus_p_m += (rho_ncdm_bg_m+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
+                rho_plus_p_theta_m += rho_ncdm_bg_m*ppw->theta_ncdm[n_ncdm];
+                rho_plus_p_m += rho_ncdm_bg_m;
+              // GFA: or should we choose this one as is done for neutrinos?
+              //  rho_plus_p_theta_m += (rho_ncdm_bg_m+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])*ppw->theta_ncdm[n_ncdm];
+              //  rho_plus_p_m += (rho_ncdm_bg_m+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
               } else {
                 rho_plus_p_theta_m += (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])*ppw->theta_ncdm[n_ncdm];
                 rho_plus_p_m += (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
@@ -8258,6 +8261,7 @@ int perturb_derivs(double tau,
                dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau+a*gamma*(1.-eps)*((1.+ca2_ncdm)/(3.+3.*w_ncdm))*ratio_rho)*y[idx+2]
                            +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*(y[idx+1]+metric_ufa_class)
                            -2.0/3.0*eps*eps*a*gamma*ratio_rho/(1-eps)*y[pv->index_pt_delta_dcdm]/(1.+w_ncdm);
+
              }
 
             //   (corrected)formula (A.8) of 1505.05511v2
@@ -8270,14 +8274,17 @@ int perturb_derivs(double tau,
            if (ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
              // several prescriptions for approximating the higher-weight integrals appearing in equation for delta_p
              // for the moment, it doesnt give good results
-             // I already tried w_delta_p and w_theta both equal to w_ncdm,
+             // I already tried for w_delta_p and w_theta:
+             // both equal to w_ncdm,
              // both equal to pseudo_p_ncdm/(3.*p_ncdm_bg),
-             // also one equal to w_ncdm and the other to pseudo_p_ncdm/(3.*p_ncdm_bg)
-             // also both equal to ca2_ncdm
-             w_delta_p = ca2_ncdm;
+             // both equal to ca2_ncdm,
+             // one equal to w_ncdm and the other to pseudo_p_ncdm/(3.*p_ncdm_bg) (and viceversa)
+             // one equal to w_ncdm and the other to ca2_ncdm (and viceversa)
+             // one equal to ca2_ncdm and the other to pseudo_p_ncdm/(3.*p_ncdm_bg) (and viceversa)
+             w_delta_p = pseudo_p_ncdm/(3.*p_ncdm_bg);
              w_theta = ca2_ncdm;
              dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-w_delta_p)-w_theta*(1.+w_ncdm)*y[idx+1]
-                       +(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
+                       -(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
                        +a*gamma*ratio_rho*((pow(eps,2)/(1-eps))*(y[pv->index_pt_delta_dcdm]/3.)-(1.-eps)*y[idx+3]);
            }
 
