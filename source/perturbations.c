@@ -8274,15 +8274,17 @@ int perturb_derivs(double tau,
            if (ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
              // several prescriptions for approximating the higher-weight integrals appearing in equation for delta_p
              // for the moment, it doesnt give good results
-             // I already tried for w_delta_p and w_theta:
+             // other possibilities that I already tried for w_delta_p and w_theta (they are worse):
              // both equal to w_ncdm,
-             // both equal to pseudo_p_ncdm/(3.*p_ncdm_bg),
+             // both equal to pseudo_p_ncdm/(3.*p_ncdm_bg)
              // both equal to ca2_ncdm,
-             // one equal to w_ncdm and the other to pseudo_p_ncdm/(3.*p_ncdm_bg) (and viceversa)
-             // one equal to w_ncdm and the other to ca2_ncdm (and viceversa)
-             // one equal to ca2_ncdm and the other to pseudo_p_ncdm/(3.*p_ncdm_bg) (and viceversa)
+             // or exchanging the roles of w_delta_p and w_theta
              w_delta_p = pseudo_p_ncdm/(3.*p_ncdm_bg);
              w_theta = ca2_ncdm;
+//             w_delta_p =  pseudo_p_ncdm/(3.*p_ncdm_bg);
+//             w_theta =  w_ncdm;
+//             w_delta_p = w_ncdm;
+//             w_theta = ca2_ncdm;
              dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-w_delta_p)-w_theta*(1.+w_ncdm)*y[idx+1]
                        -(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
                        +a*gamma*ratio_rho*((pow(eps,2)/(1-eps))*(y[pv->index_pt_delta_dcdm]/3.)-(1.-eps)*y[idx+3]);
