@@ -5547,6 +5547,9 @@ int perturb_einstein(
       // valid if all matter components are pressureless and
       // stable. This relation will be generalized soon to the case
       // of decaying dark matter.
+
+    // GFA: It doesn't seem difficult to generalize to the unstable case,
+    // just have a look at eq. 4.2.87 from Baumann lecture notes
     }
 
     if (ppt->has_source_delta_cb == _TRUE_) {
@@ -5834,7 +5837,7 @@ int perturb_total_stress_energy(
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]/y[idx]; // CS2DYN
           } else {
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
-          //  ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = 1.14*cg2_ncdm;
+          //  ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = 0.71*cg2_ncdm;
           }
 
 
@@ -5851,7 +5854,7 @@ int perturb_total_stress_energy(
            ppw->delta_p += y[idx+3]*rho_ncdm_bg; //CS2DYN
          } else {
            ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
-          // ppw->delta_p += 1.14*cg2_ncdm*rho_ncdm_bg*y[idx];
+          // ppw->delta_p += 0.71*cg2_ncdm*rho_ncdm_bg*y[idx];
          }
 
 
@@ -8162,7 +8165,7 @@ int perturb_derivs(double tau,
            // CS2DYN
            if (ppt->switch_on_eq_delta_p_wdm == _FALSE_) {
             ceff2_ncdm = ca2_ncdm;
-          //  ceff2_ncdm =1.14*ca2_ncdm;
+          //  ceff2_ncdm =0.71*ca2_ncdm;
            }
 
 
@@ -8285,7 +8288,8 @@ int perturb_derivs(double tau,
 //             w_theta =  w_ncdm;
 //             w_delta_p = w_ncdm;
 //             w_theta = ca2_ncdm;
-             dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-w_delta_p)-w_theta*(1.+w_ncdm)*y[idx+1]
+             dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-w_delta_p)
+                       -w_theta*(1.+w_ncdm)*y[idx+1]
                        -(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
                        +a*gamma*ratio_rho*((pow(eps,2)/(1-eps))*(y[pv->index_pt_delta_dcdm]/3.)-(1.-eps)*y[idx+3]);
            }
