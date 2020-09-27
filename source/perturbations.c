@@ -2680,6 +2680,10 @@ int perturb_prepare_output(struct background * pba,
           class_store_columntitle(ppt->scalar_titles,tmp,_TRUE_);
           sprintf(tmp,"cs2_ncdm[%d]",n_ncdm);
           class_store_columntitle(ppt->scalar_titles,tmp,_TRUE_);
+          sprintf(tmp,"w_p[%d]",n_ncdm);
+          class_store_columntitle(ppt->scalar_titles,tmp,_TRUE_);
+          sprintf(tmp,"w_theta[%d]",n_ncdm);
+          class_store_columntitle(ppt->scalar_titles,tmp,_TRUE_);
         }
       }
       /* Decaying cold dark matter */
@@ -6880,11 +6884,14 @@ int perturb_print_variables(double tau,
   /** - ncdm sector begins */
   int n_ncdm;
   double *delta_ncdm=NULL, *theta_ncdm=NULL, *shear_ncdm=NULL, *delta_p_over_delta_rho_ncdm=NULL;
+  double *w_p = NULL, *w_theta =  NULL; // GFA //
   double rho_ncdm_bg, p_ncdm_bg, pseudo_p_ncdm, w_ncdm;
   double rho_delta_ncdm = 0.0;
   double rho_plus_p_theta_ncdm = 0.0;
+  double rho_plus_p_ttheta_ncdm = 0.0; // GFA //
   double rho_plus_p_shear_ncdm = 0.0;
   double delta_p_ncdm = 0.0;
+  double delta_pp_ncdm = 0.0; // GFA //
   double factor = 0.0;
   double q,q2,epsilon;
   /** - ncdm sector ends */
@@ -6954,6 +6961,9 @@ int perturb_print_variables(double tau,
     class_alloc(theta_ncdm, sizeof(double)*pba->N_ncdm,error_message);
     class_alloc(shear_ncdm, sizeof(double)*pba->N_ncdm,error_message);
     class_alloc(delta_p_over_delta_rho_ncdm, sizeof(double)*pba->N_ncdm,error_message);
+    // GFA //
+    class_alloc(w_p, sizeof(double)*pba->N_ncdm,error_message);
+    class_alloc(w_theta, sizeof(double)*pba->N_ncdm,error_message);
   }
 
   /** - calculate perturbed recombination */
@@ -7063,6 +7073,7 @@ int perturb_print_variables(double tau,
     if (pba->has_ncdm == _TRUE_) {
       /** - --> Get delta, deltaP/rho, theta, shear and store in array */
       idx = ppw->pv->index_pt_psi0_ncdm1;
+
       if(ppw->approx[ppw->index_ap_ncdmfa] == (int)ncdmfa_on){
         // The perturbations are evolved integrated:
         for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
@@ -7071,29 +7082,14 @@ int perturb_print_variables(double tau,
           pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm];
           w_ncdm = p_ncdm_bg/rho_ncdm_bg;
 
-          // delta_ncdm[n_ncdm] = y[idx];
-          // theta_ncdm[n_ncdm] = y[idx+1];
-          // shear_ncdm[n_ncdm] = y[idx+2];
-          // //This is the adiabatic sound speed:
-          //
-          // if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
-          //  rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
-          //  ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
-          //  gamma = pba->Gamma_dcdm;
-          //  eps = pba->epsilon_dcdm;
-          // // delta_p_over_delta_rho_ncdm[n_ncdm]= w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
-          //  delta_p_over_delta_rho_ncdm[n_ncdm]= 1./3.;
-          // } else {
-          //  delta_p_over_delta_rho_ncdm[n_ncdm] = w_ncdm*(1.0-1.0/(3.0+3.0*w_ncdm)*(3.0*w_ncdm-2.0+pseudo_p_ncdm/p_ncdm_bg));
-          // }
-          //
-          // idx += ppw->pv->l_max_ncdm[n_ncdm]+1;
-
-
           delta_ncdm[n_ncdm] = ppw->delta_ncdm[n_ncdm];
           theta_ncdm[n_ncdm] = ppw->theta_ncdm[n_ncdm];
           shear_ncdm[n_ncdm] = ppw->shear_ncdm[n_ncdm];
           delta_p_over_delta_rho_ncdm[n_ncdm] = ppw->delta_p_over_delta_rho_ncdm[n_ncdm];
+
+          // GFA //
+          w_p[n_ncdm] = 0.0;
+          w_theta[n_ncdm] = 0.0;
 
 
         }
@@ -7101,47 +7097,6 @@ int perturb_print_variables(double tau,
       else{
         // We must integrate to find perturbations:
         for(n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
-        //  rho_delta_ncdm = 0.0;
-        //  rho_plus_p_theta_ncdm = 0.0;
-        //  rho_plus_p_shear_ncdm = 0.0;
-        //  delta_p_ncdm = 0.0;
-      //    factor = pba->factor_ncdm[n_ncdm]*pow(pba->a_today/a,4);
-
-          // for (index_q=0; index_q < ppw->pv->q_size_ncdm[n_ncdm]; index_q ++) {
-          //
-          //   q = pba->q_ncdm[n_ncdm][index_q];
-          //   q2 = q*q;
-          //   epsilon = sqrt(q2+pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]*a2);
-          //
-          //   if(pba->background_ncdm_distribution[n_ncdm]==_massive_daughter_){
-          //     aq = q/pba->PDmax_dcdm[n_ncdm];
-          //
-          //     if(a>=aq && pvecback[pba->index_bg_time]*pba->Gamma_dcdm > ppt->time_over_tau_dcdm_threshold){
-          //       if(y[idx]!=0) rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
-          //       if(y[idx+1]!=0) rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
-          //       if(y[idx+2]!=0) rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
-          //       if(y[idx]!=0) delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
-          //     }
-          //     // if(y[idx] !=0 || y[idx+1] !=0 || y[idx+2] !=0)printf("in print: a %e aq %e q %e w %e idx %d idx_q %d  y[idx] %e y[idx+1] %e y[idx+2] %e \n", a,aq, q,pba->w_ncdm[n_ncdm][index_q], idx, index_q, y[idx],y[idx+1],y[idx+2]);
-          //
-          //   }
-          //   else{
-          //     rho_delta_ncdm += q2*epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
-          //     rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
-          //     rho_plus_p_shear_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx+2];
-          //     delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
-          //   }
-          //
-          //   // printf("rho_delta_ncdm %e\n", rho_delta_ncdm);
-          //
-          //   //Jump to next momentum bin:
-          //   idx+=(ppw->pv->l_max_ncdm[n_ncdm]+1);
-          // }
-
-          // rho_delta_ncdm *= factor;
-          // rho_plus_p_theta_ncdm *= k*factor;
-          // rho_plus_p_shear_ncdm *= 2.0/3.0*factor;
-          // delta_p_ncdm *= factor/3.;
 
           delta_ncdm[n_ncdm] = 0;
           theta_ncdm[n_ncdm] = 0;
@@ -7153,32 +7108,54 @@ int perturb_print_variables(double tau,
           shear_ncdm[n_ncdm] = ppw->shear_ncdm[n_ncdm];
           delta_p_over_delta_rho_ncdm[n_ncdm] = ppw->delta_p_over_delta_rho_ncdm[n_ncdm];
 
-        // if(rho_delta_ncdm!= 0 && ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm] != 0)  delta_ncdm[n_ncdm] = rho_delta_ncdm/ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
-        // // printf("a %e rho_delta_ncdm %e ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm] %e \n",a,rho_delta_ncdm,ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]);
-        // // if(rho_delta_ncdm!= 0 && ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm] != 0)  delta_ncdm[n_ncdm] = rho_delta_ncdm;
-        // if(rho_plus_p_theta_ncdm!= 0 && ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm] != 0)  theta_ncdm[n_ncdm] = rho_plus_p_theta_ncdm/
-        //     (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
-        // // if(rho_plus_p_theta_ncdm!= 0 && ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm] != 0)  theta_ncdm[n_ncdm] = rho_plus_p_theta_ncdm;
-        // // if(rho_plus_p_shear_ncdm!= 0 && ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm] != 0)   shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm;
-        // if(rho_plus_p_shear_ncdm!= 0 && ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm] != 0)   shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm/
-        //     (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
-        //
+          // GFA //
+          rho_plus_p_theta_ncdm = 0.0;
+          rho_plus_p_ttheta_ncdm = 0.0;
+          delta_p_ncdm = 0.0;
+          delta_pp_ncdm = 0.0;
+          factor = pba->factor_ncdm[n_ncdm]*pow(pba->a_today/a,4);
 
-          // if(delta_ncdm[n_ncdm]==0 && pba->has_dcdm == _TRUE_ && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-          //   delta_ncdm[n_ncdm] = delta_dcdm;
-          // }
-          // if(theta_ncdm[n_ncdm]==0 && pba->has_dcdm == _TRUE_ && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-          //   theta_ncdm[n_ncdm] = theta_dcdm;
-          // }
+           for (index_q=0; index_q < ppw->pv->q_size_ncdm[n_ncdm]; index_q ++) {
+
+             q = pba->q_ncdm[n_ncdm][index_q];
+             q2 = q*q;
+             epsilon = sqrt(q2+pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]*a2);
+
+             if(pba->background_ncdm_distribution[n_ncdm]==_massive_daughter_){
+             aq = q/pba->PDmax_dcdm[n_ncdm];
+
+                if(a>=aq && pvecback[pba->index_bg_time]*pba->Gamma_dcdm > ppt->time_over_tau_dcdm_threshold){
+                   if(y[idx+1]!=0) rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
+                   if(y[idx+1]!=0) rho_plus_p_ttheta_ncdm += pow(q/epsilon,2)*q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
+                   if(y[idx]!=0) delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+                   if(y[idx]!=0) delta_pp_ncdm += pow(q/epsilon,2)*q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+                 }
+             }
+             else{
+                 rho_plus_p_theta_ncdm += q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
+                 rho_plus_p_ttheta_ncdm += pow(q/epsilon,2)*q2*q*pba->w_ncdm[n_ncdm][index_q]*y[idx+1];
+                 delta_p_ncdm += q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+                 delta_pp_ncdm += pow(q/epsilon,2)*q2*q2/epsilon*pba->w_ncdm[n_ncdm][index_q]*y[idx];
+               }
 
 
-          // delta_ncdm[n_ncdm] = rho_delta_ncdm;
-          // theta_ncdm[n_ncdm] = rho_plus_p_theta_ncdm;
-          // shear_ncdm[n_ncdm] = rho_plus_p_shear_ncdm;
-          // delta_p_over_delta_rho_ncdm[n_ncdm] = delta_p_ncdm/rho_delta_ncdm;
+             //Jump to next momentum bin:
+             idx+=(ppw->pv->l_max_ncdm[n_ncdm]+1);
+           }
+
+             rho_plus_p_theta_ncdm *= k*factor;
+             rho_plus_p_ttheta_ncdm *= k*factor;
+             delta_p_ncdm *= factor/3.;
+             delta_pp_ncdm *= factor/3.;
+
+             w_p[n_ncdm] = delta_pp_ncdm/(3.*delta_p_ncdm);
+             w_theta[n_ncdm] = rho_plus_p_ttheta_ncdm/(3.*rho_plus_p_theta_ncdm);
+
+
 
         }
       }
+
     }
 
 
@@ -7318,6 +7295,8 @@ int perturb_print_variables(double tau,
         class_store_double(dataptr, theta_ncdm[n_ncdm], _TRUE_, storeidx);
         class_store_double(dataptr, shear_ncdm[n_ncdm], _TRUE_, storeidx);
         class_store_double(dataptr, delta_p_over_delta_rho_ncdm[n_ncdm],  _TRUE_, storeidx);
+        class_store_double(dataptr, w_p[n_ncdm], _TRUE_, storeidx);
+        class_store_double(dataptr, w_theta[n_ncdm], _TRUE_, storeidx);
       }
     }
     /* Decaying cold dark matter */
@@ -7458,6 +7437,9 @@ int perturb_print_variables(double tau,
     free(theta_ncdm);
     free(shear_ncdm);
     free(delta_p_over_delta_rho_ncdm);
+    // GFA //
+    free(w_p);
+    free(w_theta);
   }
 
   return _SUCCESS_;
