@@ -7173,10 +7173,12 @@ int perturb_print_variables(double tau,
               eps = pba->epsilon_dcdm;
               ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
 
-              w_trial_1 = ca2_ncdm;
-            //  w_trial_2 = (4./3.)*w_ncdm/(1.+w_ncdm);
-              w_trial_2 = pseudo_p_ncdm/(3.*p_ncdm_bg);
-            //   w_trial_2 = pow(4./3.,3./2.)*w_ncdm*pow(1.+w_ncdm,-3./2.);
+              w_trial_1 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.2));
+              w_trial_2 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5));
+
+            //  w_trial_1 = ca2_ncdm;
+            //  w_trial_2 = pseudo_p_ncdm/(3.*p_ncdm_bg);
+            //  w_trial_2 = pow(4./3.,3./2.)*w_ncdm*pow(1.+w_ncdm,-3./2.);
               }
 
 
@@ -8291,8 +8293,8 @@ int perturb_derivs(double tau,
              // for the moment, it doesnt give good results
              w_delta_p = pseudo_p_ncdm/(3.*p_ncdm_bg);
              w_theta = ca2_ncdm;
-//             w_delta_p =  w_ncdm;
-//             w_theta =  w_ncdm;
+//             w_delta_p =  1.21*y[idx+3]/y[idx];
+//             w_theta =  0.87*y[idx+3]/y[idx];
              dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-w_delta_p)
                        -w_theta*(1.+w_ncdm)*y[idx+1]
                        -(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
@@ -9421,6 +9423,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
     /* GFA: compute free-streaming length of the warm dark daughter,
     evaluated at the time of decay a_D (equal to present time if lifetime >age universe) */
     pba->k_fss_wdm = sqrt(3./2.)*a_D*H_D/sqrt(ca2_ncdm);
+    printf("k_fss_wdm =%f\n",pba->k_fss_wdm );
     //Note: works well for lifetime > age_universe, but not on the contrary, maybe I should evaluate it before a_D
     // for lifetimes smaller than age of universe, maybe I should evaluate at a_nr, smaller than a_D by some velocity factors (see page 13 in Aoyama paper)
 
