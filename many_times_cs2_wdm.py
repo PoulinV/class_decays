@@ -62,21 +62,12 @@ common_settings = {# which output? transfer functions only
                    'z_max_pk':z_max_pk,
                    'recfast_z_initial':z_max_pk,
                    #'k_step_sub':'0.01',
+                   'k_output_values':'0.1,1',
                    'k_per_decade_for_pk':k_per_decade,
                    'k_per_decade_for_bao':k_per_decade,
                    'k_min_tau0':k_min_tau0, # this value controls the minimum k value in the figure
                    'perturb_sampling_stepsize':'0.05',
                    'P_k_max_1/Mpc':P_k_max_inv_Mpc
-#                   'input_verbose':1,
-#                   'background_verbose':1,
-#                   'thermodynamics_verbose':3,
-#                   'perturbations_verbose':1,
-#                   'transfer_verbose': 1,
-#                   'primordial_verbose':1,
-#                   'spectra_verbose': 1,
-#                   'nonlinear_verbose': 1,
-#                   'lensing_verbose' :1,
-#                   'output_verbose': 1
                    }
 
 ###############
@@ -104,9 +95,10 @@ tau_num = len(tau)
 # (of Hubble crossing, sound horizon crossing, etc.) at different time
 #
 background = M.get_background() # load background table
-#print background.viewkeys()
+#print(background.keys())
 thermodynamics = M.get_thermodynamics() # load thermodynamics table
-#print thermodynamics.viewkeys()
+#print(thermodynamics.keys())
+
 #
 background_tau = background['conf. time [Mpc]'] # read conformal times in background table
 background_z = background['z'] # read redshift
@@ -148,10 +140,25 @@ for i in range(tau_num):
         k_num = len(k)
         cs2 = np.zeros((tau_num,k_num))
         phi = np.zeros((tau_num,k_num))
-#    cs2[i,:] = np.log(np.abs(one_time['d_ncdm[0]'][:]))
-    cs2[i,:] = one_time['c_n'][:]
+    cs2[i,:] = np.log(np.abs(one_time['d_ncdm[0]'][:]))
+#    cs2[i,:] = one_time['c_n'][:]
     phi[i,:] = one_time['phi'][:]
-#
+ 
+
+#%%
+#all_k = M.get_perturbations()
+#print(all_k['scalar'][0].keys()) 
+#one_k0 = all_k['scalar'][0]
+#one_k1 = all_k['scalar'][1]
+#tau0 = one_k0['tau [Mpc]']
+#phi0 = one_k0['phi'][:]
+#tau1 = one_k1['tau [Mpc]']
+#phi1 = one_k1['phi'][:]
+
+#this allows to obtain the evolution of each perturbation at different wavenumbers
+#the problem is that we cannot generate an array because the code does an adaptative integration,
+# not all k-modes are computed using the same number of time steps, in fact len(tau0) neq len(tau1)
+#%%
 # find the global extra of cs2(tau,k) and phi(tau,k), used to define color code later
 #
 cs2_amp = max(cs2.max(),-cs2.min())
@@ -171,7 +178,8 @@ K,T = np.meshgrid(k,tau)
 #
 #################
 #
-fig = plt.figure(figsize=(18,8))
+#fig = plt.figure(figsize=(18,8))
+fig = plt.figure(figsize=(10,8))
 #
 # plot cs2(k,tau)
 #
@@ -253,5 +261,6 @@ fig.colorbar(fig_cs2)
 #
 # produce the PDF
 #
-plt.show()
 plt.savefig('many_times.png',dpi=300)
+plt.show()
+
