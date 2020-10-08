@@ -806,6 +806,7 @@ int perturb_indices_of_perturbs(
       class_define_index(ppt->index_tp_delta_dr,   ppt->has_source_delta_dr, index_type,1);
       class_define_index(ppt->index_tp_delta_ur,   ppt->has_source_delta_ur,  index_type,1);
       class_define_index(ppt->index_tp_delta_ncdm1,ppt->has_source_delta_ncdm,index_type,pba->N_ncdm);
+      class_define_index(ppt->index_tp_delta_p_over_delta_rho_ncdm1,ppt->has_source_delta_ncdm,index_type,pba->N_ncdm); // GFA
       class_define_index(ppt->index_tp_theta_m,    ppt->has_source_theta_m,   index_type,1);
       class_define_index(ppt->index_tp_theta_cb,   ppt->has_source_theta_cb,  index_type,1);
       class_define_index(ppt->index_tp_theta_g,    ppt->has_source_theta_g,   index_type,1);
@@ -6717,6 +6718,12 @@ int perturb_sources(
       for (index_type = ppt->index_tp_delta_ncdm1; index_type < ppt->index_tp_delta_ncdm1+pba->N_ncdm; index_type++) {
         _set_source_(index_type) = ppw->delta_ncdm[index_type - ppt->index_tp_delta_ncdm1];
       }
+
+      // GFA
+      for (index_type = ppt->index_tp_delta_p_over_delta_rho_ncdm1; index_type < ppt->index_tp_delta_p_over_delta_rho_ncdm1+pba->N_ncdm; index_type++) {
+        _set_source_(index_type) = ppw->delta_p_over_delta_rho_ncdm[index_type - ppt->index_tp_delta_p_over_delta_rho_ncdm1];
+      }
+
     }
 
     /* total velocity (gauge-invariant, defined as in arXiv:1307.1459) */
@@ -7173,8 +7180,8 @@ int perturb_print_variables(double tau,
               eps = pba->epsilon_dcdm;
               ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
 
-              w_trial_1 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.2));
-              w_trial_2 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5));
+              w_trial_1 = ca2_ncdm;
+              w_trial_2 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5)); //works better
 
             //  w_trial_1 = ca2_ncdm;
             //  w_trial_2 = pseudo_p_ncdm/(3.*p_ncdm_bg);

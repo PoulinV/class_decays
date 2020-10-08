@@ -234,6 +234,7 @@ struct spectra {
   int index_tr_delta_ur;       /**< index of ultra-relativistic neutrinos/relics density transfer function */
   int index_tr_delta_dr;       /**< index of decay radiation density transfer function */
   int index_tr_delta_ncdm1;    /**< index of first species of non-cold dark matter (massive neutrinos, ...) density transfer function */
+  int index_tr_delta_p_over_delta_rho_ncdm1;    /**< GFA */
   int index_tr_delta_tot;      /**< index of total matter density transfer function */
   int index_tr_theta_g;        /**< index of gamma velocity transfer function */
   int index_tr_theta_b;        /**< index of baryon velocity transfer function */

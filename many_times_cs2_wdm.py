@@ -57,7 +57,9 @@ common_settings = {# which output? transfer functions only
                    'N_ncdm':1,
                    'N_ur':2.0328,
                    'background_ncdm_distribution':0,
-                   'm_ncdm':3.0,
+                   'ncdm_fluid_approximation':2,
+                   'Number of momentum bins perturbs': 300,
+                   'm_ncdm':0.06,
                    # other output and precision parameters
                    'z_max_pk':z_max_pk,
                    'recfast_z_initial':z_max_pk,
@@ -140,10 +142,13 @@ for i in range(tau_num):
         k_num = len(k)
         cs2 = np.zeros((tau_num,k_num))
         phi = np.zeros((tau_num,k_num))
-    cs2[i,:] = np.log(np.abs(one_time['d_ncdm[0]'][:]))
+    cs2[i,:] = np.log(np.abs(one_time['cs2_ncdm[0]'][:]))
 #    cs2[i,:] = one_time['c_n'][:]
     phi[i,:] = one_time['phi'][:]
  
+print(one_time.keys()) 
+
+
 
 #%%
 #all_k = M.get_perturbations()
@@ -161,8 +166,14 @@ for i in range(tau_num):
 #%%
 # find the global extra of cs2(tau,k) and phi(tau,k), used to define color code later
 #
-cs2_amp = max(cs2.max(),-cs2.min())
+#cs2_amp = max(cs2.max(),-cs2.min())
+cs2_amp_max = cs2.max()  #it shouldn't be bigger than log(1/3) = -0.4771, otherwise its numerical error
+cs2_amp_min = cs2.min()
+
+cs2_amp_min 
+
 phi_amp = max(phi.max(),-phi.min())
+
 #
 # reshaping of (k,tau) necessary to call the function 'pcolormesh'
 #
@@ -185,20 +196,20 @@ fig = plt.figure(figsize=(10,8))
 #
 ax_cs2 = fig.add_subplot(121)
 print(r'> Plotting cs2')
-fig_cs2 = ax_cs2.pcolormesh(K,T,cs2,cmap='coolwarm',vmin=-cs2_amp, vmax=cs2_amp) #,shading='gouraud')
+fig_cs2 = ax_cs2.pcolormesh(K,T,cs2,cmap='coolwarm',vmin=cs2_amp_min, vmax=cs2_amp_max) #,shading='gouraud')
 print(r'> Done')
 #
 # plot lines (characteristic times and scales)
 #
-ax_cs2.axhline(y=tau_rec,color='k',linestyle='-')
+#ax_cs2.axhline(y=tau_rec,color='k',linestyle='-')
 ax_cs2.axhline(y=tau_eq,color='k',linestyle='-')
 ax_cs2.axhline(y=tau_lambda,color='k',linestyle='-')
 ax_cs2.plot(aH,tau,'r-',linewidth=2)
 #
 # dealing with labels
 #
-ax_cs2.set_title(r'$c_s^2$')
-ax_cs2.text(1.5*k[0],0.9*tau_rec,r'$\mathrm{rec.}$')
+ax_cs2.set_title(r'$\mathrm{log}_{10}(c_s^2)$')
+#ax_cs2.text(1.5*k[0],0.9*tau_rec,r'$\mathrm{rec.}$')
 ax_cs2.text(1.5*k[0],0.9*tau_eq,r'$\mathrm{R/M} \,\, \mathrm{eq.}$')
 ax_cs2.text(1.5*k[0],0.9*tau_lambda,r'$\mathrm{M/L} \,\, \mathrm{eq.}$')
 ax_cs2.annotate(r'$\mathrm{Hubble} \,\, \mathrm{cross.}$',
