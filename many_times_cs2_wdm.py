@@ -40,35 +40,40 @@ tau_num_early = 2000   # number of conformal time values before recombination, c
 tau_num_late = 200     # number of conformal time values after recombination, controls final resolution
 tau_ini = 10.          # first value of conformal time in Mpc
 tau_label_Hubble = 20. # value of time at which we want to place the label on Hubble crossing
-tau_label_ks = 40.     # value of time at which we want to place the label on sound horizon crossing
-tau_label_kd = 230.    # value of time at which we want to place the label on damping scale crossing
 #
 # Cosmological parameters and other CLASS parameters
 #
-common_settings = {# which output? transfer functions only
+common_settings = {
                    'output':'mTk',
-                   # LambdaCDM parameters
-                   'h':0.67556,
-                   'omega_b':0.022032,
-                   'omega_cdm':0.12038,
-                   'A_s':2.215e-9,
-                   'n_s':0.9619,
-                   'tau_reio':0.0925,
-                   'N_ncdm':1,
+                   'H0':67.70,
+                   'omega_b':0.0224,
+                   'ln10^{10}A_s':3.051,
+                   'n_s':0.9673,
+                   'tau_reio':0.0582,
+                   'omega_cdm':0.00001,
+                   'Omega_ini_dcdm2':0.26051,
+                   'Log10_Gamma_dcdm':1.24,
+                   'log10_epsilon_dcdm':-2.16,
+                   'N_ncdm':2,
+                   'M_dcdm':1,
                    'N_ur':2.0328,
-                   'background_ncdm_distribution':0,
+                   'background_ncdm_distribution':'0,1',
+                   'Quadrature strategy':'0,4',
+                   'evolver':0,
+                   'l_max_ncdm':17,
                    'ncdm_fluid_approximation':2,
-                   'Number of momentum bins perturbs': 300,
-                   'm_ncdm':0.06,
-                   # other output and precision parameters
+                   'ncdm_fluid_trigger_tau_over_tau_k':25,
+                   'Number of momentum bins perturbs': '50,300',
+                   'm_ncdm':'0.06,0',
+                   'massive_daughter_perturbations':'yes',
+                   'dark_radiation_perturbations': 'yes',
                    'z_max_pk':z_max_pk,
                    'recfast_z_initial':z_max_pk,
-                   #'k_step_sub':'0.01',
-                   'k_output_values':'0.1,1',
                    'k_per_decade_for_pk':k_per_decade,
                    'k_per_decade_for_bao':k_per_decade,
                    'k_min_tau0':k_min_tau0, # this value controls the minimum k value in the figure
                    'perturb_sampling_stepsize':'0.05',
+                   'k_output_values':1,
                    'P_k_max_1/Mpc':P_k_max_inv_Mpc
                    }
 
@@ -92,22 +97,18 @@ tau2[-1] *= 0.999 # this tiny shift avoids interpolation errors
 tau = np.concatenate((tau1,tau2))
 tau_num = len(tau)
 #
-# use table of background and thermodynamics quantitites to define some functions
+# use table of background  quantitites to define some functions
 # returning some characteristic scales
 # (of Hubble crossing, sound horizon crossing, etc.) at different time
 #
 background = M.get_background() # load background table
 #print(background.keys())
-thermodynamics = M.get_thermodynamics() # load thermodynamics table
-#print(thermodynamics.keys())
-
 #
 background_tau = background['conf. time [Mpc]'] # read conformal times in background table
 background_z = background['z'] # read redshift
 background_aH = 2.*math.pi*background['H [1/Mpc]']/(1.+background['z'])/M.h() # read 2pi * aH in [h/Mpc]
 background_rho_m_over_r =    (background['(.)rho_b']+background['(.)rho_cdm'])    /(background['(.)rho_g']+background['(.)rho_ur']) # read rho_r / rho_m (to find time of equality)
 background_rho_l_over_m =    background['(.)rho_lambda']    /(background['(.)rho_b']+background['(.)rho_cdm']) # read rho_m / rho_lambda (to find time of equality)
-thermodynamics_tau = thermodynamics['conf. time [Mpc]'] # read confromal times in thermodynamics table
 #
 # define a bunch of interpolation functions based on previous quantities
 #
@@ -142,34 +143,27 @@ for i in range(tau_num):
         k_num = len(k)
         cs2 = np.zeros((tau_num,k_num))
         phi = np.zeros((tau_num,k_num))
-    cs2[i,:] = np.log(np.abs(one_time['cs2_ncdm[0]'][:]))
-#    cs2[i,:] = one_time['c_n'][:]
+    cs2[i,:] = np.log10(np.abs(one_time['cs2_ncdm[1]'][:]))
     phi[i,:] = one_time['phi'][:]
  
-print(one_time.keys()) 
-
+#print(one_time.keys()) 
 
 
 #%%
-#all_k = M.get_perturbations()
-#print(all_k['scalar'][0].keys()) 
-#one_k0 = all_k['scalar'][0]
-#one_k1 = all_k['scalar'][1]
-#tau0 = one_k0['tau [Mpc]']
-#phi0 = one_k0['phi'][:]
-#tau1 = one_k1['tau [Mpc]']
-#phi1 = one_k1['phi'][:]
+all_k = M.get_perturbations()
+one_k = all_k['scalar'][0]     # this contains only the scalar perturbations for the requested k values
+print(one_k.keys())
+tau_k = one_k['tau [Mpc]']
+k_fs_wdm = one_k['k_fss_wdm']
+k_fs_wdm_at_tau =  interp1d(tau_k,k_fs_wdm)
 
-#this allows to obtain the evolution of each perturbation at different wavenumbers
-#the problem is that we cannot generate an array because the code does an adaptative integration,
-# not all k-modes are computed using the same number of time steps, in fact len(tau0) neq len(tau1)
-#%%
 # find the global extra of cs2(tau,k) and phi(tau,k), used to define color code later
 #
 #cs2_amp = max(cs2.max(),-cs2.min())
 cs2_amp_max = cs2.max()  #it shouldn't be bigger than log(1/3) = -0.4771, otherwise its numerical error
 cs2_amp_min = cs2.min()
 
+cs2_amp_max
 cs2_amp_min 
 
 phi_amp = max(phi.max(),-phi.min())
@@ -202,16 +196,19 @@ print(r'> Done')
 # plot lines (characteristic times and scales)
 #
 #ax_cs2.axhline(y=tau_rec,color='k',linestyle='-')
-ax_cs2.axhline(y=tau_eq,color='k',linestyle='-')
-ax_cs2.axhline(y=tau_lambda,color='k',linestyle='-')
-ax_cs2.plot(aH,tau,'r-',linewidth=2)
+#ax_cs2.axhline(y=tau_eq,color='k',linestyle='-')
+#ax_cs2.axhline(y=tau_lambda,color='k',linestyle='-')
+ax_cs2.plot(aH,tau,'k-',linewidth=2)
+ax_cs2.plot(k_fs_wdm_at_tau(tau),tau,'r-',linewidth=2)
+
 #
 # dealing with labels
 #
 ax_cs2.set_title(r'$\mathrm{log}_{10}(c_s^2)$')
 #ax_cs2.text(1.5*k[0],0.9*tau_rec,r'$\mathrm{rec.}$')
-ax_cs2.text(1.5*k[0],0.9*tau_eq,r'$\mathrm{R/M} \,\, \mathrm{eq.}$')
-ax_cs2.text(1.5*k[0],0.9*tau_lambda,r'$\mathrm{M/L} \,\, \mathrm{eq.}$')
+#ax_cs2.text(1.5*k[0],0.9*tau_eq,r'$\mathrm{R/M} \,\, \mathrm{eq.}$')
+#ax_cs2.text(1.5*k[0],0.9*tau_lambda,r'$\mathrm{M/L} \,\, \mathrm{eq.}$')
+
 ax_cs2.annotate(r'$\mathrm{Hubble} \,\, \mathrm{cross.}$',
                   xy=(background_aH_at_tau(tau_label_Hubble),tau_label_Hubble),
                   xytext=(0.1*background_aH_at_tau(tau_label_Hubble),0.8*tau_label_Hubble),

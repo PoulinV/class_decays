@@ -2691,6 +2691,7 @@ int perturb_prepare_output(struct background * pba,
       }
       class_store_columntitle(ppt->scalar_titles, "w_trial_1", pba->has_ncdm); // GFA //
       class_store_columntitle(ppt->scalar_titles, "w_trial_2", pba->has_ncdm); // GFA //
+      class_store_columntitle(ppt->scalar_titles, "k_fss_wdm", pba->has_ncdm); // GFA //
       /* Decaying cold dark matter */
       class_store_columntitle(ppt->scalar_titles, "delta_dcdm", pba->has_dcdm);
       class_store_columntitle(ppt->scalar_titles, "theta_dcdm", pba->has_dcdm);
@@ -6898,6 +6899,7 @@ int perturb_print_variables(double tau,
   double *delta_ncdm=NULL, *theta_ncdm=NULL, *shear_ncdm=NULL, *delta_p_over_delta_rho_ncdm=NULL;
   double *w_p = NULL, *w_theta =  NULL, *pi_ncdm = NULL; // GFA //
   double w_trial_1=0., w_trial_2=0.; // GFA //
+  double k_fss_wdm=0.; // GFA
   double rho_ncdm_bg, p_ncdm_bg, pseudo_p_ncdm, w_ncdm, ca2_ncdm;
   double rho_delta_ncdm = 0.0;
   double rho_plus_p_theta_ncdm = 0.0;
@@ -7104,6 +7106,20 @@ int perturb_print_variables(double tau,
           pi_ncdm[n_ncdm] = delta_p_over_delta_rho_ncdm[n_ncdm]*delta_ncdm[n_ncdm];
 
 
+         if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
+                rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
+                p_ncdm_bg = pvecback[pba->index_bg_p_ncdm1+n_ncdm];
+                pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm];
+                w_ncdm = p_ncdm_bg/rho_ncdm_bg;
+                rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
+                ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+                gamma = pba->Gamma_dcdm;
+                eps = pba->epsilon_dcdm;
+                ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
+                k_fss_wdm = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
+          }
+
+
         }
       }
       else{
@@ -7121,8 +7137,6 @@ int perturb_print_variables(double tau,
           delta_p_over_delta_rho_ncdm[n_ncdm] = ppw->delta_p_over_delta_rho_ncdm[n_ncdm];
 
           pi_ncdm[n_ncdm] = delta_p_over_delta_rho_ncdm[n_ncdm]*delta_ncdm[n_ncdm];
-
-
 
 
           // GFA //
@@ -7182,7 +7196,7 @@ int perturb_print_variables(double tau,
 
               w_trial_1 = ca2_ncdm;
               w_trial_2 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5)); //works better
-
+              k_fss_wdm = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
             //  w_trial_1 = ca2_ncdm;
             //  w_trial_2 = pseudo_p_ncdm/(3.*p_ncdm_bg);
             //  w_trial_2 = pow(4./3.,3./2.)*w_ncdm*pow(1.+w_ncdm,-3./2.);
@@ -7339,6 +7353,7 @@ int perturb_print_variables(double tau,
     }
     class_store_double(dataptr, w_trial_1, pba->has_ncdm, storeidx); //GFA//
     class_store_double(dataptr, w_trial_2, pba->has_ncdm, storeidx); //GFA//
+    class_store_double(dataptr, k_fss_wdm, pba->has_ncdm, storeidx); //GFA//
     /* Decaying cold dark matter */
     class_store_double(dataptr, delta_dcdm, pba->has_dcdm, storeidx);
     class_store_double(dataptr, theta_dcdm, pba->has_dcdm, storeidx);
@@ -9430,7 +9445,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
     /* GFA: compute free-streaming length of the warm dark daughter,
     evaluated at the time of decay a_D (equal to present time if lifetime >age universe) */
     pba->k_fss_wdm = sqrt(3./2.)*a_D*H_D/sqrt(ca2_ncdm);
-    printf("k_fss_wdm =%f\n",pba->k_fss_wdm );
+    printf("k_fss_wdm =%f Mpc^{-1}\n",pba->k_fss_wdm );
     //Note: works well for lifetime > age_universe, but not on the contrary, maybe I should evaluate it before a_D
     // for lifetimes smaller than age of universe, maybe I should evaluate at a_nr, smaller than a_D by some velocity factors (see page 13 in Aoyama paper)
 
