@@ -32,7 +32,7 @@ plt.rcParams["figure.figsize"] = [8.0,6.0]
 #
 # User settings controlling the figure aspect
 #
-z_max_pk = 46000       # highest redshift involved
+z_max_pk = 45600       # highest redshift involved
 k_per_decade = 400     # number of k values, controls final resolution
 k_min_tau0 = 40.       # this value controls the minimum k value in the figure (it is k_min * tau0)
 P_k_max_inv_Mpc =1.0   # this value is directly the maximum k value in the figure in Mpc
@@ -40,6 +40,8 @@ tau_num_early = 2000   # number of conformal time values before recombination, c
 tau_num_late = 200     # number of conformal time values after recombination, controls final resolution
 tau_ini = 10.          # first value of conformal time in Mpc
 tau_label_Hubble = 20. # value of time at which we want to place the label on Hubble crossing
+tau_label_kfss= 1000. #  value of time at which we want to place the label on k_fss crossing
+
 #
 # Cosmological parameters and other CLASS parameters
 #
@@ -129,7 +131,7 @@ tau_lambda = background_tau_at_lm(1.)
 # check and inform user whether intiial arbitrary choice of z_max_pk was OK
 max_z_needed = background_z_at_tau(tau[0])
 if max_z_needed > z_max_pk:
-    print(r'must increase the value of z_max_pk = %f to at least '%max_z_needed)
+    print(r'must increase the value of z_max_pk  to at least %f '%max_z_needed)
     () + 1  # this strange line is just a trick to stop the script execution there
 else:
     print(r'in a next run with the same values of tau, you may decrease z_max_pk from %f to %f '%(z_max_pk,max_z_needed))
@@ -144,6 +146,8 @@ for i in range(tau_num):
         cs2 = np.zeros((tau_num,k_num))
         phi = np.zeros((tau_num,k_num))
     cs2[i,:] = np.log10(np.abs(one_time['cs2_ncdm[1]'][:]))
+#    cs2[i,:] = one_time['cs2_ncdm[1]'][:]
+
     phi[i,:] = one_time['phi'][:]
  
 #print(one_time.keys()) 
@@ -205,6 +209,7 @@ ax_cs2.plot(k_fs_wdm_at_tau(tau),tau,'r-',linewidth=2)
 # dealing with labels
 #
 ax_cs2.set_title(r'$\mathrm{log}_{10}(c_s^2)$')
+#ax_cs2.set_title(r'$c_s^2$')
 #ax_cs2.text(1.5*k[0],0.9*tau_rec,r'$\mathrm{rec.}$')
 #ax_cs2.text(1.5*k[0],0.9*tau_eq,r'$\mathrm{R/M} \,\, \mathrm{eq.}$')
 #ax_cs2.text(1.5*k[0],0.9*tau_lambda,r'$\mathrm{M/L} \,\, \mathrm{eq.}$')
@@ -213,6 +218,11 @@ ax_cs2.annotate(r'$\mathrm{Hubble} \,\, \mathrm{cross.}$',
                   xy=(background_aH_at_tau(tau_label_Hubble),tau_label_Hubble),
                   xytext=(0.1*background_aH_at_tau(tau_label_Hubble),0.8*tau_label_Hubble),
                   arrowprops=dict(facecolor='black', shrink=0.05, width=1, headlength=5, headwidth=5))
+
+ax_cs2.annotate(r'$\mathrm{free} \,\, \mathrm{streaming}$',
+                  xy=(k_fs_wdm_at_tau(tau_label_kfss),tau_label_kfss),
+                  xytext=(0.05*k_fs_wdm_at_tau(tau_label_kfss),0.8*tau_label_kfss),
+                  arrowprops=dict(facecolor='black', shrink=0.02, width=1, headlength=5, headwidth=5))
 
 # dealing with axes
 #
@@ -269,6 +279,6 @@ fig.colorbar(fig_cs2)
 #
 # produce the PDF
 #
-plt.savefig('many_times.png',dpi=300)
+plt.savefig('cs2_wdm_ktau_bestfit_normal_fluid.png',dpi=300)
 plt.show()
 
