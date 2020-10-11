@@ -8433,7 +8433,12 @@ int perturb_derivs(double tau,
                 // printf("FD_ncdm %e pba->Gamma_dcdm  %e n_dcdm %e qcube %e H %e  \n",FD_ncdm,pba->Gamma_dcdm,n_dcdm,qcube,pvecback[pba->index_bg_H]);
                 // dy[idx] =*pvecback[pba->index_bg_rho_dcdm]*3/8./_PI_/(_G_)*_c_*_c_/_Mpc_over_m_/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_))*(y[pv->index_pt_delta_dcdm]+metric_euler/k2)/(4*_PI_*pow(q*pba->T_cmb*8.617e-5*_eV_to_invMpc_,3)*pvecback[pba->index_bg_H]);
                 // y[idx] =0;
-                y[idx] =(y[pv->index_pt_delta_dcdm]-metric_continuity/3/a/pvecback[pba->index_bg_H]) * FD_ncdm;
+
+                if (ppt->switch_off_gamma_in_wdm_perts == _TRUE_) { // GFA
+                  y[idx] =-(metric_continuity/3/a/pvecback[pba->index_bg_H]) * FD_ncdm;
+                } else {
+                  y[idx] =(y[pv->index_pt_delta_dcdm]-metric_continuity/3/a/pvecback[pba->index_bg_H]) * FD_ncdm;
+                }
                 // y[idx] =(y[pv->index_pt_delta_dcdm]) * FD_ncdm;
                 // printf("%e %e %e\n",y[pv->index_pt_delta_dcdm],metric_continuity/3/aq/pba->Hq_table[n_ncdm][index_q],FD_ncdm);
                 y[idx+1] = 0;
