@@ -2687,11 +2687,12 @@ int perturb_prepare_output(struct background * pba,
           class_store_columntitle(ppt->scalar_titles,tmp,_TRUE_);
           sprintf(tmp,"pi_ncdm[%d]",n_ncdm);
           class_store_columntitle(ppt->scalar_titles,tmp,_TRUE_);
+          sprintf(tmp,"k_fss_wdm[%d]",n_ncdm);
+          class_store_columntitle(ppt->scalar_titles,tmp,_TRUE_);
         }
       }
       class_store_columntitle(ppt->scalar_titles, "w_trial_1", pba->has_ncdm); // GFA //
       class_store_columntitle(ppt->scalar_titles, "w_trial_2", pba->has_ncdm); // GFA //
-      class_store_columntitle(ppt->scalar_titles, "k_fss_wdm", pba->has_ncdm); // GFA //
       /* Decaying cold dark matter */
       class_store_columntitle(ppt->scalar_titles, "delta_dcdm", pba->has_dcdm);
       class_store_columntitle(ppt->scalar_titles, "theta_dcdm", pba->has_dcdm);
@@ -6897,9 +6898,8 @@ int perturb_print_variables(double tau,
   /** - ncdm sector begins */
   int n_ncdm;
   double *delta_ncdm=NULL, *theta_ncdm=NULL, *shear_ncdm=NULL, *delta_p_over_delta_rho_ncdm=NULL;
-  double *w_p = NULL, *w_theta =  NULL, *pi_ncdm = NULL; // GFA //
+  double *w_p = NULL, *w_theta =  NULL, *pi_ncdm = NULL, *k_fss_wdm =NULL; // GFA //
   double w_trial_1=0., w_trial_2=0.; // GFA //
-  double k_fss_wdm=0.; // GFA
   double rho_ncdm_bg, p_ncdm_bg, pseudo_p_ncdm, w_ncdm, ca2_ncdm;
   double rho_delta_ncdm = 0.0;
   double rho_plus_p_theta_ncdm = 0.0;
@@ -6980,6 +6980,7 @@ int perturb_print_variables(double tau,
     class_alloc(w_p, sizeof(double)*pba->N_ncdm,error_message);
     class_alloc(w_theta, sizeof(double)*pba->N_ncdm,error_message);
     class_alloc(pi_ncdm, sizeof(double)*pba->N_ncdm,error_message);
+    class_alloc(k_fss_wdm, sizeof(double)*pba->N_ncdm,error_message);
   }
 
   /** - calculate perturbed recombination */
@@ -7116,7 +7117,15 @@ int perturb_print_variables(double tau,
                 gamma = pba->Gamma_dcdm;
                 eps = pba->epsilon_dcdm;
                 ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
-                k_fss_wdm = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
+                k_fss_wdm[n_ncdm] = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
+          } else {
+                rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
+                p_ncdm_bg = pvecback[pba->index_bg_p_ncdm1+n_ncdm];
+                pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm];
+                w_ncdm = p_ncdm_bg/rho_ncdm_bg;
+                ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg))/(3.0*(1.0+w_ncdm));
+                k_fss_wdm[n_ncdm] = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
+
           }
 
 
@@ -7136,7 +7145,7 @@ int perturb_print_variables(double tau,
           shear_ncdm[n_ncdm] = ppw->shear_ncdm[n_ncdm];
           delta_p_over_delta_rho_ncdm[n_ncdm] = ppw->delta_p_over_delta_rho_ncdm[n_ncdm];
 
-          pi_ncdm[n_ncdm] = delta_p_over_delta_rho_ncdm[n_ncdm]*delta_ncdm[n_ncdm];
+          pi_ncdm[n_ncdm] = delta_p_over_delta_rho_ncdm[n_ncdm]*delta_ncdm[n_ncdm]; //GFA: better compute it using directly q-integration
 
 
           // GFA //
@@ -7182,26 +7191,29 @@ int perturb_print_variables(double tau,
              w_p[n_ncdm] = delta_pp_ncdm/(3.*delta_p_ncdm);
              w_theta[n_ncdm] = rho_plus_p_ttheta_ncdm/(3.*rho_plus_p_theta_ncdm);
 
-            if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
-
-              rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
-              p_ncdm_bg = pvecback[pba->index_bg_p_ncdm1+n_ncdm];
-              pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm];
-              w_ncdm = p_ncdm_bg/rho_ncdm_bg;
-              rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
-              ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
-              gamma = pba->Gamma_dcdm;
-              eps = pba->epsilon_dcdm;
-              ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
-
-              w_trial_1 = ca2_ncdm;
-              w_trial_2 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5)); //works better
-              k_fss_wdm = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
-            //  w_trial_1 = ca2_ncdm;
-            //  w_trial_2 = pseudo_p_ncdm/(3.*p_ncdm_bg);
-            //  w_trial_2 = pow(4./3.,3./2.)*w_ncdm*pow(1.+w_ncdm,-3./2.);
+             if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) { /* GFA */
+                  rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
+                  p_ncdm_bg = pvecback[pba->index_bg_p_ncdm1+n_ncdm];
+                  pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm];
+                  w_ncdm = p_ncdm_bg/rho_ncdm_bg;
+                  rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
+                  ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+                  gamma = pba->Gamma_dcdm;
+                  eps = pba->epsilon_dcdm;
+                  ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
+                  k_fss_wdm[n_ncdm] = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
+                  w_trial_1 = ca2_ncdm;
+                  w_trial_2 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5)); //works better            //  w_trial_1 = ca2_ncdm;
+                  //  w_trial_2 = pseudo_p_ncdm/(3.*p_ncdm_bg);
+                  //  w_trial_2 = pow(4./3.,3./2.)*w_ncdm*pow(1.+w_ncdm,-3./2.);
+              } else {
+                  rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
+                  p_ncdm_bg = pvecback[pba->index_bg_p_ncdm1+n_ncdm];
+                  pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm];
+                  w_ncdm = p_ncdm_bg/rho_ncdm_bg;
+                  ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg))/(3.0*(1.0+w_ncdm));
+                  k_fss_wdm[n_ncdm] = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
               }
-
 
 
         }
@@ -7349,11 +7361,11 @@ int perturb_print_variables(double tau,
         class_store_double(dataptr, w_p[n_ncdm], _TRUE_, storeidx); //GFA//
         class_store_double(dataptr, w_theta[n_ncdm], _TRUE_, storeidx); //GFA//
         class_store_double(dataptr, pi_ncdm[n_ncdm], _TRUE_, storeidx); //GFA//
+        class_store_double(dataptr, k_fss_wdm[n_ncdm], _TRUE_, storeidx); //GFA//
       }
     }
     class_store_double(dataptr, w_trial_1, pba->has_ncdm, storeidx); //GFA//
     class_store_double(dataptr, w_trial_2, pba->has_ncdm, storeidx); //GFA//
-    class_store_double(dataptr, k_fss_wdm, pba->has_ncdm, storeidx); //GFA//
     /* Decaying cold dark matter */
     class_store_double(dataptr, delta_dcdm, pba->has_dcdm, storeidx);
     class_store_double(dataptr, theta_dcdm, pba->has_dcdm, storeidx);
@@ -7496,6 +7508,7 @@ int perturb_print_variables(double tau,
     free(w_p);
     free(w_theta);
     free(pi_ncdm);
+    free(k_fss_wdm);
   }
 
   return _SUCCESS_;
