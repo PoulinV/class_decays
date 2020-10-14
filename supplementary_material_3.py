@@ -7,31 +7,38 @@ import numpy as np
 
 
 
-
+# WITH NEW FITTING FORMULA FOR THE SOUND SPEED 
 data = np.zeros([4,3])
 data[0,0]= (0.78459/0.78458)-1.0
 data[0,1]= (0.50884/0.50912)-1.0
 data[0,2]= (0.18675/0.18742)-1.0
-data[1,0]= (0.75641/0.75568)-1.0
-data[1,1]= (0.36174/0.35936)-1.0
-#data[1,2]= (0.07128/0.06657)-1.0 #NORMAL FLUID
+
+data[1,0]= (0.75641/0.75522)-1.0
+data[1,1]= (0.36174/0.35763)-1.0
+#data[1,2]= (0.07128/0.06596)-1.0 
+
+data[1,2]= np.nan 
+
+
+data[2,0]= (0.78917/0.79042)-1.0
+data[2,1]= (0.56569/0.57199)-1.0 
+data[2,2]= (0.36981/0.36529)-1.0 
+
+data[3,0]= (0.82608/0.82584)-1.0
+data[3,1]= (0.82040/0.81955)-1.0
+data[3,2]= (0.81185/0.81207)-1.0
+
 #data[1,2]= (0.0713/0.0659)-1.0  #USING FUDGE FACTOR F=1.2
 #data[1,2]= (0.0713/0.0661)-1.0  #USING FUDGE FACTOR F=1.14
-data[1,2]= (0.0713/0.0685)-1.0  #USING FUDGE FACTOR F=0.71
-data[2,0]= (0.78917/0.79398)-1.0
-#data[2,1]= (0.56569/0.59346)-1.0 #NORMAL FLUID
+#data[1,2]= (0.0713/0.0685)-1.0  #USING FUDGE FACTOR F=0.71
+
 #data[2,1]= (0.56569/0.57528)-1.0 #USING FUDGE FACTOR F=1.2
 #data[2,1]= (0.56569/0.58038)-1.0 #USING FUDGE FACTOR F=1.14
-data[2,1]= (0.56569/0.62752)-1.0 #USING FUDGE FACTOR F=0.71
-#data[2,2]= (0.36981/0.38949)-1.0 #NORMAL FLUID
+#data[2,1]= (0.56569/0.62752)-1.0 #USING FUDGE FACTOR F=0.71
+
 #data[2,2]= (0.36981/0.36269)-1.0 #USING FUDGE FACTOR F=1.2
 #data[2,2]= (0.36981/0.37014)-1.0 #USING FUDGE FACTOR F=1.14
-data[2,2]= (0.36981/0.44168)-1.0 #USING FUDGE FACTOR F=0.71
-data[3,0]= (0.82608/0.82592)-1.0
-data[3,1]= (0.82040/0.82019)-1.0
-data[3,2]= (0.81185/0.81221)-1.0
-
-
+#data[2,2]= (0.36981/0.44168)-1.0 #USING FUDGE FACTOR F=0.71
 
 x_start = -1.5
 x_end = 1.5

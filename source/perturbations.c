@@ -5844,11 +5844,15 @@ int perturb_total_stress_energy(
         //    }
 
 
-          if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_ ) {
+          if (ppt->switch_on_eq_delta_p_wdm == _TRUE_ && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ ) {
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]/y[idx]; // CS2DYN
           } else {
-            ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
-          //  ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = 0.71*cg2_ncdm;
+            if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+              ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm*(1.0+0.2*(1.0-2.0*pba->epsilon_dcdm)*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5));
+            } else {
+              ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
+            }
+
           }
 
 
@@ -5861,12 +5865,14 @@ int perturb_total_stress_energy(
           // ppw->rho_plus_p_shear += 2./3.*rho_dr_over_f*y[ppw->pv->index_pt_F0_dr+2];
          //  ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
 
-         if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ && ppt->switch_on_eq_delta_p_wdm == _TRUE_) {
+         if (ppt->switch_on_eq_delta_p_wdm == _TRUE_ && pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_ ) {
            ppw->delta_p += y[idx+3]*rho_ncdm_bg; //CS2DYN
-        //   ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
          } else {
-           ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
-          // ppw->delta_p += 0.71*cg2_ncdm*rho_ncdm_bg*y[idx];
+           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
+             ppw->delta_p += cg2_ncdm*(1.0+0.2*(1.0-2.0*pba->epsilon_dcdm)*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5))*rho_ncdm_bg*y[idx];
+           } else {
+             ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
+           }
          }
 
 
@@ -7203,7 +7209,7 @@ int perturb_print_variables(double tau,
                   ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
                   k_fss_wdm[n_ncdm] = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
                   w_trial_1 = ca2_ncdm;
-                  w_trial_2 = ca2_ncdm*(1.0+ 0.25*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5)); //works better            //  w_trial_1 = ca2_ncdm;
+                  w_trial_2 = ca2_ncdm*(1.0+ 0.25*pow(k/k_fss_wdm[n_ncdm],0.5)); //works better            //  w_trial_1 = ca2_ncdm;
                   //  w_trial_2 = pseudo_p_ncdm/(3.*p_ncdm_bg);
                   //  w_trial_2 = pow(4./3.,3./2.)*w_ncdm*pow(1.+w_ncdm,-3./2.);
               } else {
@@ -8215,8 +8221,8 @@ int perturb_derivs(double tau,
            ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H)*(1.-eps));
            // CS2DYN
            if (ppt->switch_on_eq_delta_p_wdm == _FALSE_) {
-            ceff2_ncdm = ca2_ncdm;
-          //  ceff2_ncdm =0.71*ca2_ncdm;
+              ceff2_ncdm = ca2_ncdm*(1.0+0.2*(1.0-2.0*pba->epsilon_dcdm)*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5));
+          //  ceff2_ncdm =ca2_ncdm;
            }
 
            cvis2_ncdm = 3.*w_ncdm*ca2_ncdm;

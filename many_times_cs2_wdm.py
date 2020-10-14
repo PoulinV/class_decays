@@ -54,8 +54,8 @@ common_settings = {
                    'tau_reio':0.0582,
                    'omega_cdm':0.00001,
                    'Omega_ini_dcdm2':0.26051,
-                   'Log10_Gamma_dcdm':1.24,
-                   'log10_epsilon_dcdm':-2.16,
+                   'Log10_Gamma_dcdm':0.8306,
+                   'log10_epsilon_dcdm':-2.0,
                    'N_ncdm':2,
                    'M_dcdm':1,
                    'N_ur':2.0328,
@@ -63,9 +63,9 @@ common_settings = {
                    'Quadrature strategy':'0,4',
                    'evolver':0,
                    'l_max_ncdm':17,
-                   'ncdm_fluid_approximation':2,
-                   'ncdm_fluid_trigger_tau_over_tau_k':25,
-                   'Number of momentum bins perturbs': '50,300',
+                   'ncdm_fluid_approximation':3,
+#                   'ncdm_fluid_trigger_tau_over_tau_k':25,
+                   'Number of momentum bins perturbs': '50,600',
                    'm_ncdm':'0.06,0',
                    'massive_daughter_perturbations':'yes',
                    'dark_radiation_perturbations': 'yes',
@@ -146,8 +146,6 @@ for i in range(tau_num):
         cs2 = np.zeros((tau_num,k_num))
         phi = np.zeros((tau_num,k_num))
     cs2[i,:] = np.log10(np.abs(one_time['cs2_ncdm[1]'][:]))
-#    cs2[i,:] = one_time['cs2_ncdm[1]'][:]
-
     phi[i,:] = one_time['phi'][:]
  
 #print(one_time.keys()) 
@@ -158,7 +156,7 @@ all_k = M.get_perturbations()
 one_k = all_k['scalar'][0]     # this contains only the scalar perturbations for the requested k values
 print(one_k.keys())
 tau_k = one_k['tau [Mpc]']
-k_fs_wdm = one_k['k_fss_wdm']
+k_fs_wdm = one_k['k_fss_wdm[1]']
 k_fs_wdm_at_tau =  interp1d(tau_k,k_fs_wdm)
 
 # find the global extra of cs2(tau,k) and phi(tau,k), used to define color code later
@@ -279,6 +277,6 @@ fig.colorbar(fig_cs2)
 #
 # produce the PDF
 #
-plt.savefig('cs2_wdm_ktau_bestfit_normal_fluid.png',dpi=300)
+#plt.savefig('cs2_wdm_ktau_bestfit_normal_fluid.png',dpi=300)
 plt.show()
 
