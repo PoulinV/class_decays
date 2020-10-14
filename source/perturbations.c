@@ -5848,7 +5848,7 @@ int perturb_total_stress_energy(
             ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = y[idx+3]/y[idx]; // CS2DYN
           } else {
             if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
-              ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm*(1.0+0.2*(1.0-2.0*pba->epsilon_dcdm)*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5));
+              ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm*(1.0+0.2*(1.0-2.0*pba->epsilon_dcdm)*pow(k*sqrt(2./3.)*sqrt(cg2_ncdm)/(a*H),0.5));
             } else {
               ppw->delta_p_over_delta_rho_ncdm[n_ncdm] = cg2_ncdm;
             }
@@ -5869,7 +5869,7 @@ int perturb_total_stress_energy(
            ppw->delta_p += y[idx+3]*rho_ncdm_bg; //CS2DYN
          } else {
            if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
-             ppw->delta_p += cg2_ncdm*(1.0+0.2*(1.0-2.0*pba->epsilon_dcdm)*pow(k*sqrt(2./3.)*sqrt(ca2_ncdm)/(a*H),0.5))*rho_ncdm_bg*y[idx];
+             ppw->delta_p += cg2_ncdm*(1.0+0.2*(1.0-2.0*pba->epsilon_dcdm)*pow(k*sqrt(2./3.)*sqrt(cg2_ncdm)/(a*H),0.5))*rho_ncdm_bg*y[idx];
            } else {
              ppw->delta_p += cg2_ncdm*rho_ncdm_bg*y[idx];
            }
