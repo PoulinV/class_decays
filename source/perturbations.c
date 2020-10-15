@@ -8204,11 +8204,11 @@ int perturb_derivs(double tau,
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
           rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
-          if (ppt->switch_off_gamma_in_wdm_perts == _TRUE_) {
-            ratio_rho = 0.;
-          } else {
-            ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
-          }
+//          if (ppt->switch_off_gamma_in_wdm_perts == _TRUE_) {
+//            ratio_rho = 0.;
+//          } else {
+          ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+//          }
 
           gamma = pba->Gamma_dcdm;
           decay =a*gamma*ratio_rho; /* GFA*/
@@ -8262,10 +8262,6 @@ int perturb_derivs(double tau,
                dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
                  -3.0*a_prime_over_a*y[idx+3]+3.0*a_prime_over_a*w_ncdm*y[idx]
                  +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
-//               ceff2_ncdm = ca2_ncdm;
-//               dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
-//                       -3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
-//                        +a*gamma*(1.-eps)*ratio_rho*(y[pv->index_pt_delta_dcdm]-y[idx]+metric_euler/k2);
 
              } else {
 
@@ -8286,10 +8282,6 @@ int perturb_derivs(double tau,
               dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
                 + k2*y[idx+3]/(1.0+w_ncdm)-k2*y[idx+2]
                 + metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
-//               ceff2_ncdm = ca2_ncdm;
-//               dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
-//                         +ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]
-//                         +metric_euler-a*gamma*(1.-eps)*((1.+ca2_ncdm)/(1.+w_ncdm))*ratio_rho*(y[idx+1]-3./4*y[pv->index_pt_theta_dcdm]);
             } else {
 
               dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]
@@ -8334,14 +8326,10 @@ int perturb_derivs(double tau,
              // for the moment, it doesnt give good results
              w_delta_p = pseudo_p_ncdm/(3.*p_ncdm_bg);
              w_theta = ca2_ncdm;
-//             w_delta_p =  1.21*y[idx+3]/y[idx];
-//             w_theta =  0.87*y[idx+3]/y[idx];
              dy[idx+3] = -3.*a_prime_over_a*y[idx+3]*((2./3.)-w_ncdm-w_delta_p)
                        -w_theta*(1.+w_ncdm)*y[idx+1]
                        -(metric_ufa_class/3)*w_ncdm*(5.-(pseudo_p_ncdm/p_ncdm_bg))
                        +a*gamma*ratio_rho*((pow(eps,2)/(1-eps))*(y[pv->index_pt_delta_dcdm]/3.)-(1.-eps)*y[idx+3]);
-
-//             dy[idx+3] = 0.;
            }
 
 
@@ -8453,11 +8441,11 @@ int perturb_derivs(double tau,
                 // dy[idx] =*pvecback[pba->index_bg_rho_dcdm]*3/8./_PI_/(_G_)*_c_*_c_/_Mpc_over_m_/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_))*(y[pv->index_pt_delta_dcdm]+metric_euler/k2)/(4*_PI_*pow(q*pba->T_cmb*8.617e-5*_eV_to_invMpc_,3)*pvecback[pba->index_bg_H]);
                 // y[idx] =0;
 
-                if (ppt->switch_off_gamma_in_wdm_perts == _TRUE_) { // GFA
-                  FD_ncdm = 0.;
-                } else {
-                  FD_ncdm = pba->Gamma_dcdm * n_dcdm /(4*_PI_*qcube*pvecback[pba->index_bg_H]); //nb: \cal{H} = aH.
-                }
+//                if (ppt->switch_off_gamma_in_wdm_perts == _TRUE_) { // GFA
+//                  FD_ncdm = 0.;
+//                } else {
+                FD_ncdm = pba->Gamma_dcdm * n_dcdm /(4*_PI_*qcube*pvecback[pba->index_bg_H]); //nb: \cal{H} = aH.
+//                }
                 // y[idx] =(y[pv->index_pt_delta_dcdm]) * FD_ncdm;
                 // printf("%e %e %e\n",y[pv->index_pt_delta_dcdm],metric_continuity/3/aq/pba->Hq_table[n_ncdm][index_q],FD_ncdm);
                 y[idx] =(y[pv->index_pt_delta_dcdm]-metric_continuity/3/a/pvecback[pba->index_bg_H]) * FD_ncdm;
