@@ -2198,7 +2198,7 @@ int background_solve(
       printf("     -> Omega_scf = %g, wished %g\n",
              pvecback[pba->index_bg_rho_scf]/pvecback[pba->index_bg_rho_crit], pba->Omega0_scf);
       if(pba->has_lambda == _TRUE_)
-	printf("     -> Omega_Lambda = %g, wished %g\n",
+	    printf("     -> Omega_Lambda = %g, wished %g\n",
                pvecback[pba->index_bg_rho_lambda]/pvecback[pba->index_bg_rho_crit], pba->Omega0_lambda);
       printf("     -> parameters: [lambda, alpha, A, B] = \n");
       printf("                    [");

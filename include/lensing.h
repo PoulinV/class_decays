@@ -78,6 +78,8 @@ struct lensing {
 			   cl[index_l * ple->lt_size + index_lt] */
 
   double * ddcl_lens; /**< second derivatives for interpolation */
+  //VP
+  double A_lens_TTTEEE;//rescale only Cl^TTTEEE
 
   //@}
 
