@@ -2117,6 +2117,7 @@ int spectra_indices(
   class_define_index(psp->index_tr_delta_ur,ppt->has_source_delta_ur,index_tr,1);
   class_define_index(psp->index_tr_delta_dr,ppt->has_source_delta_dr,index_tr,1);
   class_define_index(psp->index_tr_delta_ncdm1,ppt->has_source_delta_ncdm,index_tr,pba->N_ncdm);
+  class_define_index(psp->index_tr_delta_p_over_delta_rho_ncdm1,ppt->has_source_delta_ncdm,index_tr,pba->N_ncdm); // GFA
   class_define_index(psp->index_tr_delta_tot,ppt->has_density_transfers,index_tr,1);
   class_define_index(psp->index_tr_phi,ppt->has_source_phi,index_tr,1);
   class_define_index(psp->index_tr_psi,ppt->has_source_psi,index_tr,1);
@@ -3500,6 +3501,7 @@ int spectra_matter_transfers(
   int last_index_back;
   double * pvecback_sp_long; /* array with argument pvecback_sp_long[pba->index_bg] */
   double delta_i,theta_i,rho_i;
+  double delta_p_over_delta_i; // GFA
   double delta_rho_tot,rho_tot;
   double rho_plus_p_theta_tot,rho_plus_p_tot;
   int n_ncdm;
@@ -3855,6 +3857,14 @@ int spectra_matter_transfers(
 
               delta_rho_tot += rho_i * delta_i;
 
+              // GFA
+
+              delta_p_over_delta_i = ppt->sources[index_md]
+                [index_ic * ppt->tp_size[index_md] + ppt->index_tp_delta_p_over_delta_rho_ncdm1+n_ncdm]
+                [(index_tau-psp->ln_tau_size+ppt->tau_size) * ppt->k_size[index_md] + index_k];
+
+              psp->matter_transfer[((index_tau*psp->ln_k_size + index_k) * psp->ic_size[index_md] + index_ic) * psp->tr_size + psp->index_tr_delta_p_over_delta_rho_ncdm1+n_ncdm] = delta_p_over_delta_i;
+
             }
 
             rho_tot += rho_i;
@@ -4011,6 +4021,8 @@ int spectra_output_tk_titles(struct background *pba,
         for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
           sprintf(tmp,"d_ncdm[%d]",n_ncdm);
           class_store_columntitle(titles,tmp,_TRUE_);
+          sprintf(tmp,"cs2_ncdm[%d]",n_ncdm);          // GFA
+          class_store_columntitle(titles,tmp,_TRUE_);
         }
       }
       class_store_columntitle(titles,"d_dcdm",pba->has_dcdm);
@@ -4144,6 +4156,7 @@ int spectra_output_tk_data(
           if (pba->has_ncdm == _TRUE_){
             for (n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
               class_store_double(dataptr,tk[psp->index_tr_delta_ncdm1+n_ncdm],ppt->has_source_delta_ncdm,storeidx);
+              class_store_double(dataptr,tk[psp->index_tr_delta_p_over_delta_rho_ncdm1+n_ncdm],ppt->has_source_delta_ncdm,storeidx); // GFA
             }
           }
           class_store_double(dataptr,tk[psp->index_tr_delta_dcdm],ppt->has_source_delta_dcdm,storeidx);
@@ -4186,6 +4199,7 @@ int spectra_output_tk_data(
         class_store_double_or_default(dataptr,-tk[psp->index_tr_delta_g]/k2,ppt->has_source_delta_g,storeidx,0.0);
         class_store_double_or_default(dataptr,-tk[psp->index_tr_delta_ur]/k2,ppt->has_source_delta_ur,storeidx,0.0);
         class_store_double_or_default(dataptr,-tk[psp->index_tr_delta_ncdm1]/k2,ppt->has_source_delta_ncdm,storeidx,0.0);
+        class_store_double_or_default(dataptr,-tk[psp->index_tr_delta_p_over_delta_rho_ncdm1]/k2,ppt->has_source_delta_ncdm,storeidx,0.0); // GFA
         class_store_double_or_default(dataptr,-tk[psp->index_tr_delta_tot]/k2,_TRUE_,storeidx,0.0);
       }
     }
