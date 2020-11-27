@@ -1,5 +1,6 @@
 # import necessary modules
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -55,6 +56,22 @@ files9 = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_cold_gam_10H0_nof
 data9 = []
 for data_file9 in files9:
     data9.append(np.loadtxt(data_file9))
+    
+files10 = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_warm2_gam_0p1H0_nofluid_cl_lensed.dat']
+data10 = []
+for data_file10 in files10:
+    data10.append(np.loadtxt(data_file10))
+
+files11 = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_warm2_gam_H0_nofluid_cl_lensed.dat']
+data11 = []
+for data_file11 in files11:
+    data11.append(np.loadtxt(data_file11))
+
+files12 = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_warm2_gam_10H0_nofluid_cl_lensed.dat']
+data12 = []
+for data_file12 in files12:
+    data12.append(np.loadtxt(data_file12))
+
 
 
 cl1 = data1[0]
@@ -93,6 +110,17 @@ cl9 = data9[0]
 clTT_full_cold_g10H0 = interp1d(cl9[:,0], cl9[:,1])
 clEE_full_cold_g10H0 = interp1d(cl9[:,0], cl9[:,2])
 
+cl10 = data10[0]
+clTT_full_warm2_g0p1H0 = interp1d(cl10[:,0], cl10[:,1])
+clEE_full_warm2_g0p1H0 = interp1d(cl10[:,0], cl10[:,2])
+
+cl11 = data11[0]
+clTT_full_warm2_gH0 = interp1d(cl11[:,0], cl11[:,1])
+clEE_full_warm2_gH0 = interp1d(cl11[:,0], cl11[:,2])
+
+cl12 = data12[0]
+clTT_full_warm2_g10H0 = interp1d(cl12[:,0], cl12[:,1])
+clEE_full_warm2_g10H0 = interp1d(cl12[:,0], cl12[:,2])
 #%% READ FLUID DATA FILES
     
 files1b = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_hot_gam_0p1H0_fluid_cl_lensed.dat']
@@ -140,6 +168,21 @@ data9b = []
 for data_file9b in files9b:
     data9b.append(np.loadtxt(data_file9b))
     
+files10b = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_warm2_gam_0p1H0_fluid_cl_lensed.dat']
+data10b = []
+for data_file10b in files10b:
+    data10b.append(np.loadtxt(data_file10b))
+
+files11b = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_warm2_gam_H0_fluid_cl_lensed.dat']
+data11b = []
+for data_file11b in files11b:
+    data11b.append(np.loadtxt(data_file11b))
+    
+files12b = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_warm2_gam_10H0_fluid_cl_lensed.dat']
+data12b = []
+for data_file12b in files12b:
+    data12b.append(np.loadtxt(data_file12b))
+    
     
 cl1b = data1b[0]
 clTT_approx_hot_g0p1H0 = interp1d(cl1b[:,0], cl1b[:,1])
@@ -177,6 +220,19 @@ cl9b = data9b[0]
 clTT_approx_cold_g10H0 = interp1d(cl9b[:,0], cl9b[:,1])
 clEE_approx_cold_g10H0 = interp1d(cl9b[:,0], cl9b[:,2])
 
+cl10b = data10b[0]
+clTT_approx_warm2_g0p1H0 = interp1d(cl10b[:,0], cl10b[:,1])
+clEE_approx_warm2_g0p1H0 = interp1d(cl10b[:,0], cl10b[:,2])
+
+cl11b = data11b[0]
+clTT_approx_warm2_gH0 = interp1d(cl11b[:,0], cl11b[:,1])
+clEE_approx_warm2_gH0 = interp1d(cl11b[:,0], cl11b[:,2])
+
+cl12b = data12b[0]
+clTT_approx_warm2_g10H0 = interp1d(cl12b[:,0], cl12b[:,1])
+clEE_approx_warm2_g10H0 = interp1d(cl12b[:,0], cl12b[:,2])
+
+
 
 #%% TIME TO PLOT 
 
@@ -195,37 +251,62 @@ ax_2.set_xlim([2,2500])
 ax_2.tick_params(axis='both', which='minor', labelsize=12)
 
 #plot each TT and EE
-ax_1.semilogx(ll,clTT_approx_hot_g0p1H0(ll)/clTT_full_hot_g0p1H0(ll)-1,'red',label=r'$\varepsilon =0.5 \, \, \, \Gamma = 0.1 H_0$')
-ax_2.semilogx(ll,clEE_approx_hot_g0p1H0(ll)/clEE_full_hot_g0p1H0(ll)-1,'red',label=r'$\varepsilon =0.5 \, \, \, \Gamma = 0.1 H_0$')
+ax_1.semilogx(ll,clTT_approx_hot_g0p1H0(ll)/clTT_full_hot_g0p1H0(ll)-1,'red')
+ax_2.semilogx(ll,clEE_approx_hot_g0p1H0(ll)/clEE_full_hot_g0p1H0(ll)-1,'red')
 
-ax_1.semilogx(ll,clTT_approx_hot_gH0(ll)/clTT_full_hot_gH0(ll)-1,'green',label=r'$\varepsilon =0.5 \, \, \, \Gamma = H_0$')
-ax_2.semilogx(ll,clEE_approx_hot_gH0(ll)/clEE_full_hot_gH0(ll)-1,'green',label=r'$\varepsilon =0.5 \, \, \, \Gamma = H_0$')
+ax_1.semilogx(ll,clTT_approx_hot_gH0(ll)/clTT_full_hot_gH0(ll)-1,'red',linestyle='dotted')
+ax_2.semilogx(ll,clEE_approx_hot_gH0(ll)/clEE_full_hot_gH0(ll)-1,'red',linestyle='dotted')
 
-ax_1.semilogx(ll,clTT_approx_hot_g10H0(ll)/clTT_full_hot_g10H0(ll)-1,'blue',label=r'$\varepsilon =0.5 \, \, \, \Gamma = 10 H_0$')
-ax_2.semilogx(ll,clEE_approx_hot_g10H0(ll)/clEE_full_hot_g10H0(ll)-1,'blue',label=r'$\varepsilon =0.5 \, \, \, \Gamma = 10 H_0$')
+ax_1.semilogx(ll,clTT_approx_hot_g10H0(ll)/clTT_full_hot_g10H0(ll)-1,'red',linestyle='dashed')
+ax_2.semilogx(ll,clEE_approx_hot_g10H0(ll)/clEE_full_hot_g10H0(ll)-1,'red',linestyle='dashed')
 
-ax_1.semilogx(ll,clTT_approx_warm_g0p1H0(ll)/clTT_full_warm_g0p1H0(ll)-1,'violet',label=r'$\varepsilon =0.1 \, \, \, \Gamma = 0.1 H_0$')
-ax_2.semilogx(ll,clEE_approx_warm_g0p1H0(ll)/clEE_full_warm_g0p1H0(ll)-1,'violet',label=r'$\varepsilon =0.1 \, \, \, \Gamma = 0.1 H_0$')
+ax_1.semilogx(ll,clTT_approx_warm_g0p1H0(ll)/clTT_full_warm_g0p1H0(ll)-1,'green')
+ax_2.semilogx(ll,clEE_approx_warm_g0p1H0(ll)/clEE_full_warm_g0p1H0(ll)-1,'green')
 
-ax_1.semilogx(ll,clTT_approx_warm_gH0(ll)/clTT_full_warm_gH0(ll)-1,'orange',label=r'$\varepsilon =0.1 \, \, \, \Gamma = H_0$')
-ax_2.semilogx(ll,clEE_approx_warm_gH0(ll)/clEE_full_warm_gH0(ll)-1,'orange',label=r'$\varepsilon =0.1 \, \, \, \Gamma = H_0$')
+ax_1.semilogx(ll,clTT_approx_warm_gH0(ll)/clTT_full_warm_gH0(ll)-1,'green',linestyle='dotted')
+ax_2.semilogx(ll,clEE_approx_warm_gH0(ll)/clEE_full_warm_gH0(ll)-1,'green',linestyle='dotted')
 
-ax_1.semilogx(ll,clTT_approx_warm_g10H0(ll)/clTT_full_warm_g10H0(ll)-1,'pink',label=r'$\varepsilon =0.1 \, \, \, \Gamma = 10 H_0$')
-ax_2.semilogx(ll,clEE_approx_warm_g10H0(ll)/clEE_full_warm_g10H0(ll)-1,'pink',label=r'$\varepsilon =0.1 \, \, \, \Gamma = 10 H_0$')
+#ax_1.semilogx(ll,clTT_approx_warm_g10H0(ll)/clTT_full_warm_g10H0(ll)-1,'green',linestyle='dashed')
+#ax_2.semilogx(ll,clEE_approx_warm_g10H0(ll)/clEE_full_warm_g10H0(ll)-1,'green',linestyle='dashed')
 
-ax_1.semilogx(ll,clTT_approx_cold_g0p1H0(ll)/clTT_full_cold_g0p1H0(ll)-1,'darkcyan',label=r'$\varepsilon =0.001 \, \, \, \Gamma = 0.1 H_0$')
-ax_2.semilogx(ll,clEE_approx_cold_g0p1H0(ll)/clEE_full_cold_g0p1H0(ll)-1,'darkcyan',label=r'$\varepsilon =0.001 \, \, \, \Gamma = 0.1 H_0$')
+ax_1.semilogx(ll,clTT_approx_warm2_g0p1H0(ll)/clTT_full_warm2_g0p1H0(ll)-1,'blue')
+ax_2.semilogx(ll,clEE_approx_warm2_g0p1H0(ll)/clEE_full_warm2_g0p1H0(ll)-1,'blue')
 
-ax_1.semilogx(ll,clTT_approx_cold_gH0(ll)/clTT_full_cold_gH0(ll)-1,'brown',label=r'$\varepsilon =0.001 \, \, \, \Gamma =  H_0$')
-ax_2.semilogx(ll,clEE_approx_cold_gH0(ll)/clEE_full_cold_gH0(ll)-1,'brown',label=r'$\varepsilon =0.001 \, \, \, \Gamma =  H_0$')
+ax_1.semilogx(ll,clTT_approx_warm2_gH0(ll)/clTT_full_warm2_gH0(ll)-1,'blue',linestyle='dotted')
+ax_2.semilogx(ll,clEE_approx_warm2_gH0(ll)/clEE_full_warm2_gH0(ll)-1,'blue',linestyle='dotted')
 
-ax_1.semilogx(ll,clTT_approx_cold_g10H0(ll)/clTT_full_cold_g10H0(ll)-1,'black',label=r'$\varepsilon =0.001 \, \, \, \Gamma = 10 H_0$')
-ax_2.semilogx(ll,clEE_approx_cold_g10H0(ll)/clEE_full_cold_g10H0(ll)-1,'black',label=r'$\varepsilon =0.001 \, \, \, \Gamma = 10 H_0$')
+ax_1.semilogx(ll,clTT_approx_warm2_g10H0(ll)/clTT_full_warm2_g10H0(ll)-1,'blue',linestyle='dashed')
+ax_2.semilogx(ll,clEE_approx_warm2_g10H0(ll)/clEE_full_warm2_g10H0(ll)-1,'blue',linestyle='dashed')
+
+ax_1.semilogx(ll,clTT_approx_cold_g0p1H0(ll)/clTT_full_cold_g0p1H0(ll)-1,'black')
+ax_2.semilogx(ll,clEE_approx_cold_g0p1H0(ll)/clEE_full_cold_g0p1H0(ll)-1,'black')
+
+ax_1.semilogx(ll,clTT_approx_cold_gH0(ll)/clTT_full_cold_gH0(ll)-1,'black',linestyle='dotted')
+ax_2.semilogx(ll,clEE_approx_cold_gH0(ll)/clEE_full_cold_gH0(ll)-1,'black',linestyle='dotted')
+
+ax_1.semilogx(ll,clTT_approx_cold_g10H0(ll)/clTT_full_cold_g10H0(ll)-1,'black',linestyle='dashed')
+ax_2.semilogx(ll,clEE_approx_cold_g10H0(ll)/clEE_full_cold_g10H0(ll)-1,'black',linestyle='dashed')
 
 
-
+# red, green, blue and black correspond to eps=0.5, 0.1, 0.01, 0.001, respectively
 # IMPROVE LEGEND
-ax_1.legend(frameon=False,fontsize = 13,loc='upper right',borderaxespad=0.)
+
+lines = ax_1.get_lines()
+
+black_line1 = mlines.Line2D([], [], color='black', linestyle='solid', label=r'$\Gamma = 0.1 H_0$')
+black_line2 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$\Gamma = H_0$')
+black_line3 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$\Gamma = 10 H_0$')
+
+
+legend1 = ax_1.legend([lines[i] for i in [0,3,5,8]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc=(0.8,0.6), fontsize=13, frameon=False)
+legend2 = ax_1.legend(handles= [black_line1,black_line2,black_line3], loc=(0.55, 0.65), fontsize=13, frameon=False)
+
+
+ax_1.add_artist(legend1)
+ax_1.add_artist(legend2)
+
+
+#ax_1.legend(frameon=False,fontsize = 13,loc='upper right',borderaxespad=0.)
 
 #plot cosmic variance and Planck error bars
 l_cosmic_variance = np.linspace(0,48,1000)

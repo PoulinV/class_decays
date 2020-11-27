@@ -13,17 +13,17 @@ start_time = time.time()
 
 #%% read data files
 
-files1 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_cl_lensed.dat']
+files1 = ['/Users/gfranco/cloud/output/dcdm_bestfit_nofluid_cl_lensed.dat']
 data1 = []
 for data_file1 in files1:
     data1.append(np.loadtxt(data_file1))
     
-files2 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_z1_pk.dat']
+files2 = ['/Users/gfranco/cloud/output/dcdm_bestfit_nofluid_z1_pk.dat']
 data2 = []
 for data_file2 in files2:
     data2.append(np.loadtxt(data_file2))
 
-files3 = ['/home/guillermo/class_MAJORON/dcdm_bestfit_nofluid_z2_pk.dat']
+files3 = ['/Users/gfranco/cloud/output/dcdm_bestfit_nofluid_z2_pk.dat']
 data3 = []
 for data_file3 in files3:
     data3.append(np.loadtxt(data_file3))   
@@ -42,9 +42,11 @@ fpk_z3_dcdm_full  = interp1d(pk_z3_dcdm[:,0],pk_z3_dcdm[:,1])
 
 #%%
 
-ax_1 = plt.subplot(311)
-ax_2 = plt.subplot(312, sharex = ax_1)
-ax_3 = plt.subplot(313, sharex = ax_2)
+f = plt.figure(figsize=(10,15))
+
+ax_1 = f.add_subplot(311)
+ax_2 = f.add_subplot(312, sharex = ax_1)
+ax_3 = f.add_subplot(313, sharex = ax_2)
 plt.subplots_adjust(hspace=0)
 
 ax_1.set_ylim([-0.04,0.04])
@@ -55,7 +57,7 @@ ax_2.set_xlim([2,2500])
 ax_3.set_xlim([2,2500])
 
 
-Log10Gamma_dcdm = 1.24
+Log10Gamma_dcdm = 1.2476
 
 Gamma_dcdm=10**(Log10Gamma_dcdm )
 tau =1./(Gamma_dcdm*1.02e-3)
@@ -64,12 +66,11 @@ tau
 nbins = 300
 
 
-log10epsilon = -2.16
+log10epsilon = -2.1624
 epsilon = 10**(log10epsilon)
 epsilon
 
-M_ncdm=0.23
-#M_ncdm=0.9
+M_ncdm=0.27
 m_ncdm=M_ncdm/3.0
 
 
@@ -134,9 +135,9 @@ M.compute()
 derived = M.get_current_derived_parameters(['sigma8','Omega_m','z_eq'])
 S8 = derived['sigma8']*np.sqrt(derived['Omega_m']/0.3)
 
-print("sigma8 for LCDM is %f"%derived['sigma8'])
-print("and Omega_m is %f, so that S8=%f "%(derived['Omega_m'],S8))
-print("and z_eq is %f"%derived['z_eq'])
+#print("sigma8 for LCDM is %f"%derived['sigma8'])
+#print("and Omega_m is %f, so that S8=%f "%(derived['Omega_m'],S8))
+#print("and z_eq is %f"%derived['z_eq'])
 
 clM = M.lensed_cl(2600)
 ll_LCDM = clM['ell'][2:]
@@ -203,12 +204,12 @@ M.set({'output':'tCl,pCl,lCl,mPk',
                    'lensing':'yes',
                    'l_max_scalars':2600,
                    'n_s':0.9673,
-                   'ln10^{10}A_s':3.051,
+                   'ln10^{10}A_s':3.052,
                    'tau_reio':0.0582,
 #                   'z_reio':8.058,
                    'omega_b':0.02240,
 #                   'H0':67.70,
-                   '100*theta_s':1.042131, #obtained by running class with all these parameters and H0=67.70
+                   '100*theta_s':1.042174, #obtained by running class with all these parameters and H0=67.70
                    'P_k_max_h/Mpc':1.0,
                    'z_max_pk' : 4.0
                    })
@@ -267,9 +268,9 @@ for k in kk:
     
 S8 = derived['sigma8']*np.sqrt(derived['Omega_m']/0.3)
 
-print("sigma8 for DCDM with epsilon=%.3f and tau= %.0f Gyrs is %f" %(epsilon,tau,derived['sigma8']))
-print("and Omega_m is %f, so that S8=%f "%(derived['Omega_m'],S8))
-print("and z_eq is %f"%derived['z_eq'])
+#print("sigma8 for DCDM with epsilon=%.3f and tau= %.0f Gyrs is %f" %(epsilon,tau,derived['sigma8']))
+#print("and Omega_m is %f, so that S8=%f "%(derived['Omega_m'],S8))
+#print("and z_eq is %f"%derived['z_eq'])
 
 M.struct_cleanup()
 M.empty()
@@ -288,7 +289,7 @@ fphiphi_DCDM = interp1d(ll_DCDM_0,ll_DCDM_0*(ll_DCDM_0+1.0)*clphiphi_DCDM_0/(2.0
 print("~~~~~computing LCDM+nu~~~~~")
 M.set(common_settings)
 M.set({
-'omega_cdm': 0.1160,
+'omega_cdm': 0.1154,
 '100*theta_s':1.042059,
 #'H0':67.76,
 'N_ncdm':1,
@@ -309,9 +310,9 @@ clphiphi_DCDM_1 = clM_1['pp'][2:]
 
 S8 = derived['sigma8']*np.sqrt(derived['Omega_m']/0.3)
 
-print("sigma8 for LCDM (fixed theta_s) with total neutrino mass M_nu=%.2f eV is %f" %(M_ncdm,derived['sigma8']) )
-print("and Omega_m is %f, so that S8=%f"%(derived['Omega_m'],S8))
-print("and z_eq is %f"%derived['z_eq'])
+#print("sigma8 for LCDM (fixed theta_s) with total neutrino mass M_nu=%.2f eV is %f" %(M_ncdm,derived['sigma8']) )
+#print("and Omega_m is %f, so that S8=%f"%(derived['Omega_m'],S8))
+#print("and z_eq is %f"%derived['z_eq'])
 
 h = M.h()
 for k in kk:
@@ -376,9 +377,9 @@ print("~~~~~ready to plot~~~~~")
 
 
 # WITH FLUID APPROXIMATION
-ax_1.semilogx(ll_DCDM_0,fTT_DCDM(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\Lambda$DDM  Best-fit')
-ax_2.semilogx(ll_DCDM_0,fEE_DCDM(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\Lambda$DDM  Best-fit')
-ax_3.semilogx(ll_DCDM_0,fphiphi_DCDM(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'r',label=r'$\Lambda$DDM  Best-fit')
+ax_1.semilogx(ll_DCDM_0,fTT_DCDM(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'red',label=r'$\Lambda$DDM  Best-fit')
+ax_2.semilogx(ll_DCDM_0,fEE_DCDM(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'red',label=r'$\Lambda$DDM  Best-fit')
+ax_3.semilogx(ll_DCDM_0,fphiphi_DCDM(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'red',label=r'$\Lambda$DDM  Best-fit')
 
 # WITH FULL CALCULATION
 #ax_1.semilogx(ll_DCDM_0,fcl_tt_dcdm_full(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\Lambda$DDM  Best-fit')
@@ -387,9 +388,9 @@ ax_3.semilogx(ll_DCDM_0,fphiphi_DCDM(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'r',lab
 
 
 
-ax_1.semilogx(ll_DCDM_0,fTT_mNU(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV})$'%M_ncdm)
-ax_2.semilogx(ll_DCDM_0,fEE_mNU(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV})$'%M_ncdm)
-ax_3.semilogx(ll_DCDM_0,fphiphi_mNU(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'b',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV}) $'%M_ncdm)
+ax_1.semilogx(ll_DCDM_0,fTT_mNU(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'blue',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV})$'%M_ncdm)
+ax_2.semilogx(ll_DCDM_0,fEE_mNU(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'blue',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV})$'%M_ncdm)
+ax_3.semilogx(ll_DCDM_0,fphiphi_mNU(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'blue',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV}) $'%M_ncdm)
 
 #Planck error bars
 
@@ -476,16 +477,16 @@ axes.set_ylabel(r'$\frac{P(k)}{P_{ref}(k)}-1$', fontsize=20)
 #axes.plot(kk,map(truediv, list(np.array(Pk5) - np.array(Pk4)), Pk4),'r--')
 
 #WITH FULL CALCULATION
-axes.plot(kk,fpk_z0_dcdm_full(kk)/fpk_z0_ref(kk)-1.0,'r')
-axes.plot(kk,fpk_z3_dcdm_full(kk)/fpk_z3_ref(kk)-1.0,'r--')
+axes.plot(kk,fpk_z0_dcdm_full(kk)/fpk_z0_ref(kk)-1.0,'red')
+axes.plot(kk,fpk_z3_dcdm_full(kk)/fpk_z3_ref(kk)-1.0,'red',linestyle='dashed')
 
 
 #LCDM+MNU
 #axes.plot(kk,map(truediv, list(np.array(Pk3) - np.array(Pk1)), Pk1),'b')
 #axes.plot(kk,map(truediv, list(np.array(Pk6) - np.array(Pk4)), Pk4),'b--')
 
-axes.plot(kk,fpk_z0_Mnu(kk)/fpk_z0_ref(kk)-1.0,'b')
-axes.plot(kk,fpk_z3_Mnu(kk)/fpk_z3_ref(kk)-1.0,'b--')
+axes.plot(kk,fpk_z0_Mnu(kk)/fpk_z0_ref(kk)-1.0,'blue')
+axes.plot(kk,fpk_z3_Mnu(kk)/fpk_z3_ref(kk)-1.0,'blue',linestyle='dashed')
 
 
 
@@ -508,7 +509,7 @@ plt.fill_between(k_range_sigma8, -1.0,0.5, color='lightgray' )
 
 #plt.text(2.0e-4, -0.26, r'$\Omega_{m} =0.31 \, \, \, \, \, \, \, \, \, \, \, \, \sigma_{8} = 0.75  $', fontsize =15)
 
-plt.text(5.0e-3, -0.26, r'$ S_{8} = %.2f  $'%S8, fontsize =15)
+plt.text(5.0e-3, -0.26, r'$ S_{8} = 0.76  $', fontsize =15)
 
 # Q: SO, EVEN IF WE ARE PLOTTING RESIDUALS IN P(K) FOR FIXED H0, THE S8 VALUE WE SHOW
 # IS FROM THE CALCULATION AT FIXED 100*THETA_S, IS THAT RIGHT?

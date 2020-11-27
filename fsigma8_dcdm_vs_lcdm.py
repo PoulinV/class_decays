@@ -12,18 +12,18 @@ start_time = time.time()
 
 #%%
 
-Log10Gamma_dcdm = 1.24
+Log10Gamma_dcdm = 1.2476
 Gamma_dcdm=10**(Log10Gamma_dcdm )
 tau =1./(Gamma_dcdm*1.02e-3)
 tau
 
 nbins = 300
 
-log10epsilon = -2.16
+log10epsilon = -2.1624
 epsilon = 10**(log10epsilon)
 epsilon
 
-M_ncdm=0.23
+M_ncdm=0.27
 m_ncdm=M_ncdm/3.0
 
 
@@ -42,7 +42,7 @@ common_settings = {'output':'tCl,pCl,lCl,mPk',
                    'tau_reio':0.055,
                    'omega_b':0.02242,
                    '100*theta_s':1.042059,
-                   'P_k_max_1/Mpc':1.0,
+                   'P_k_max_h/Mpc':1.0,
                    'z_max_pk' : 5.0
                    }
   
@@ -65,10 +65,10 @@ M.set({
 M.compute()
 
 
-derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
-
 h = M.h() # get reduced Hubble for conversions to 1/Mpc
-print("Omega_m for LCDM is %f" %derived['Omega_m'])
+
+#derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
+#print("Omega_m for LCDM is %f" %derived['Omega_m'])
 
 
 for z in zz:
@@ -86,11 +86,11 @@ M.set({'output':'tCl,pCl,lCl,mPk',
                    'lensing':'yes',
                    'l_max_scalars':2600,
                    'n_s':0.9673,
-                   'ln10^{10}A_s':3.051,
+                   'ln10^{10}A_s':3.052,
                    'tau_reio':0.0582,
                    'omega_b':0.02240,
-                   '100*theta_s':1.042131, #obtained by running class with all these parameters and H0=67.70
-                   'P_k_max_1/Mpc':1.0,
+                   '100*theta_s':1.042174, #obtained by running class with all these parameters and H0=67.70
+                   'P_k_max_h/Mpc':1.0,
                    'z_max_pk' : 2.0})
 M.set({
     'omega_cdm': 0.00001,
@@ -113,13 +113,12 @@ M.set({
 
 M.compute()
 
-derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
 h = M.h()
-
-print("~~~~~ DCDM computed in in %.f s~~~~~"%(time.time()-timeafterref))
 t_i = time.time()
+#derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
+#print("~~~~~ DCDM computed in in %.f s~~~~~"%(time.time()-timeafterref))
 
-print("Omega_m for DCDM with epsilon=%.3f and tau= %.0f Gyrs is %f" %(epsilon,tau,derived['Omega_m']))
+#print("Omega_m for DCDM with epsilon=%.3f and tau= %.0f Gyrs is %f" %(epsilon,tau,derived['Omega_m']))
 
 for z in zz:
     fsigma8_dcdm.append(M.scale_independent_growth_factor_f(z)*M.sigma(8.0/h,z)) 
@@ -132,7 +131,7 @@ M.empty()
 
 M.set(common_settings)
 M.set({
-'omega_cdm': 0.1160,
+'omega_cdm': 0.1154,
 'N_ncdm':1,
 'background_ncdm_distribution': 0,
 'N_ur':0.00641,
@@ -142,12 +141,9 @@ M.set({
 M.compute()
 
 h = M.h()
-derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
-
-
-print("~~~~~LCDM+mNU computed in %.f s~~~~~"%(time.time()-t_i))
-
-print("Omega_m for LCDM with total neutrino mass M_nu=%.2f eV is %f" %(M_ncdm,derived['Omega_m']) )
+#derived = M.get_current_derived_parameters(['sigma8','Omega_m'])
+#print("~~~~~LCDM+mNU computed in %.f s~~~~~"%(time.time()-t_i))
+#print("Omega_m for LCDM with total neutrino mass M_nu=%.2f eV is %f" %(M_ncdm,derived['Omega_m']) )
 
 for z in zz:
     fsigma8_mNu.append(M.scale_independent_growth_factor_f(z)*M.sigma(8.0/h,z)) 

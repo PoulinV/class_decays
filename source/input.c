@@ -794,13 +794,20 @@ int input_read_parameters(
     class_call(parser_read_double(pfc,"omega_ini_dcdm",&param2,&flag2,errmsg),
                errmsg,
                errmsg);
-    class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+    class_call(parser_read_double(pfc,"f_dcdm",&param3,&flag3,errmsg),
                errmsg,
-               "In input file, you can only enter one of Omega_ini_dcdm or omega_ini_dcdm, choose one");
+               errmsg);
+
+    class_test(class_at_least_two_of_three(flag1,flag2,flag3),
+                errmsg,
+                "In input file, you can only enter one of Omega_ini_dcdm, omega_ini_dcdm or f_dcdm, choose one");
+
     if (flag1 == _TRUE_)
       pba->Omega_ini_dcdm = param1;
     if (flag2 == _TRUE_)
       pba->Omega_ini_dcdm = param2/pba->h/pba->h;
+    if (flag3 == _TRUE_)
+      pba->Omega_ini_dcdm = (param3/(1.-param3))*pba->Omega0_cdm;
 
     /** - Read Gamma in same units as H0, i.e. km/(s Mpc)*/
     class_read_double("Gamma_dcdm",pba->Gamma_dcdm);

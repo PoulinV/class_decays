@@ -65,7 +65,7 @@ common_settings = {
                    'l_max_ncdm':17,
                    'ncdm_fluid_approximation':2,
                    'ncdm_fluid_trigger_tau_over_tau_k':25,
-                   'Number of momentum bins perturbs': '50,300',
+                   'Number of momentum bins perturbs': '50,400',
                    'm_ncdm':'0.06,0',
                    'massive_daughter_perturbations':'yes',
                    'dark_radiation_perturbations': 'yes',

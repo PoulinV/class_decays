@@ -4305,6 +4305,7 @@ int perturb_initial_conditions(struct precision * ppr,
   double fracnu,fracg,fracb,fraccdm,om;
   double ktau_two,ktau_three;
   double f_dr;
+  double f0 = 0; //GFA
 
   double delta_tot;
   double velocity_tot;
@@ -4329,6 +4330,17 @@ int perturb_initial_conditions(struct precision * ppr,
                                  ppw->pvecback),
                pba->error_message,
                ppt->error_message);
+
+// GFA: redo this, just to store pvecback (needed later for the f0 computation)
+    class_alloc(pvecback,pba->bg_size_normal*sizeof(double),pba->error_message);
+    class_call(background_at_tau(pba,
+                                 tau,
+                                 pba->normal_info,
+                                 pba->inter_normal,
+                                &(ppw->last_index_back),
+                                 pvecback),
+              pba->error_message,
+              ppt->error_message);
 
     a = ppw->pvecback[pba->index_bg_a];
 
@@ -4768,57 +4780,23 @@ int perturb_initial_conditions(struct precision * ppr,
       idx = ppw->pv->index_pt_psi0_ncdm1;
       for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++){
           for (index_q=0; index_q < ppw->pv->q_size_ncdm[n_ncdm]; index_q++) {
-
-          // //IC TO IMPLEMENT (VP)
-          //
           q = pba->q_ncdm[n_ncdm][index_q];
-          if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-          // // aq = q/pba->PDmax_dcdm*pba->T_cmb*8.617343e-05*1e-9; //convert Tcmb to GeV using k_b*1e-9
-          // // class_call(background_tau_of_z(pba,
-          // //                                1/aq,
-          // //                                &tau_q),
-          // //            pba->error_message,
-          // //            ppt->error_message);
-          // //
-          // // /* obsolete: previous choice was to start always at recombination time */
-          // // /* tau_ini = pth->tau_rec; */
-          // //
-          // // /* set values of first_index_back/thermo */
-          // // class_call(background_at_tau(pba,
-          // //                              tau_q,
-          // //                              pba->short_info,
-          // //                              pba->inter_normal,
-          // //                              &first_index_back,
-          // //                              pvecback),
-          // //            pba->error_message,
-          // //            ppt->error_message);
-          // //
-          // // rho_dcdm = pba->Omega_ini_dcdm*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_/_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
-          // // n_dcdm = rho_dcdm/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg
-          // // qcube=q*q*q*pba->T_cmb/hbar_c_over_kb*_Mpc_over_m_*pba->T_cmb/hbar_c_over_kb*_Mpc_over_m_*pba->T_cmb/hbar_c_over_kb*_Mpc_over_m_;
-          // // Fq = pba->Gamma_dcdm*n_dcdm/4/_PI_/qcube/pvecback->[pba->index_bg_H];
-          //
-          // // rho_dcdm = pba->Omega_ini_dcdm*3*pba->H0*pba->H0/8./_PI_/(_G_)*_c_*_c_*_Mpc_over_m_;  // convert to kg/Mpc^3// COMOVING, no aq factors.
-          // // n_dcdm = rho_dcdm*exp(-pba->Gamma_dcdm*t)/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_));// 1e9*_eV_ / (_c_ * _c_) convert M from GeV to kg
-          // // qcube=pow(q*1e9*_eV_/(_h_P_/2/_PI_)/_c_*_Mpc_over_m_,3);
-          // // FD_ncdm = pba->Gamma_dcdm * n_dcdm /(4*_PI_*qcube*pba->Hq_table[index_q]); //nb: \cal{H} = aH.
-          // // // dy[idx] =*pvecback[pba->index_bg_rho_dcdm]*3/8./_PI_/(_G_)*_c_*_c_/_Mpc_over_m_/(pba->M_dcdm*1e9*_eV_ / (_c_ * _c_))*(y[pv->index_pt_delta_dcdm]+metric_euler/k2)/(4*_PI_*pow(q*pba->T_cmb*8.617e-5*_eV_to_invMpc_,3)*pvecback[pba->index_bg_H]);
-          // //  ppw->pv->y[idx]  =(y[pv->index_pt_delta_dcdm]-metric_continuity/3/pba->Hq_table[index_q]) * FD_ncdm;
-          // //  ppw->pv->y[idx+1] = 0;
-          // //  ppw->pv->y[idx+2] = 2/5*(y[pv->index_pt_delta_dcdm]+metric_euler/k2)/(pvecback[pba->index_bg_H])* FD_ncdm;
-          // // // dy[idx+2] = 2/15*(metric_shear)/(pvecback[pba->index_bg_H])* FD_ncdm;
-          // //  ppw->pv->y[idx+3] = 0;
 
-
-          ppw->pv->y[idx] = 0;
-          ppw->pv->y[idx+1] =  0;
-          ppw->pv->y[idx+2] = 0;
+          if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
+          //  epsilon = sqrt(q*q+a*a*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
+          // GFA: compute the background psd of the wdm
+          class_call(background_ncdm_distribution_perts(pba,ppr,q,n_ncdm,pvecback,&f0),
+                     pba->error_message,ppr->error_message);
+          ppw->pv->y[idx] = f0*ppw->pv->y[ppw->pv->index_pt_delta_dcdm]; // GFA: with this we are imposing that delta_wdm = delta_dcdm,
+          // which is reasonable since delta_wdm and delta_dcdm are always coupled at initial times
+          // this also leads to an initial sound speed equal to the EoS at that time, cs2 = w_wdm
+          ppw->pv->y[idx+1] = 0; //not sure about the initial condition for theta_wdm, since theta_dcdm vanishes in the synchronous gauge
+          ppw->pv->y[idx+2] = 0; //not sure about initial conditions for the rest of multipoles, but it shouldn't be relevant
           for(l=3; l<ppw->pv->l_max_ncdm[n_ncdm]; l++){
              ppw->pv->y[idx+l] = 0;
           }
            ppw->pv->y[idx+l] = 0;
-          // // pba->is_q_initialized_dcdm[index_q] = 0;//reset to 0
-          //
+
           }
           else{
             epsilon = sqrt(q*q+a*a*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
@@ -4829,13 +4807,14 @@ int perturb_initial_conditions(struct precision * ppr,
               +exp_factor*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
               // printf("1+z %e t %e pba->Gamma_neutrinos %e exp_factor %e\n",1/a,t/_Gyr_over_Mpc_,pba->Gamma_neutrinos[n_ncdm],exp_factor);
             }
+
             else if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-              // dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
               dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
             }
             else {
               dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
             }
+
             ppw->pv->y[idx] = -0.25 * delta_ur * dlnf0_dlnq;
 
             ppw->pv->y[idx+1] =  -epsilon/3./q/k*theta_ur* dlnf0_dlnq;

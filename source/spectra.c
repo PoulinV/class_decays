@@ -3212,7 +3212,7 @@ int spectra_pk(
              psp->error_message,
              psp->error_message);
 
-  if (psp->spectra_verbose>0)
+//  if (psp->spectra_verbose>0)
     fprintf(stdout," -> sigma8=%g (computed till k = %g h/Mpc)\n",
             psp->sigma8,
             exp(psp->ln_k[psp->ln_k_size-1])/pba->h);

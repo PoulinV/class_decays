@@ -21,7 +21,7 @@ ax_2.set_ylim([-0.022,0.022])
 ax_1.set_xlim([2,2500])
 ax_2.set_xlim([2,2500])
 
-Log10Gamma_dcdm = 1.24
+Log10Gamma_dcdm = 1.2476
 
 Gamma_dcdm=10**(Log10Gamma_dcdm )
 tau =1./(Gamma_dcdm*1.02e-3)
@@ -30,7 +30,8 @@ tau
 nbins = 300
 
 
-log10epsilon = -2.16
+log10epsilon = -2.1624
+
 epsilon = 10**(log10epsilon)
 epsilon
 
@@ -88,7 +89,7 @@ M.set({'output':'tCl,pCl,lCl,mPk',
                    'lensing':'yes',
                    'l_max_scalars':2600,
                    'n_s':0.9673,
-                   'ln10^{10}A_s':3.051,
+                   'ln10^{10}A_s':3.052,
                    'tau_reio':0.0582,
                    'omega_b':0.0224,
                    'H0':67.70,
@@ -108,7 +109,7 @@ M.set({'output':'tCl,pCl,lCl,mPk',
     
 M.set({
     'omega_cdm': 0.000001,
-    'Omega_ini_dcdm2': 0.26051,
+    'Omega_ini_dcdm2': 0.26058,
     'Log10_Gamma_dcdm': Log10Gamma_dcdm,
     'M_dcdm': 1,
     'log10_epsilon_dcdm': log10epsilon,
@@ -193,7 +194,7 @@ plt.clf()
 
 plt.xscale('log')
 plt.xlim(kk[0],kk[-1])
-plt.ylim(-0.09,0.09)
+plt.ylim(-0.07,0.07)
 
 plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
 plt.ylabel(r'$\frac{P_{\mathrm{approx}}(k)}{P_{\mathrm{full}}(k)}-1$', fontsize=20)
