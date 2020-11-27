@@ -4783,14 +4783,14 @@ int perturb_initial_conditions(struct precision * ppr,
           q = pba->q_ncdm[n_ncdm][index_q];
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
-          //  epsilon = sqrt(q*q+a*a*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
+          epsilon = sqrt(q*q+a*a*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
           // GFA: compute the background psd of the wdm
           class_call(background_ncdm_distribution_perts(pba,ppr,q,n_ncdm,pvecback,&f0),
                      pba->error_message,ppr->error_message);
           ppw->pv->y[idx] = f0*ppw->pv->y[ppw->pv->index_pt_delta_dcdm]; // GFA: with this we are imposing that delta_wdm = delta_dcdm,
           // which is reasonable since delta_wdm and delta_dcdm are always coupled at initial times
           // this also leads to an initial sound speed equal to the EoS at that time, cs2 = w_wdm
-          ppw->pv->y[idx+1] = 0; //not sure about the initial condition for theta_wdm, since theta_dcdm vanishes in the synchronous gauge
+          ppw->pv->y[idx+1] = ppw->pv->y[idx]*q*k*tau/epsilon/3.; //this initial condition could still be improved
           ppw->pv->y[idx+2] = 0; //not sure about initial conditions for the rest of multipoles, but it shouldn't be relevant
           for(l=3; l<ppw->pv->l_max_ncdm[n_ncdm]; l++){
              ppw->pv->y[idx+l] = 0;

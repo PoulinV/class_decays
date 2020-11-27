@@ -466,17 +466,17 @@ pkz0_approx_eps_0p0032_tau_10gyrs = interp1d(pkCc[:,0], pkCc[:,1])
 plt.xscale('log')
 
 plt.xlim(kk[0],kk[-1])
-plt.ylim(-0.1,+0.1)
+#plt.ylim(-0.1,+0.1)
 
 
-plt.plot(kk,(pkz0_approx_eps_0p002_tau_1gyr(kk)-pkz0_full_eps_0p002_tau_1gyr(kk))/fpk_LCDM(kk),'blue', label=r'$\tau = 1 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.002, \, \, \, \, S_8 \, \mathrm{residuals} = 0.37 \%$')
-plt.plot(kk,(pkz0_approx_eps_0p0032_tau_10gyrs(kk)-pkz0_full_eps_0p0032_tau_10gyrs(kk))/fpk_LCDM(kk),'green', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032, \, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
-plt.plot(kk,(pkz0_approx_eps_0p008_tau_32gyrs(kk)-pkz0_full_eps_0p008_tau_32gyrs(kk))/fpk_LCDM(kk),'red', label=r'$\tau = 32 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.008, \, \, \, \, S_8 \, \mathrm{residuals} = 0.89 \%$')
+#plt.plot(kk,(pkz0_approx_eps_0p002_tau_1gyr(kk)-pkz0_full_eps_0p002_tau_1gyr(kk))/fpk_LCDM(kk),'blue', label=r'$\tau = 1 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.002, \, \, \, \, S_8 \, \mathrm{residuals} = 0.37 \%$')
+#plt.plot(kk,(pkz0_approx_eps_0p0032_tau_10gyrs(kk)-pkz0_full_eps_0p0032_tau_10gyrs(kk))/fpk_LCDM(kk),'green', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032, \, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
+#plt.plot(kk,(pkz0_approx_eps_0p008_tau_32gyrs(kk)-pkz0_full_eps_0p008_tau_32gyrs(kk))/fpk_LCDM(kk),'red', label=r'$\tau = 32 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.008, \, \, \, \, S_8 \, \mathrm{residuals} = 0.89 \%$')
 
 
-#plt.semilogy(kk,pkz0_approx_eps_0p002_tau_1gyr(kk),'red', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032 \,, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
-#plt.semilogy(kk,pkz0_full_eps_0p002_tau_1gyr(kk),'blue', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032 \,, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
-#plt.semilogy(kk,fpk_LCDM(kk),'green', label=r'LCDM')
+plt.semilogy(kk,pkz0_approx_eps_0p002_tau_1gyr(kk),'red', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032 \,, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
+plt.semilogy(kk,pkz0_full_eps_0p002_tau_1gyr(kk),'blue', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032 \,, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
+plt.semilogy(kk,fpk_LCDM(kk),'green', label=r'LCDM')
 
 
 
