@@ -506,11 +506,11 @@ int lensing_init(
 
     for (l=2; l<=ple->l_unlensed_max; l++) {
 
-      Cgl[index_mu] += (2.*l+1.)*l*(l+1.)*
-        cl_pp[l]*d11[index_mu][l];
+    Cgl[index_mu] += (2.*l+1.)*l*(l+1.)*
+      cl_pp[l]*ple->A_lens_TTTEEE*d11[index_mu][l]/psp->A_lens_pp;//A_lens_TTTEEE rescale only in TT,TE,EE
 
-      Cgl2[index_mu] += (2.*l+1.)*l*(l+1.)*
-        cl_pp[l]*d1m1[index_mu][l];
+    Cgl2[index_mu] += (2.*l+1.)*l*(l+1.)*
+      cl_pp[l]*ple->A_lens_TTTEEE*d1m1[index_mu][l]/psp->A_lens_pp; //A_lens_TTTEEE rescale only in TT,TE,EE
 
     }
 

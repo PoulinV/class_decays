@@ -261,6 +261,10 @@ struct spectra {
                               */
   double * ddmatter_transfer; /**< second derivative of above array with respect to log(tau), for spline interpolation. */
 
+
+  //VP
+  double A_lens;//rescale both Cl^pp and Cl^TT,TE,EE
+  double A_lens_pp;//rescale only Cl^pp
   /* double * LddCl; /\**< density Cl's in the Limber plus thin shell approximation (then, there are no non-diagonal correlations between various shells of different redshifts); depends on index_tau,index_l as: LddCl[index_tau*psp->psp->l_size[psp->index_md_scalars]+index_l] *\/ */
 
   /* double * LTdCl; /\**< cross (temperature * density) Cl's in the Limber plus thin shell approximation; depends on index_tau,index_l as: LTdCl[index_tau*psp->psp->l_size[psp->index_md_scalars]+index_l] *\/ */
