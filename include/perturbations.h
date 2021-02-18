@@ -118,6 +118,10 @@ struct perturbs
   /* perturbed recombination */
   /** Do we want to consider perturbed temperature and ionization fraction? */
   short has_perturbed_recombination;
+
+  /** Do we want the time table to be identical to background? */
+  /** default = FALSE */
+  short tau_table_like_background;
   /** Neutrino contribution to tensors */
   enum tensor_methods tensor_method;  /**< way to treat neutrinos in tensor perturbations(neglect, approximate as massless, take exact equations) */
 
@@ -237,6 +241,7 @@ struct perturbs
   short has_source_t;  /**< do we need source for CMB temperature? */
   short has_source_p;  /**< do we need source for CMB polarization? */
   short has_source_delta_m;   /**< do we need source for delta of total matter? */
+  short has_source_delta_cb; /**< do we ALSO need source for delta of ONLY cdm and baryon? */
   short has_source_delta_g;    /**< do we need source for delta of gammas? */
   short has_source_delta_b;    /**< do we need source for delta of baryons? */
   short has_source_delta_cdm;  /**< do we need source for delta of cold dark matter? */
@@ -247,6 +252,7 @@ struct perturbs
   short has_source_delta_ur; /**< do we need source for delta of ultra-relativistic neutrinos/relics? */
   short has_source_delta_ncdm; /**< do we need source for delta of all non-cold dark matter species (e.g. massive neutrinos)? */
   short has_source_theta_m;    /**< do we need source for theta of total matter? */
+  short has_source_theta_cb; /**< do we ALSO need source for theta of ONLY cdm and baryon? */
   short has_source_theta_g;    /**< do we need source for theta of gammas? */
   short has_source_theta_b;    /**< do we need source for theta of baryons? */
   short has_source_theta_cdm;  /**< do we need source for theta of cold dark matter? */
@@ -274,6 +280,7 @@ struct perturbs
   int index_tp_t2; /**< index value for temperature (j=2 term) */
   int index_tp_p; /**< index value for polarization */
   int index_tp_delta_m; /**< index value for delta tot */
+  int index_tp_delta_cb; /**< index value for delta cb */
   int index_tp_delta_g;   /**< index value for delta of gammas */
   int index_tp_delta_b;   /**< index value for delta of baryons */
   int index_tp_delta_cdm; /**< index value for delta of cold dark matter */
@@ -283,10 +290,12 @@ struct perturbs
   int index_tp_delta_dr; /**< index value for delta of decay radiation */
   int index_tp_delta_ur; /**< index value for delta of ultra-relativistic neutrinos/relics */
   int index_tp_delta_ncdm1; /**< index value for delta of first non-cold dark matter species (e.g. massive neutrinos) */
+  int index_tp_delta_p_over_delta_rho_ncdm1; /**< GFA */
   int index_tp_perturbed_recombination_delta_temp;		/**< Gas temperature perturbation */
   int index_tp_perturbed_recombination_delta_chi;		/**< Inionization fraction perturbation */
 
   int index_tp_theta_m;    /**< index value for theta tot */
+  int index_tp_theta_cb;   /**< index value for theta cb */
   int index_tp_theta_g;    /**< index value for theta of gammas */
   int index_tp_theta_b;    /**< index value for theta of baryons */
   int index_tp_theta_cdm;  /**< index value for theta of cold dark matter */
@@ -377,6 +386,12 @@ struct perturbs
 
   /** do we want to include DR pertubations? */
   short dark_radiation_perturbations;
+  short massive_daughter_perturbations;
+  short mother_dcdm_perturbations; /* GFA */
+  short switch_off_gamma_in_wdm_perts; /* GFA, just for testing*/
+  short switch_off_shear_wdm; /* GFA, just for testing */
+  short switch_on_eq_delta_p_wdm; /* GFA, just for testing  */
+  double time_over_tau_dcdm_threshold;
   //@}
 
 };
@@ -510,10 +525,14 @@ struct perturb_workspace
   double * delta_ncdm;	/**< relative density perturbation of each ncdm species */
   double * theta_ncdm;	/**< velocity divergence theta of each ncdm species */
   double * shear_ncdm;	/**< shear for each ncdm species */
+  double * delta_p_over_delta_rho_ncdm;	/**< sound speed for each ncdm species */
   double ** N_ncdm_perts;	/**< shear for each ncdm species */
 
   double delta_m;	/**< relative density perturbation of all non-relativistic species */
   double theta_m;	/**< velocity divergence theta of all non-relativistic species */
+
+  double delta_cb;       /**< relative density perturbation of only cdm and baryon */
+  double theta_cb;       /**< velocity divergence theta of only cdm and baryon */
 
   double delta_rho_fld;        /**< density perturbation of fluid, not so trivial in PPF scheme */
   double rho_plus_p_theta_fld; /**< velocity divergence of fluid, not so trivial in PPF scheme */
@@ -809,6 +828,20 @@ extern "C" {
   int perturb_prepare_output(struct background * pba,
                              struct perturbs * ppt);
 
+
+  int compute_dfdlnq_ncdm(  struct precision *ppr,
+                            struct background *pba,
+                            struct perturbs *ppt,
+                            int n_ncdm);
+
+  int background_ncdm_distribution_perts(
+                                   struct background *pba,
+                                   struct precision *ppr,
+                                   double q,
+                                   int n_ncdm,
+                                   double * pvecback,
+                                   double * f0
+                                 ) ;
 #ifdef __cplusplus
 }
 #endif

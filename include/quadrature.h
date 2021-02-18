@@ -10,7 +10,7 @@
 /******************************************/
 #include "common.h"
 
-enum ncdm_quadrature_method {qm_auto, qm_Laguerre, qm_trapz_indefinite, qm_trapz, qm_simpson_log};
+enum ncdm_quadrature_method {qm_auto, qm_Laguerre, qm_trapz, qm_trapz_indefinite, qm_simpson_log,qm_simpson_lin, left_rectangle};
 
 /* Structures for QSS */
 
@@ -35,6 +35,7 @@ typedef struct adaptive_integration_tree_node{
 			double *w,
 			int *N,
 			int N_max, double rtol,
+      double qmin_tmp,
 			double *qvec,
 			int qsiz,
 			int (*test)(void * params_for_function, double q, double *psi),
@@ -44,6 +45,7 @@ typedef struct adaptive_integration_tree_node{
        int get_qsampling_manual(double *x,
 				double *w,
 				int N,
+				double qmin_tmp,
 				double qmax,
 				enum ncdm_quadrature_method method,
 				double *qvec,

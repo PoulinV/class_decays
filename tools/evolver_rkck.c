@@ -38,6 +38,7 @@ int evolver_rk(int (*derivs)(double x,
   struct generic_integrator_workspace gi;
   double * dy;
   short call_output;
+	int counter=0; /* GFA */
 
   class_test(x_ini > x_sampling[x_size-1],
 	     error_message,
@@ -58,7 +59,7 @@ int evolver_rk(int (*derivs)(double x,
   call_output = _FALSE_;
 
   while ((x1 < x_end) && (next_index_x<x_size)) {
-
+  counter++;
     class_call((*evaluate_timescale)(x1,
 				     parameters_and_workspace_for_derivs,
 				     &timescale,
@@ -147,6 +148,7 @@ int evolver_rk(int (*derivs)(double x,
 
   }
 
+
   /* a last call is compulsory to ensure that all quantitites in
      y,dy,parameters_and_workspace_for_derivs are updated to the last
      point in the covered range */
@@ -158,7 +160,7 @@ int evolver_rk(int (*derivs)(double x,
 	     error_message,
 	     error_message);
 
-  if (print_variables != NULL)
+  if (print_variables != NULL) {
     class_call((*print_variables)(x1,
 				  y,
 				  dy,
@@ -166,7 +168,8 @@ int evolver_rk(int (*derivs)(double x,
 				  error_message),
 	       error_message,
 	       error_message);
-
+    // printf("Number of integration time steps in interval of cte approx = %d\n", counter);
+	}
   class_call(cleanup_generic_integrator(&gi),
 	     gi.error_message,
 	     error_message);

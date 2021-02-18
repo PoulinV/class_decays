@@ -10,7 +10,15 @@
 #include "dei_rkck.h"
 #include "parser.h"
 
+/** list of possible types of spatial curvature */
+
 enum spatial_curvature {flat,open,closed};
+enum neutrino_mass_hierarchy {inverted,normal,degenerate};
+
+/** list of possible parametrisations of the DE equation of state */
+
+enum equation_of_state {CLP,EDE};
+
 /**
  * All background parameters and evolution that other modules need to know.
  *
@@ -36,6 +44,8 @@ struct background
 
   //@{
 
+  double a_ini_over_a_today; /* GFA */
+
   double H0; /**< \f$ H_0 \f$: Hubble parameter (in fact, [\f$H_0/c\f$]) in \f$ Mpc^{-1} \f$ */
 
   double Omega0_g; /**< \f$ \Omega_{0 \gamma} \f$: photons */
@@ -49,8 +59,13 @@ struct background
   double Omega0_lambda; /**< \f$ \Omega_{0_\Lambda} \f$: cosmological constant */
 
   double Omega0_fld; /**< \f$ \Omega_{0 de} \f$: fluid */
+
+  enum equation_of_state fluid_equation_of_state; /**< parametrisation scheme for fluid equation of state */
+  enum neutrino_mass_hierarchy neutrino_hierarchy; /**< neutrino mass hierarchy */
+
   double w0_fld; /**< \f$ w0_{DE} \f$: current fluid equation of state parameter */
   double wa_fld; /**< \f$ wa_{DE} \f$: fluid equation of state parameter derivative */
+  double Omega_EDE; /**< \f$ wa_{DE} \f$: Early Dark Energy density parameter */
 
   double cs2_fld; /**< \f$ c^2_{s~DE} \f$: sound speed of the fluid
 		     in the frame comoving with the fluid (so, this is
@@ -68,14 +83,17 @@ struct background
   double Omega0_ur; /**< \f$ \Omega_{0 \nu r} \f$: ultra-relativistic neutrinos */
 
   double Omega0_dcdmdr; /**< \f$ \Omega_{0 dcdm}+\Omega_{0 dr} \f$: decaying cold dark matter (dcdm) decaying to dark radiation (dr) */
+  double Omega0_dcdmdrwdm; /**< \f$ GFA: \Omega_{0 dcdm}+\Omega_{0 dr}+\Omega_{0 wdm} \f$: decaying cold dark matter (dcdm) decaying to dark radiation (dr) and warm dark matter (wdm) */
 
   double Gamma_dcdm; /**< \f$ \Gamma_{dcdm} \f$: decay constant for decaying cold dark matter */
-  double Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: decay constant for decaying neutrinos */
+  double * Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: list of decay constant for decaying neutrinos */
   double M_dcdm; /**< \f$ M_{dcdm} \f$: mass [GeV] of the  decaying cold dark matter */
   double m_dcdm; /**< \f$ m_{dcdm} \f$: mass [GeV] of the  daugher particle */
-
+  double epsilon_dcdm; /**< \f$ epsilon_{dcdm} \f$: fraction of mass energy converted to the daughter radiation */
+  double * PDmax_dcdm; /**< Max impulsion given to the daugher particles */
   double Omega_ini_dcdm;    /**< \f$ \Omega_{ini,dcdm} \f$: rescaled initial value for dcdm density (see 1407.2418 for definitions) */
-
+  double Omega_ini_dcdm2;    /**< GFA: \f$ \Omega_{ini,dcdm2} \f$: rescaled initial value for dcdm density (two-body decay) */
+  int massive_daugther_is_radiation; /** for debugging massive_daughter */     /** 0: no; 1: yes in background; 2: yes in background & perts */
   double Omega0_scf;        /**< \f$ \Omega_{0 scf} \f$: scalar field */
   short attractor_ic_scf;   /**< whether the scalar field has attractor initial conditions */
   double phi_ini_scf;       /**< \f$ \phi(t_0) \f$: scalar field initial value */
@@ -142,9 +160,15 @@ struct background
   double * m_ncdm_in_eV; /**< list of ncdm masses in eV (inferred from M_ncdm and other parameters above) */
   double Neff; /**< so-called "effective neutrino number", computed at earliest time in interpolation table */
   double Omega0_dcdm; /**< \f$ \Omega_{0 dcdm} \f$: decaying cold dark matter */
+  double Omega0_wdm; /**< GFA \f$ \Omega_{0 wdm} \f$:  wdm daughter */
   double Omega0_dr; /**< \f$ \Omega_{0 dr} \f$: decay radiation */
-
-
+  double Omega0_m; /* total matter today */
+  double rho0_wdm_over_rho0_m; /**< GFA  fraction of wdm density compared to the total matter density (evaluated today)*/
+  double a_eq;      /**< scale factor at radiation/matter equality */
+  double H_eq;      /**< Hubble rate at radiation/matter equality [Mpc^-1] */
+  double z_eq;      /**< redshift at radiation/matter equality */
+  double tau_eq;    /**< conformal time at radiation/matter equality [Mpc] */
+  double k_fss_wdm; /* GFA */
   //@}
 
   /** @name - other background parameters */
@@ -276,6 +300,7 @@ struct background
   short has_dr;        /**< presence of relativistic decay radiation? */
   short has_scf;       /**< presence of a scalar field? */
   short has_ncdm;      /**< presence of non-cold dark matter? */
+  short has_decaying_neutrinos;  /**< presence of decaying neutrinos? */
   short has_lambda;    /**< presence of cosmological constant? */
   short has_fld;       /**< presence of fluid with constant w and cs2? */
   short has_ur;        /**< presence of ultra-relativistic neutrinos/relics? */
@@ -290,6 +315,7 @@ struct background
 
   //@{
   int * ncdm_quadrature_strategy; /**< Vector of integers according to quadrature strategy. */
+  int * ncdm_input_q_size_bg; /**< Vector of numbers of q bins */
   int * ncdm_input_q_size; /**< Vector of numbers of q bins */
   double * ncdm_qmax;   /**< Vector of maximum value of q */
   double ** q_ncdm_bg;  /**< Pointers to vectors of background sampling in q */
@@ -301,6 +327,8 @@ struct background
   int * q_size_ncdm_bg; /**< Size of the q_ncdm_bg arrays */
   int * q_size_ncdm;    /**< Size of the q_ncdm arrays */
   double * factor_ncdm; /**< List of normalization factors for calculating energy density etc.*/
+  double ** tq_table;  /**< Pointers to vectors of time at mom q */
+  double ** Hq_table;  /**< Pointers to vectors of hubble rate at mom q */
 
   //@}
 
@@ -422,6 +450,10 @@ extern "C" {
                             struct background *pba
                             );
 
+  int background_free_noinput(
+                    struct background *pba
+                    );
+
   int background_indices(
 			 struct background *pba
 			 );
@@ -452,8 +484,10 @@ extern "C" {
                              double M,
                              double factor,
                              int background_ncdm_distribution,
+                             int n_ncdm,
                              double z,
                              double t,
+                             double H,
                              double * n,
 		                         double * rho,
                              double * p,
@@ -478,6 +512,11 @@ extern "C" {
 				    double * pvecback,
 				    double * pvecback_integration
 				    );
+
+  int background_find_equality(
+                               struct precision *ppr,
+                               struct background *pba
+                               );
 
   int background_output_titles(struct background * pba,
                                char titles[_MAXTITLESTRINGLENGTH_]
@@ -542,7 +581,7 @@ extern "C" {
 
 /* parameters entering in Stefan-Boltzmann constant sigma_B */
 #define _k_B_ 1.3806504e-23 // in J/K
-#define _h_P_ 6.62606896e-34
+#define _h_P_ 6.62606896e-34 //in Js
 /* remark: sigma_B = 2 pi^5 k_B^4 / (15h^3c^2) = 5.670400e-8
                    = Stefan-Boltzmann constant in W/m^2/K^4 = Kg/K^4/s^3 */
 
