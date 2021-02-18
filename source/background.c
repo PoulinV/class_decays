@@ -785,7 +785,7 @@ int background_free(
   free(pba->background_table);
   free(pba->d2background_dtau2_table);
 
-  // if(pba->free_input_parameters == _TRUE_)
+  if(pba->free_input_parameters == _TRUE_)//important for decaying neutrinos
   err = background_free_input(pba);
 
   return err;
