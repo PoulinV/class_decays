@@ -1773,7 +1773,7 @@ int background_ncdm_momenta(
         if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q];
       }
 
-
+      // if (n!=NULL)printf(" n %e\n",  *n);
       // printf("%e %e %e\n",q2,wvec[index_q],factor2);
     }
   }
@@ -1785,6 +1785,8 @@ int background_ncdm_momenta(
   }
 
   if (n!=NULL) *n *= factor2/(1.+z);
+  if (n!=NULL && background_ncdm_distribution == _decaying_neutrinos_) *n *= 1/(pba->T_cmb*0.71*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_); //one extra factor of 2pi is weird...
+
   if (rho!=NULL) *rho *= factor2;
   if (p!=NULL) *p *= factor2;
   if (drho_dM!=NULL) *drho_dM *= factor2;
@@ -2728,9 +2730,10 @@ int background_derivs(
     dy[pba->index_bi_rho_dr] = -4.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*y[pba->index_bi_rho_dr];
     if(pba->has_dcdm == _TRUE_)
       dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm]*pba->epsilon_dcdm;
+  for(n_ncdm = 0; n_ncdm<pba->N_ncdm; n_ncdm++){
     if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos[n_ncdm] > 0){
       // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
-      for(n_ncdm = 0; n_ncdm<pba->N_ncdm; n_ncdm++){
+
         if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
           dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;///_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ convert from eV to 1/Mpc. One extra factor of 1/2pi is weird.
           // printf("pvecback[pba->index_bg_rho_ncdm1] %e pvecback[pba->index_bg_n_ncdm1]*pba->M_ncdm[n_ncdm] %e _eV_/_h_P_/2./_PI_*_c_/_Mpc_over_m_ %e\n",pvecback[pba->index_bg_rho_ncdm1+n_ncdm],pvecback[pba->index_bg_n_ncdm1]*pba->m_ncdm_in_eV[n_ncdm]*1.56e+29,_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);

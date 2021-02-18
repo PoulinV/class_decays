@@ -559,7 +559,7 @@ int input_read_parameters(
   double z_max=0.;
   int bin;
   int input_verbose=0;
-
+  double delta_m_squared_sol, delta_m_squared_atm;
   sigma_B = 2. * pow(_PI_,5) * pow(_k_B_,4) / 15. / pow(_h_P_,3) / pow(_c_,2);
 
   /** - set all parameters (input and precision) to default values */
@@ -1125,10 +1125,20 @@ int input_read_parameters(
       flag2=_FALSE_;
       if (strcmp(string1,"inverted") == 0) {
         pba->neutrino_hierarchy = inverted;
+        delta_m_squared_sol = 7.50e-5;
+        delta_m_squared_atm = -2.524e-3;
+        pba->m_ncdm_in_eV[1] =  pow((delta_m_squared_sol + pow(pba->m_ncdm_in_eV[0],2.)),0.5);
+        pba->m_ncdm_in_eV[2] =  pow((delta_m_squared_atm +  pow(pba->m_ncdm_in_eV[0],2.)),0.5);
+        if (input_verbose > 0)printf("sum m_nu = %e\n",pba->m_ncdm_in_eV[0]+pba->m_ncdm_in_eV[1]+pba->m_ncdm_in_eV[2]);
         flag2 =_TRUE_;
       }
       if (strcmp(string1,"normal") == 0) {
         pba->neutrino_hierarchy = normal;
+          delta_m_squared_sol = 7.50e-5;
+          delta_m_squared_atm = 2.524e-3;
+          pba->m_ncdm_in_eV[1] =  pow((delta_m_squared_sol + pow(pba->m_ncdm_in_eV[0],2.)),0.5);
+          pba->m_ncdm_in_eV[2] =  pow((delta_m_squared_atm +  pow(pba->m_ncdm_in_eV[0],2.)),0.5);
+          if (input_verbose > 0)printf("sum m_nu = %e\n",pba->m_ncdm_in_eV[0]+pba->m_ncdm_in_eV[1]+pba->m_ncdm_in_eV[2]);
         flag2 =_TRUE_;
       }
       if (strcmp(string1,"degenerate") == 0) {
@@ -1156,6 +1166,7 @@ int input_read_parameters(
           else if(pba->neutrino_hierarchy == normal || pba->neutrino_hierarchy == degenerate){
             pba->Gamma_neutrinos[0] = pow(pba->m_ncdm_in_eV[0]/pba->m_ncdm_in_eV[2],3)*pba->Gamma_neutrinos[2];
             pba->Gamma_neutrinos[1] = pow(pba->m_ncdm_in_eV[1]/pba->m_ncdm_in_eV[2],3)*pba->Gamma_neutrinos[2];
+            if (input_verbose > 0)printf("sum m_nu = %e\n",pba->m_ncdm_in_eV[0]+pba->m_ncdm_in_eV[1]+pba->m_ncdm_in_eV[2]);
           }
       }
     }
