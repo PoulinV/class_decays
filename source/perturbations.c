@@ -7405,7 +7405,7 @@ int perturb_derivs(double tau,
             //non relat limit
             // fprime_dr = pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)*pow(a,5)/pow(pba->H0,2); //the cold dark matter limit
             // dy[pv->index_pt_F0_dr] +=  fprime_dr*(ppw->delta_ncdm[n_ncdm]+metric_euler/k2);
-            // dy[pv->index_pt_F0_dr+1] += pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*pow(a,5)/pow(pba->H0,2)/k*ppw->theta_ncdm[n_ncdm];
+            dy[pv->index_pt_F0_dr+1] += pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*pow(a,5)/pow(pba->H0,2)/k*ppw->theta_ncdm[n_ncdm];
             //relativistic case
             // for (l = 0; l < pv->l_max_ncdm[n_ncdm]; l++) {
             // for (l = 0; l < 1; l++) {
