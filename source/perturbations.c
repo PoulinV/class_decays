@@ -5603,7 +5603,7 @@ int perturb_total_stress_energy(
                 // printf("init %e \n", ppw->N_ncdm_perts[n_ncdm][l]);
                 //we compute additional variables to be used in the dr Boltzmann hierarchy
                 for(l = 0; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
-                  ppw->N_ncdm_perts[n_ncdm][l] += q2*pba->w_ncdm[n_ncdm][index_q]*y[idx+l]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
+                  ppw->N_ncdm_perts[n_ncdm][l] += q2*pow(q,l)*pba->w_ncdm[n_ncdm][index_q]*y[idx+l]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
                   // if(pow(ppw->N_ncdm_perts[n_ncdm][l]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_,2)>pow(rho_delta_ncdm*factor,2))printf("a %e %d %e %e \n",a,l, ppw->N_ncdm_perts[n_ncdm][l]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_,rho_delta_ncdm*factor);
                 }
               }
@@ -7405,11 +7405,14 @@ int perturb_derivs(double tau,
             //non relat limit
             // fprime_dr = pba->Gamma_neutrinos*(pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)*pow(a,5)/pow(pba->H0,2); //the cold dark matter limit
             // dy[pv->index_pt_F0_dr] +=  fprime_dr*(ppw->delta_ncdm[n_ncdm]+metric_euler/k2);
-            // dy[pv->index_pt_F0_dr+1] += fprime_dr/k*ppw->theta_ncdm[n_ncdm];
+            // dy[pv->index_pt_F0_dr+1] += pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*pow(a,5)/pow(pba->H0,2)/k*ppw->theta_ncdm[n_ncdm];
             //relativistic case
-            for (l = 0; l < pv->l_max_ncdm[n_ncdm]; l++) {
-              dy[pv->index_pt_F0_dr+l] +=  a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][l]/pow(pba->H0,2)*pow(a,3); //pow(pba->H0,2)=rho_crit_today in CLASS units.//weird: extra factor of a^3, otherwise does not match the non-relat limit.
-            }
+            // for (l = 0; l < pv->l_max_ncdm[n_ncdm]; l++) {
+            // for (l = 0; l < 1; l++) {
+              dy[pv->index_pt_F0_dr] +=  a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][0]/pow(pba->H0,2)*pow(a,3); //pow(pba->H0,2)=rho_crit_today in CLASS units.//weird: extra factor of a^3, otherwise does not match the non-relat limit.
+              // dy[pv->index_pt_F0_dr+1] +=  a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][1]/pow(pba->H0,2)*pow(a,3); //pow(pba->H0,2)=rho_crit_today in CLASS units.//weird: extra factor of a^3, otherwise does not match the non-relat limit.
+              // dy[pv->index_pt_F0_dr+1] +=  pba->Gamma_neutrinos*a*ppw->N_ncdm_perts[n_ncdm][1]/pow(pba->H0,2)*pow(a,3); //pow(pba->H0,2)=rho_crit_today in CLASS units.//weird: extra factor of a^3, otherwise does not match the non-relat limit.
+            // }
           }
         }
       }
