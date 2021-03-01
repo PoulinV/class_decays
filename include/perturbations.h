@@ -100,6 +100,7 @@ struct perturbs
    *  'thermodynamics' structures) */
 
   //@{
+  double include_new_term_decay_neutrinos; //new VP: 1 or 0 to include new decay term in decaying neutrinos daughter radiation.
 
   short has_perturbations; /**< do we need to compute perturbations at all ? */
 
@@ -122,6 +123,7 @@ struct perturbs
   /** Do we want the time table to be identical to background? */
   /** default = FALSE */
   short tau_table_like_background;
+  short include_ncdm_perts;
   /** Neutrino contribution to tensors */
   enum tensor_methods tensor_method;  /**< way to treat neutrinos in tensor perturbations(neglect, approximate as massless, take exact equations) */
 

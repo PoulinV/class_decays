@@ -1033,6 +1033,23 @@ int input_read_parameters(
     //            errmsg,
     //            errmsg);
 
+    class_call(parser_read_string(pfc,
+                                  "include_ncdm_perts",
+                                  &(string1),
+                                  &(flag1),
+                                  errmsg),
+               errmsg,
+               errmsg);
+   if (flag1 == _TRUE_){
+    if ((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)) {
+      ppt->include_ncdm_perts = _TRUE_;
+    }else{
+      ppt->include_ncdm_perts = _FALSE_;
+    }
+  }else{
+    ppt->include_ncdm_perts = _TRUE_;
+  }
+
 
     class_call(parser_read_string(pfc,"print_ncdm_distribution",&string1,&flag1,errmsg),
                errmsg,
@@ -1067,6 +1084,7 @@ int input_read_parameters(
     }
 
     class_read_double("convergence_tol_decaying_neutrinos",pba->convergence_tol_decaying_neutrinos);
+    class_read_double("include_new_term_decay_neutrinos",ppt->include_new_term_decay_neutrinos);//1 or 0
 
     /* Quadrature modes, 0 is qm_auto. */
     class_read_list_of_integers_or_default("Quadrature strategy",pba->ncdm_quadrature_strategy,0,N_ncdm);
@@ -3394,6 +3412,7 @@ int input_default_params(
   pba->Gamma_neutrinos = NULL;
   pba->neutrino_hierarchy = degenerate;
   pba->convergence_tol_decaying_neutrinos = 1e-3;
+  ppt->include_new_term_decay_neutrinos = 1;
   pba->loop_over_background = _FALSE_;
   pba->M_dcdm = 0.0;
   pba->m_dcdm = 0.0;
