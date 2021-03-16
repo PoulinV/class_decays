@@ -3821,8 +3821,10 @@ int loop_over_background(struct background * pba,
     for(n_ncdm = 0;n_ncdm < pba->N_ncdm;n_ncdm ++){
       if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_ || pba->background_ncdm_distribution[n_ncdm]==_massive_daughter_){
         // printf("pba->Omega0_ncdm[n_ncdm] %e Old_Omega_neutrinos %e Omega_tot_neutrinos %e\n",pba->Omega0_ncdm[n_ncdm],Old_Omega_neutrinos,pba->Omega0_ncdm_tot);
-        if(Old_Omega_neutrinos!=0.0)convergence = fabs(pba->Omega0_ncdm[n_ncdm]/Old_Omega_neutrinos-1);
+        if(Old_Omega_neutrinos!=0 && Old_Omega_neutrinos!=pba->Omega0_ncdm[n_ncdm])convergence = fabs(pba->Omega0_ncdm[n_ncdm]/Old_Omega_neutrinos-1);
         else convergence = 0;
+
+        if(isinf(convergence))convergence=0;
       }
     }
     if(convergence<=pba->convergence_tol_decaying_neutrinos){
