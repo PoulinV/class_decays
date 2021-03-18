@@ -1274,6 +1274,7 @@ int input_read_parameters(
                                                  &rho_ncdm,
                                                  NULL,
                                                  NULL,
+                                                 NULL,
                                                  NULL),
                          pba->error_message,
                          errmsg);
@@ -1321,12 +1322,13 @@ int input_read_parameters(
                                                  &rho_ncdm,
                                                  NULL,
                                                  NULL,
+                                                 NULL,
                                                  NULL),
                          pba->error_message,
                          errmsg);
                pba->Omega0_ncdm[n] = rho_ncdm/pba->H0/pba->H0; //placeholder
-               pba->Omega0_ncdm_tot += 1e-15;//ignore ncdm for simplicity
-               /* GFA: maybe we should actually consider it, in order to properly compute Omega_matter */
+               pba->Omega0_ncdm_tot += 1e-15;//ignore ncdm
+
             }
             else if(pba->background_ncdm_distribution[n] == _decaying_neutrinos_){
               pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
@@ -1348,6 +1350,7 @@ int input_read_parameters(
                                                  &rho_ncdm,
                                                  NULL,
                                                  NULL,
+                                                 NULL,
                                                  NULL),
                          pba->error_message,
                          errmsg);
@@ -1355,7 +1358,6 @@ int input_read_parameters(
                // pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//ignore ncdm for simplicity
               // printf("pba->M_ncdm[n] %e \n", pba->M_ncdm[n]);
               // printf("IM HERE %e \n",pba->Omega0_ncdm[n]);
-//
             }
 
     }

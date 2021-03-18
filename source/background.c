@@ -262,7 +262,7 @@ int background_functions(
   /* scale factor relative to scale factor today */
   double a_rel;
   /* background ncdm quantities */
-  double num_ncdm,rho_ncdm,p_ncdm,pseudo_p_ncdm;
+  double num_ncdm,rho_ncdm,p_ncdm,pseudo_p_ncdm, pseudo_n_ncdm;
   double rho_dcdm;
   /* index for n_ncdm species */
   int n_ncdm;
@@ -386,7 +386,8 @@ int background_functions(
                                              &rho_ncdm,
                                              &p_ncdm,
                                              NULL,
-                                             &pseudo_p_ncdm),
+                                             &pseudo_p_ncdm,
+                                             &pseudo_n_ncdm),
                      pba->error_message,
                      pba->error_message);
 
@@ -414,6 +415,11 @@ int background_functions(
           pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
           pvecback[pba->index_bg_p_ncdm1+n_ncdm] = p_ncdm;
           pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm] = pseudo_p_ncdm;
+          if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+            pvecback[pba->index_bg_pseudo_n_ncdm1+n_ncdm] = pseudo_n_ncdm; // GFA
+          }
+
+
 
           rho_tot += rho_ncdm;
           p_tot += p_ncdm;
@@ -733,6 +739,7 @@ if (pba->background_verbose > 0) { /* GFA: now this has to be called at the end 
                                   &rho_ncdm_rel,
                                   NULL,
                                   NULL,
+                                  NULL,
                                   NULL);
 
         /* inform user of the contribution of each species to
@@ -991,6 +998,7 @@ if (pba->Omega0_dcdmdr != 0.){ /* GFA */
   class_define_index(pba->index_bg_rho_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_p_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_pseudo_p_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
+  class_define_index(pba->index_bg_pseudo_n_ncdm1,pba->has_decaying_neutrinos,index_bg,pba->N_ncdm); // GFA
 
   /* - index for dcdm */
   class_define_index(pba->index_bg_rho_dcdm,pba->has_dcdm,index_bg,1);
@@ -1680,7 +1688,8 @@ int background_ncdm_momenta(
                             double * rho, // density
                             double * p,   // pressure
                             double * drho_dM,  // d rho / d M used in next function
-                            double * pseudo_p  // pseudo-p used in ncdm fluid approx
+                            double * pseudo_p,  // pseudo-p used in ncdm fluid approx
+                            double * pseudo_n  // GFA: pseudo-n used in ncdm fluid approx (only for decaying neutrinos)
                             ) {
 
   int index_q;
@@ -1703,6 +1712,7 @@ int background_ncdm_momenta(
   if (p!=NULL) *p = 0.;
   if (drho_dM!=NULL) *drho_dM = 0.;
   if (pseudo_p!=NULL) *pseudo_p = 0.;
+  if (pseudo_n!=NULL) *pseudo_n = 0.;
 
   /** - loop over momenta */
   for (index_q=0; index_q<qsize; index_q++) {
@@ -1743,6 +1753,7 @@ int background_ncdm_momenta(
         if (p!=NULL) *p += q2*q2/3./epsilon*wvec[index_q]*exp_factor;
         if (drho_dM!=NULL) *drho_dM += q2*M/(1.+z)/(1.+z)/epsilon*wvec[index_q]*exp_factor;
         if (pseudo_p!=NULL) *pseudo_p += pow(q2/epsilon,3)/3.0*wvec[index_q]*exp_factor;
+        if (pseudo_n!=NULL) *pseudo_n += pow(q2/epsilon,2)*wvec[index_q]*exp_factor;
       }
       else if(background_ncdm_distribution == _massive_daughter_){
         if(pba->tq_table[n_ncdm][index_q]>0 && pba->tq_table[n_ncdm][index_q]*pba->Gamma_dcdm<1e-3){
@@ -1791,6 +1802,8 @@ int background_ncdm_momenta(
   if (p!=NULL) *p *= factor2;
   if (drho_dM!=NULL) *drho_dM *= factor2;
   if (pseudo_p!=NULL) *pseudo_p *=factor2;
+  if (pseudo_n!=NULL) *pseudo_n *=factor2/(1.+z);
+  if (pseudo_n!=NULL && background_ncdm_distribution == _decaying_neutrinos_) *pseudo_n *= 1/(pba->T_cmb*0.71*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
 
   return _SUCCESS_;
 }
@@ -1830,6 +1843,7 @@ int background_ncdm_M_from_Omega(
                           &rho,
                           NULL,
                           NULL,
+                          NULL,
                           NULL);
 
   /* Is the value of Omega less than a massless species?*/
@@ -1857,6 +1871,7 @@ int background_ncdm_M_from_Omega(
                             &rho,
                             NULL,
                             &drhodM,
+                            NULL,
                             NULL);
 
     deltaM = (rho0-rho)/drhodM; /* By definition of the derivative */
@@ -2284,6 +2299,7 @@ int background_initial_conditions(
                                              NULL,
                                              &rho_ncdm,
                                              &p_ncdm,
+                                             NULL,
                                              NULL,
                                              NULL),
                      pba->error_message,

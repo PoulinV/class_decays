@@ -211,6 +211,7 @@ struct background
   int index_bg_rho_ncdm1;     /**< energy density of first ncdm species (others contiguous) */
   int index_bg_p_ncdm1;       /**< pressure of first ncdm species (others contiguous) */
   int index_bg_pseudo_p_ncdm1;/**< another statistical momentum useful in ncdma approximation */
+  int index_bg_pseudo_n_ncdm1;/**< GFA: another statistical momentum useful in ncdm approximation (only required for decaying neutrinos) */
 
   int index_bg_Omega_r;       /**< relativistic density fraction (\f$ \Omega_{\gamma} + \Omega_{\nu r} \f$) */
 
@@ -492,7 +493,8 @@ extern "C" {
 		                         double * rho,
                              double * p,
                              double * drho_dM,
-			                       double * pseudo_p
+			                       double * pseudo_p,
+                             double * pseudo_n
                              );
 
   int background_ncdm_M_from_Omega(
