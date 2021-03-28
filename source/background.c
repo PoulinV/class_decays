@@ -1748,6 +1748,7 @@ int background_ncdm_momenta(
       /* integrand of the various quantities */
       if(background_ncdm_distribution == _decaying_neutrinos_){
         exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
+      //  printf(" pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t = %e\n",pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t );
         if (n!=NULL) *n += q2*wvec[index_q]*exp_factor;
         if (rho!=NULL) *rho += q2*epsilon*wvec[index_q]*exp_factor;
         if (p!=NULL) *p += q2*q2/3./epsilon*wvec[index_q]*exp_factor;

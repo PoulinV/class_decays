@@ -5819,8 +5819,12 @@ int perturb_total_stress_energy(
           rho_ncdm_bg = ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
           p_ncdm_bg = ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm];
           pseudo_p_ncdm = ppw->pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm];
-          rho_plus_p_ncdm = rho_ncdm_bg + p_ncdm_bg;
           w_ncdm = p_ncdm_bg/rho_ncdm_bg;
+          if (w_ncdm < 0) {
+            p_ncdm_bg = 1e-18;
+            pseudo_p_ncdm = 1e-30;
+          }
+          rho_plus_p_ncdm = rho_ncdm_bg + p_ncdm_bg;
           H = ppw->pvecback[pba->index_bg_H];
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
@@ -5837,6 +5841,10 @@ int perturb_total_stress_energy(
             mass_nu = pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;
             nu_ncdm = ppw->pvecback[pba->index_bg_n_ncdm1+n_ncdm];
             cg2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)+(gamma/(3.0*w_ncdm*H))*pseudo_n_ncdm*mass_nu/rho_ncdm_bg)/(3.0*(1.0+w_ncdm)+(gamma/H)*nu_ncdm*mass_nu/rho_ncdm_bg);
+            if (w_ncdm < 0) {
+              w_ncdm = 1e-15;
+              cg2_ncdm = (5./3.)*w_ncdm;
+            }
             w_delta_nu= (27.0/64.0)*w_ncdm*pow(1.0+w_ncdm,3);
             ppw->N_ncdm_perts[n_ncdm][0] = (1.0-3.0*w_delta_nu)*rho_ncdm_bg*y[idx]/mass_nu;
             ppw->N_ncdm_perts[n_ncdm][0] *= 1/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
@@ -7163,6 +7171,12 @@ int perturb_print_variables(double tau,
                 mass_nu = pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;
                 nu_ncdm = ppw->pvecback[pba->index_bg_n_ncdm1+n_ncdm];
                 ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)+(gamma/(3.0*w_ncdm*H))*pseudo_n_ncdm*mass_nu/rho_ncdm_bg)/(3.0*(1.0+w_ncdm)+(gamma/H)*nu_ncdm*mass_nu/rho_ncdm_bg);
+                if (w_ncdm < 0) {
+                  w_ncdm = 1e-15;
+                  ca2_ncdm = (5./3.)*w_ncdm;
+                  pseudo_p_ncdm = 1e-30;
+                  p_ncdm_bg = 1e-18;
+                }
                 k_fss_wdm[n_ncdm] = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
           } else {
                 rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm];
@@ -7257,6 +7271,12 @@ int perturb_print_variables(double tau,
                   mass_nu = pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;
                   nu_ncdm = ppw->pvecback[pba->index_bg_n_ncdm1+n_ncdm];
                   ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)+(gamma/(3.0*w_ncdm*H))*pseudo_n_ncdm*mass_nu/rho_ncdm_bg)/(3.0*(1.0+w_ncdm)+(gamma/H)*nu_ncdm*mass_nu/rho_ncdm_bg);
+                  if (w_ncdm < 0) {
+                    w_ncdm = 1e-15;
+                    ca2_ncdm = (5./3.)*w_ncdm;
+                    pseudo_p_ncdm = 1e-30;
+                    p_ncdm_bg = 1e-18;
+                  }
                   k_fss_wdm[n_ncdm] = sqrt(3./2.)*a*H/sqrt(ca2_ncdm);
                   w_trial_1 = 1.0-3.0*((27.0/64.0)*w_ncdm*pow(1.0+w_ncdm,3));
                   w_trial_2 = 1.0-3.0*((3.0/4.0)*w_ncdm*(1.0+w_ncdm));
@@ -8237,8 +8257,6 @@ int perturb_derivs(double tau,
     if (pba->has_ncdm == _TRUE_) {
 
       // printf("here in ncdm\n");
-
-
       idx = pv->index_pt_psi0_ncdm1;
 
       /** - ----> first case: use a fluid approximation (ncdmfa) */
@@ -8255,6 +8273,7 @@ int perturb_derivs(double tau,
           pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm]; /* pseudo-pressure (see CLASS IV paper) */
           w_ncdm = p_ncdm_bg/rho_ncdm_bg; /* equation of state parameter */
           H = pvecback[pba->index_bg_H];
+      //    printf("w_ncdm = %e\n",w_ncdm );
 
           if (pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_) {
            rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
@@ -8285,9 +8304,18 @@ int perturb_derivs(double tau,
              }
            cvis2_ncdm = 3.*w_ncdm*ca2_ncdm;
          } else if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_) {
-           ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)+(gamma/(3.0*w_ncdm*H))*pseudo_n_ncdm*mass_nu/rho_ncdm_bg)/(3.0*(1.0+w_ncdm)+(gamma/H)*nu_ncdm*mass_nu/rho_ncdm_bg);
-          } else {
            ca2_ncdm = w_ncdm/3.0/(1.0+w_ncdm)*(5.0-pseudo_p_ncdm/p_ncdm_bg);
+        //   ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)+(gamma/(3.0*w_ncdm*H))*pseudo_n_ncdm*mass_nu/rho_ncdm_bg)/(3.0*(1.0+w_ncdm)+(gamma/H)*nu_ncdm*mass_nu/rho_ncdm_bg);
+            if (w_ncdm < 0) {
+              w_ncdm = 1e-15;
+              ca2_ncdm = (5./3.)*w_ncdm;
+              pseudo_p_ncdm = 1e-30;
+              p_ncdm_bg = 1e-18;
+            }
+
+
+          } else {
+             ca2_ncdm = w_ncdm/3.0/(1.0+w_ncdm)*(5.0-pseudo_p_ncdm/p_ncdm_bg);
           }
 
           /* c_eff is (delta p / delta rho) in the gauge under
@@ -8395,35 +8423,23 @@ int perturb_derivs(double tau,
 
             /** - -----> continuity equation */
 
-            w_delta_nu = (27.0/64.0)*w_ncdm*pow(1.0+w_ncdm,3);
-
-            dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
-              -3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]
-              -a*gamma*y[idx]*(1.0-3.0*w_delta_nu-nu_ncdm*mass_nu/rho_ncdm_bg);
-
-          //    if ((tau >4.2e3) && (tau < 4.6e3) ) {
-          //      printf("tau = %e\n",tau);
-          //      printf("-(1.0+w_ncdm)*(y[idx+1]+metric_continuity) = %e\n",-(1.0+w_ncdm)*(y[idx+1]+metric_continuity));
-          //      printf("-3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx] = %e\n",-3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx]);
-          //      printf("-a*gamma*y[idx]*(1.0-3.0*w_delta_nu-nu_ncdm*mass_nu/rho_ncdm_bg) = %e\n",-a*gamma*y[idx]*(1.0-3.0*w_delta_nu-nu_ncdm*mass_nu/rho_ncdm_bg));
-          //    }
-
-            /** - ----->  euler equation */
-            w_theta_nu =  (3.0/4.0)*w_ncdm*(1.0+w_ncdm);
-
-            dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
-              ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]+ metric_euler
-              -a*gamma*y[idx+1]*(1.0-3.0*w_theta_nu-((1+ca2_ncdm)/(1.0+w_ncdm))*nu_ncdm*mass_nu/rho_ncdm_bg);
-
-            /** - -----> shear derivative */
-            w_sigma_nu =  (3.0/4.0)*w_ncdm*(1.0+w_ncdm);
-
-            dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau)*y[idx+2]
-              +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*s_l[2]*(y[idx+1]+metric_ufa_class)
-              -a*gamma*y[idx+2]*(1.0-3.0*w_sigma_nu-((1+ca2_ncdm)/(1.0+w_ncdm))*nu_ncdm*mass_nu/rho_ncdm_bg);
+             w_delta_nu = (27.0/64.0)*w_ncdm*pow(1.0+w_ncdm,3);
+             dy[idx] = -(1.0+w_ncdm)*(y[idx+1]+metric_continuity)
+               -3.0*a_prime_over_a*(ceff2_ncdm-w_ncdm)*y[idx];
+             //  -a*gamma*y[idx]*(1.0-3.0*w_delta_nu-nu_ncdm*mass_nu/rho_ncdm_bg);
 
 
+             /** - ----->  euler equation */
+             w_theta_nu =  (3.0/4.0)*w_ncdm*(1.0+w_ncdm);
+             dy[idx+1] = -a_prime_over_a*(1.0-3.0*ca2_ncdm)*y[idx+1]+
+               ceff2_ncdm/(1.0+w_ncdm)*k2*y[idx]-k2*y[idx+2]+ metric_euler;
+             //  -a*gamma*y[idx+1]*(1.0-3.0*w_theta_nu-((1+ca2_ncdm)/(1.0+w_ncdm))*nu_ncdm*mass_nu/rho_ncdm_bg);
 
+             /** - -----> shear derivative */
+             w_sigma_nu =  (3.0/4.0)*w_ncdm*(1.0+w_ncdm);
+             dy[idx+2] = -3.0*(a_prime_over_a*(2./3.-ca2_ncdm-pseudo_p_ncdm/p_ncdm_bg/3.)+1./tau)*y[idx+2]
+               +8.0/3.0*cvis2_ncdm/(1.0+w_ncdm)*s_l[2]*(y[idx+1]+metric_ufa_class);
+             //  -a*gamma*y[idx+2]*(1.0-3.0*w_sigma_nu-((1+ca2_ncdm)/(1.0+w_ncdm))*nu_ncdm*mass_nu/rho_ncdm_bg);
 
           } else {
             /** - -----> exact continuity equation */
