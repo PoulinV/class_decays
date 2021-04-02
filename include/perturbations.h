@@ -101,6 +101,7 @@ struct perturbs
 
   //@{
   double include_new_term_decay_neutrinos; //new VP: 1 or 0 to include new decay term in decaying neutrinos daughter radiation.
+  double include_fluid_decay_term_neutrinos; // GFA: 1 or 0 to include extra decay term in fluid eqs for decaying neutrinos.
 
   short has_perturbations; /**< do we need to compute perturbations at all ? */
 

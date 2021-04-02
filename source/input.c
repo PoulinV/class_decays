@@ -1085,6 +1085,7 @@ int input_read_parameters(
 
     class_read_double("convergence_tol_decaying_neutrinos",pba->convergence_tol_decaying_neutrinos);
     class_read_double("include_new_term_decay_neutrinos",ppt->include_new_term_decay_neutrinos);//1 or 0
+    class_read_double("include_fluid_decay_term_neutrinos",ppt->include_fluid_decay_term_neutrinos);//1 or 0
 
     /* Quadrature modes, 0 is qm_auto. */
     class_read_list_of_integers_or_default("Quadrature strategy",pba->ncdm_quadrature_strategy,0,N_ncdm);
@@ -3415,6 +3416,7 @@ int input_default_params(
   pba->neutrino_hierarchy = degenerate;
   pba->convergence_tol_decaying_neutrinos = 1e-3;
   ppt->include_new_term_decay_neutrinos = 1;
+  ppt->include_fluid_decay_term_neutrinos = 0;
   pba->loop_over_background = _FALSE_;
   pba->M_dcdm = 0.0;
   pba->m_dcdm = 0.0;
