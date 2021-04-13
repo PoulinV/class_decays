@@ -18,8 +18,6 @@ fpk_LCDM = interp1d(pkk[:,0], pkk[:,1])
 
 #%%
 
-
-
 # WITH NEW FITTING FORMULA FOR THE SOUND SPEED
 data = np.zeros([4,3])
 data[0,0]= (0.78458/0.78459)-1.0

@@ -3780,9 +3780,11 @@ int loop_over_background(struct background * pba,
                          struct precision * ppr){
   double convergence, Omega_tot, Old_Omega_neutrinos;
   int n_ncdm;
+  int iter; // GFA
   convergence = 1;
   Old_Omega_neutrinos = 0;
   Omega_tot = 0;
+  iter = 0;
 
 
   while(fabs(convergence) > pba->convergence_tol_decaying_neutrinos){
@@ -3842,7 +3844,17 @@ int loop_over_background(struct background * pba,
       // printf("Omega0_ncdm_tot %e Omega0_dr %e\n",pba->Omega0_ncdm_tot, pba->Omega0_dr);
       pba->Omega0_lambda = 1. - pba->Omega0_k - Omega_tot;
     }
-    if(pba->background_verbose>0)printf("New Omega_lambda = %e, convergence = %e\n", pba->Omega0_lambda, convergence);
+    iter += 1;
+    if(pba->background_verbose>0)printf("New Omega_lambda = %e, convergence = %e, iterations =%d\n", pba->Omega0_lambda, convergence, iter);
+
+    if (iter > 5) {
+      // GFA: Tipically convergence is reached very soon (in 2-3 iterations), if iter >5, most likely the loop will continue during many more iterations until CLASS crashes
+      // This could happen because we're close to an inflection point, so iterations progressively diverge from the root
+      // This happens only for lifetimes of the order of the age of the universe (Gamma \sim H0) and big neutrino masses ( sum m_\nu > 0.3 eV)
+      // To handle this, simply escape the loop and keep the current value of Omega_Lambda
+      // A better solution could be found, but in any case this happens for values highly excluded by data
+      break;
+    }
 
   }
 
