@@ -1748,8 +1748,16 @@ int background_ncdm_momenta(
       /* integrand of the various quantities */
       if(background_ncdm_distribution == _decaying_neutrinos_){
         exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
-        if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>230) {
-          exp_factor = exp(-230);
+        if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
+          // GFA: When Gamma_neutrinos is very high (equal or bigger than 10^5 km/s/Mpc), at late times the exponential
+          // factor becomes so tiny that it is difficult to handle it numerically. This produces weird
+          // results such as negative w_ncdm, making the fluid equation to crash. In order to avoid this,
+          // we simply force the exponential to get frozen  when its argument reaches a certain threshold.
+          // This makes w_ncdm and the fluid eqs to behave normally. It shouldn't be a problem, because once
+          // the neutrinos have decayed, it doesn't matter whether the neutrino density is of order 10^{-150}
+          // or 10^{-250}, what matters is that in practice it is so small that terms like rho*delta
+          // vanish in the perturbation equations (so evolution of neutrino perts after decay is irrelevant)
+          exp_factor = exp(-150);
         }
 
         if (n!=NULL) *n += q2*wvec[index_q]*exp_factor;
