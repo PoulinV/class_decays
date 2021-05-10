@@ -2,8 +2,12 @@
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import numpy as np
-import matplotlib.gridspec as gridspec
 from scipy.interpolate import interp1d
+
+#from matplotlib import rc
+#rc('font',**{'family':'serif','serif':['Palatino']})
+#rc('text', usetex=True)
+plt.rcParams["figure.figsize"] = [3.0,8.0]
 
 #%%
 ############################################# get LCDM reference #############
@@ -17,8 +21,6 @@ pkk = data[0]
 fpk_LCDM = interp1d(pkk[:,0], pkk[:,1])
 
 #%%
-
-
 
 # WITH NEW FITTING FORMULA FOR THE SOUND SPEED
 data = np.zeros([4,3])
@@ -62,30 +64,30 @@ y_end = 1.5
 
 
 extent = [x_start, x_end, y_start, y_end]
+if False:
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-
-ax.set_xlabel(r'$\mathrm{Log}_{10}(\Gamma / H_0)$', fontsize =15)
-ax.set_ylabel(r'$\mathrm{Log}_{10}(\varepsilon)$', fontsize = 15)
-ax.set_title(r'$S_8^{\mathrm{approx}}/S_8^{\mathrm{full}} -1$', fontsize = 20, pad=15)
+    ax.set_xlabel(r'$\mathrm{Log}_{10}(\Gamma / H_0)$', fontsize =15)
+    ax.set_ylabel(r'$\mathrm{Log}_{10}(\varepsilon)$', fontsize = 15)
+    ax.set_title(r'$S_8^{\mathrm{approx}}/S_8^{\mathrm{full}} -1$', fontsize = 20, pad=15)
 
 #ax.tick_params(axis="x", labelsize=15)
 #ax.tick_params(axis="y", labelsize=15)
 
-plt.locator_params(axis='x', nbins=3)
+    plt.locator_params(axis='x', nbins=3)
 
 
-ax.set_yticks([-1.6,-0.7,0.2,1.1])
-ax.set_yticklabels(['$-3$','$-2$','$-1$','$-0.30103$'])
+    ax.set_yticks([-1.6,-0.7,0.2,1.1])
+    ax.set_yticklabels(['$-3$','$-2$','$-1$','$-0.30103$'])
 
+    plt.locator_params(axis='y', nbins=4)
+   
+    im = ax.imshow(data, extent=extent, origin='upper', interpolation='none', cmap='viridis')
 
-plt.locator_params(axis='y', nbins=4)
-
-im = ax.imshow(data, extent=extent, origin='upper', interpolation='none', cmap='viridis')
-
-fig.colorbar(im)
-plt.show()
+    fig.colorbar(im)
+    plt.show()
 
 
 #%% OBTAIN RESIDUALS IN THE MATTER POWER SPECTRUM TODAY
@@ -296,212 +298,537 @@ pkz0_approx_warm2_g10H0 = interp1d(pk12b[:,0], pk12b[:,1])
 #%%  TIME TO PLOT
 #k = pk1[:,0]
 
+if False:
+
+    fig, (ax_1, ax_2) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]})
+
+    plt.subplots_adjust(wspace=0)
 
 
-fig, (ax_1, ax_2) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]})
+    k = np.logspace(-4,0,1000) # k in h/Mpc
 
-plt.subplots_adjust(wspace=0)
 
+    ax_1.set_xscale('log')
+
+    ax_1.set_xlim(k[0],k[-1])
+    ax_1.set_ylim(-0.075,0.075)
+
+    ax_1.plot(k,(pkz0_approx_hot_g0p1H0(k)-pkz0_full_hot_g0p1H0(k))/fpk_LCDM(k),'red')
+    ax_1.plot(k,(pkz0_approx_hot_gH0(k)-pkz0_full_hot_gH0(k))/fpk_LCDM(k),'red',linestyle='dotted')
+    ax_1.plot(k,(pkz0_approx_hot_g10H0(k)-pkz0_full_hot_g10H0(k))/fpk_LCDM(k),'red',linestyle='dashed')
+    ax_1.plot(k,(pkz0_approx_warm_g0p1H0(k)-pkz0_full_warm_g0p1H0(k))/fpk_LCDM(k),'green')
+    ax_1.plot(k,(pkz0_approx_warm_gH0(k)-pkz0_full_warm_gH0(k))/fpk_LCDM(k),'green',linestyle='dotted')
+    ax_1.plot(k,(pkz0_approx_warm_g10H0(k)-pkz0_full_warm_g10H0(k))/fpk_LCDM(k),'green',linestyle='dashed')
+## ERRORS (ON S_8) IN THIS CASE ARE BIG , BUT SHOULDN'T BE A PROBLEM, EXCLUDED BY PLANCK
+
+    ax_1.plot(k,(pkz0_approx_warm2_g0p1H0(k)-pkz0_full_warm2_g0p1H0(k))/fpk_LCDM(k),'blue')
+    ax_1.plot(k,(pkz0_approx_warm2_gH0(k)-pkz0_full_warm2_gH0(k))/fpk_LCDM(k),'blue',linestyle='dotted')
+    ax_1.plot(k,(pkz0_approx_warm2_g10H0(k)-pkz0_full_warm2_g10H0(k))/fpk_LCDM(k),'blue',linestyle='dashed')
+    ax_1.plot(k,(pkz0_approx_cold_g0p1H0(k)-pkz0_full_cold_g0p1H0(k))/fpk_LCDM(k),'black')
+    ax_1.plot(k,(pkz0_approx_cold_gH0(k)-pkz0_full_cold_gH0(k))/fpk_LCDM(k),'black',linestyle='dotted')
+    ax_1.plot(k,(pkz0_approx_cold_g10H0(k)-pkz0_full_cold_g10H0(k))/fpk_LCDM(k),'black',linestyle='dashed')
+
+    ax_1.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
+    ax_1.set_ylabel(r'$(P_{\mathrm{approx}}-P_{\mathrm{full}})/P_{\Lambda\mathrm{CDM}}$', fontsize=20)
+    ax_1.set_title(r'$z=0$',fontsize=15)
+
+
+    k_range_sigma8 = np.linspace(0.1,0.9,1000) #which are the exact wavenumbers probed by DES-Y1?
+    ax_1.fill_between(k_range_sigma8, -0.2,0.2, color='lightgray' )
+    
+    lines = ax_1.get_lines()
+    
+    black_line1 = mlines.Line2D([], [], color='black', linestyle='solid', label=r'$\Gamma = 0.1 H_0$')
+    black_line2 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$\Gamma = H_0$')
+    black_line3 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$\Gamma = 10 H_0$')
+    
+    legend1 = ax_1.legend([lines[i] for i in [0,3,6,9]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc='lower left', fontsize=13, frameon=False)
+    legend2 = ax_1.legend(handles= [black_line1,black_line2,black_line3], loc='upper left', fontsize=13, frameon=False)
+    
+
+    ax_1.add_artist(legend1)
+    ax_1.add_artist(legend2)
+    
+    ax_1.tick_params(axis="x", labelsize=16)
+    ax_1.tick_params(axis="y", labelsize=16)
+    
+    
+    ax_2.tick_params(axis='both', which='both', bottom='False', top='False', labelbottom='False', right='False', left='False', labelleft='False')
+    ax_2.text(0.15,0.8,r"$|S_8^{\mathrm{approx}}/S_8^{\mathrm{full}} -1|$", fontsize=13)
+    
+    l1 = mlines.Line2D([], [], color='red', linestyle='solid', label=r'$0.001 \ \%$')
+    l2 = mlines.Line2D([], [], color='red', linestyle='dotted', label=r'$0.06 \ \% $')
+    l3 = mlines.Line2D([], [], color='red', linestyle='dashed', label=r'$0.36 \ \% $')
+    
+    l4 = mlines.Line2D([], [], color='green', linestyle='solid', label=r'$0.16 \ \%$')
+    l5 = mlines.Line2D([], [], color='green', linestyle='dotted', label=r'$1.14 \ \% $')
+    
+    l6 = mlines.Line2D([], [], color='blue', linestyle='solid', label=r'$0.16 \ \%$')
+    l7 = mlines.Line2D([], [], color='blue', linestyle='dotted', label=r'$1.11 \ \% $')
+    l8 = mlines.Line2D([], [], color='blue', linestyle='dashed', label=r'$1.22 \ \% $')
+    
+    l9 = mlines.Line2D([], [], color='black', linestyle='solid', label=r'$0.03 \ \%$')
+    l10 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$0.1 \ \% $')
+    l11 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$0.11 \ \% $')
+    
+
+    legend3 = ax_2.legend(handles= [l1,l2,l3,l4,l5,l6,l7,l8,l9,l10,l11], loc=(0.2,0.2), fontsize=13, frameon=False)
+    
+    ax_2.add_artist(legend3)
+    
+    plt.show()
+    plt.clf()
+
+#%% DIRECTLY PLOT TOGETHER RESIDUALS WITH RESPECT LCDM, FOR BOTH FLUID AND FULL CALCULATION
+    
+ax_1 = plt.subplot(311)
+ax_2 = plt.subplot(312)
+ax_3 = plt.subplot(313)
+plt.subplots_adjust(hspace=0)
 
 k = np.logspace(-4,0,1000) # k in h/Mpc
 
-
 ax_1.set_xscale('log')
+ax_2.set_xscale('log')
+ax_3.set_xscale('log')
 
+
+
+ax_1.set_ylim([-0.2,0.04])
+ax_2.set_ylim([-0.9,0.3])
+ax_3.set_ylim([-1.3,1.9])
 ax_1.set_xlim(k[0],k[-1])
-ax_1.set_ylim(-0.075,0.075)
-
-ax_1.plot(k,(pkz0_approx_hot_g0p1H0(k)-pkz0_full_hot_g0p1H0(k))/fpk_LCDM(k),'red')
-
-ax_1.plot(k,(pkz0_approx_hot_gH0(k)-pkz0_full_hot_gH0(k))/fpk_LCDM(k),'red',linestyle='dotted')
-
-ax_1.plot(k,(pkz0_approx_hot_g10H0(k)-pkz0_full_hot_g10H0(k))/fpk_LCDM(k),'red',linestyle='dashed')
-
-ax_1.plot(k,(pkz0_approx_warm_g0p1H0(k)-pkz0_full_warm_g0p1H0(k))/fpk_LCDM(k),'green')
-
-ax_1.plot(k,(pkz0_approx_warm_gH0(k)-pkz0_full_warm_gH0(k))/fpk_LCDM(k),'green',linestyle='dotted')
-
-#ax.plot(k,(pkz0_approx_warm_g10H0(k)-pkz0_full_warm_g10H0(k))/fpk_LCDM(k),'green',linestyle='dashed')
-## ERRORS (ON S_8) IN THIS CASE ARE BIG , BUT SHOULDN'T BE A PROBLEM, EXCLUDED BY PLANCK
-
-ax_1.plot(k,(pkz0_approx_warm2_g0p1H0(k)-pkz0_full_warm2_g0p1H0(k))/fpk_LCDM(k),'blue')
-
-ax_1.plot(k,(pkz0_approx_warm2_gH0(k)-pkz0_full_warm2_gH0(k))/fpk_LCDM(k),'blue',linestyle='dotted')
-
-ax_1.plot(k,(pkz0_approx_warm2_g10H0(k)-pkz0_full_warm2_g10H0(k))/fpk_LCDM(k),'blue',linestyle='dashed')
-
-ax_1.plot(k,(pkz0_approx_cold_g0p1H0(k)-pkz0_full_cold_g0p1H0(k))/fpk_LCDM(k),'black')
-
-ax_1.plot(k,(pkz0_approx_cold_gH0(k)-pkz0_full_cold_gH0(k))/fpk_LCDM(k),'black',linestyle='dotted')
-
-ax_1.plot(k,(pkz0_approx_cold_g10H0(k)-pkz0_full_cold_g10H0(k))/fpk_LCDM(k),'black',linestyle='dashed')
-
-ax_1.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
-ax_1.set_ylabel(r'$(P_{\mathrm{approx}}-P_{\mathrm{full}})/P_{\Lambda\mathrm{CDM}}$', fontsize=20)
-ax_1.set_title(r'$z=0$',fontsize=15)
+ax_2.set_xlim(k[0],k[-1])
+ax_3.set_xlim(k[0],k[-1])
 
 
-k_range_sigma8 = np.linspace(0.1,0.9,1000) #which are the exact wavenumbers probed by DES-Y1?
-ax_1.fill_between(k_range_sigma8, -0.2,0.2, color='lightgray' )
+ax_3.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
+
+ax_2.set_ylabel(r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', fontsize=20, labelpad=10)
+
+
+
+ax_1.plot(k,(pkz0_full_hot_g0p1H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'red')
+ax_1.plot(k,(pkz0_full_warm_g0p1H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'green')
+ax_1.plot(k,(pkz0_full_warm2_g0p1H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'blue')
+ax_1.plot(k,(pkz0_full_cold_g0p1H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'black')
+
+ax_1.plot(k,(pkz0_approx_hot_g0p1H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'red',linestyle='dashed')
+ax_1.plot(k,(pkz0_approx_warm_g0p1H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'green', linestyle='dashed')
+ax_1.plot(k,(pkz0_approx_warm2_g0p1H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'blue', linestyle='dashed')
+ax_1.plot(k,(pkz0_approx_cold_g0p1H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'black', linestyle='dashed')
+
+
+ax_2.plot(k,(pkz0_full_hot_gH0(k)-fpk_LCDM(k))/fpk_LCDM(k),'red')
+ax_2.plot(k,(pkz0_full_warm_gH0(k)-fpk_LCDM(k))/fpk_LCDM(k),'green')
+ax_2.plot(k,(pkz0_full_warm2_gH0(k)-fpk_LCDM(k))/fpk_LCDM(k),'blue')
+ax_2.plot(k,(pkz0_full_cold_gH0(k)-fpk_LCDM(k))/fpk_LCDM(k),'black')
+
+ax_2.plot(k,(pkz0_approx_hot_gH0(k)-fpk_LCDM(k))/fpk_LCDM(k),'red',linestyle='dashed')
+ax_2.plot(k,(pkz0_approx_warm_gH0(k)-fpk_LCDM(k))/fpk_LCDM(k),'green',linestyle='dashed')
+ax_2.plot(k,(pkz0_approx_warm2_gH0(k)-fpk_LCDM(k))/fpk_LCDM(k),'blue',linestyle='dashed')
+ax_2.plot(k,(pkz0_approx_cold_gH0(k)-fpk_LCDM(k))/fpk_LCDM(k),'black',linestyle='dashed')
+
+ax_3.plot(k,(pkz0_full_hot_g10H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'red')
+ax_3.plot(k,(pkz0_full_warm_g10H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'green')
+ax_3.plot(k,(pkz0_full_warm2_g10H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'blue')
+ax_3.plot(k,(pkz0_full_cold_g10H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'black')
+
+ax_3.plot(k,(pkz0_approx_hot_g10H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'red',linestyle='dashed')
+ax_3.plot(k,(pkz0_approx_warm_g10H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'green',linestyle='dashed')
+ax_3.plot(k,(pkz0_approx_warm2_g10H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'blue',linestyle='dashed')
+ax_3.plot(k,(pkz0_approx_cold_g10H0(k)-fpk_LCDM(k))/fpk_LCDM(k),'black',linestyle='dashed')
+
 
 lines = ax_1.get_lines()
-
-black_line1 = mlines.Line2D([], [], color='black', linestyle='solid', label=r'$\Gamma = 0.1 H_0$')
-black_line2 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$\Gamma = H_0$')
-black_line3 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$\Gamma = 10 H_0$')
-
-legend1 = ax_1.legend([lines[i] for i in [0,3,5,8]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc='lower left', fontsize=13, frameon=False)
-
-legend2 = ax_1.legend(handles= [black_line1,black_line2,black_line3], loc='upper left', fontsize=13, frameon=False)
-
-
+legend1 = ax_1.legend([lines[i] for i in [0,1,2,3]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc='lower left', fontsize=11, frameon=False)
 ax_1.add_artist(legend1)
-ax_1.add_artist(legend2)
 
-ax_1.tick_params(axis="x", labelsize=16)
-ax_1.tick_params(axis="y", labelsize=16)
+black_line1 = mlines.Line2D([], [], color='black', linestyle='solid', label=r'Full hierarchy')
+black_line2 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'Fluid approx.')
+legend2 = ax_2.legend(handles= [black_line1,black_line2], loc='lower left', fontsize=11, frameon=False)
+ax_2.add_artist(legend2)
 
-
-ax_2.tick_params(axis='both', which='both', bottom='False', top='False', labelbottom='False', right='False', left='False', labelleft='False')
-
-ax_2.text(0.15,0.8,r"$|S_8^{\mathrm{approx}}/S_8^{\mathrm{full}} -1|$", fontsize=13)
-
-l1 = mlines.Line2D([], [], color='red', linestyle='solid', label=r'$0.001 \ \%$')
-l2 = mlines.Line2D([], [], color='red', linestyle='dotted', label=r'$0.06 \ \% $')
-l3 = mlines.Line2D([], [], color='red', linestyle='dashed', label=r'$0.36 \ \% $')
-
-l4 = mlines.Line2D([], [], color='green', linestyle='solid', label=r'$0.16 \ \%$')
-l5 = mlines.Line2D([], [], color='green', linestyle='dotted', label=r'$1.14 \ \% $')
-
-l6 = mlines.Line2D([], [], color='blue', linestyle='solid', label=r'$0.16 \ \%$')
-l7 = mlines.Line2D([], [], color='blue', linestyle='dotted', label=r'$1.11 \ \% $')
-l8 = mlines.Line2D([], [], color='blue', linestyle='dashed', label=r'$1.22 \ \% $')
-
-l9 = mlines.Line2D([], [], color='black', linestyle='solid', label=r'$0.03 \ \%$')
-l10 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$0.1 \ \% $')
-l11 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$0.11 \ \% $')
+ax_1.text(0.002,-0.1,r"$\bf{\Gamma = 0.1 H_0}$", fontsize=13)
+ax_2.text(0.002,-0.4,r"$\bf{\Gamma = H_0}$", fontsize=13)
+ax_3.text(0.002,0.4,r"$\bf{\Gamma = 10 H_0}$", fontsize=13)
 
 
-legend3 = ax_2.legend(handles= [l1,l2,l3,l4,l5,l6,l7,l8,l9,l10,l11], loc=(0.2,0.2), fontsize=13, frameon=False)
+ax_1.tick_params(axis="y", labelsize=15)
+ax_2.tick_params(axis="y", labelsize=15)
+ax_3.tick_params(axis="y", labelsize=15)
+ax_3.tick_params(axis="x", labelsize=15)
 
-ax_2.add_artist(legend3)
+
+ax_1.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
+ax_2.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
+
+
 
 plt.show()
 plt.clf()
 
-
-#%%  PLOT PERTURBATIONS, delta_wdm at two different wavenumbers, and for 4 different combinations of gamma and epsilon
-
-#filesA = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_warm2_gam_10H0_nofluid_perturbations_k1_s.dat']
-#dataA = []
-#for data_fileA in filesA:
-#    dataA.append(np.loadtxt(data_fileA))
+ 
     
-#filesB = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_warm2_gam_10H0_nofluid_perturbations_k3_s.dat']
-#dataB = []
-#for data_fileB in filesB:
-#    dataB.append(np.loadtxt(data_fileB))
-
 #%% PLOTS for parameters at the 2sigma limit constraints from Planck+SNIa+BAO
-kk = np.logspace(-4,0,1000) # k in h/Mpc
 
-
+if False:
+    kk = np.logspace(-4,0,1000) # k in h/Mpc
 ###   read reference data files FULL CALCULATION
-
-filesA = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_0p002_tau_1gyr_nofluid_z1_pk.dat']
-dataA = []
-for data_fileA in filesA:
-    dataA.append(np.loadtxt(data_fileA))
+    
+    filesA = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_0p002_tau_1gyr_nofluid_z1_pk.dat']
+    dataA = []
+    for data_fileA in filesA:
+        dataA.append(np.loadtxt(data_fileA))
     
 
-filesB = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_0p008_tau_32gyrs_nofluid_z1_pk.dat']
-dataB = []
-for data_fileB in filesB:
-    dataB.append(np.loadtxt(data_fileB))
+    filesB = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_0p008_tau_32gyrs_nofluid_z1_pk.dat']
+    dataB = []
+    for data_fileB in filesB:
+        dataB.append(np.loadtxt(data_fileB))
     
-filesC = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_0p0032_tau_10gyrs_nofluid_z1_pk.dat']
-dataC = []
-for data_fileC in filesC:
-    dataC.append(np.loadtxt(data_fileC))
+    filesC = ['/Users/gfranco/class_majoron/output/sup4_2/dcdm_eps_0p0032_tau_10gyrs_nofluid_z1_pk.dat']
+    dataC = []
+    for data_fileC in filesC:
+        dataC.append(np.loadtxt(data_fileC))
     
-pkA = dataA[0]
-pkz0_full_eps_0p002_tau_1gyr = interp1d(pkA[:,0], pkA[:,1])
+    pkA = dataA[0]
+    pkz0_full_eps_0p002_tau_1gyr = interp1d(pkA[:,0], pkA[:,1])
 
-pkB = dataB[0]
-pkz0_full_eps_0p008_tau_32gyrs = interp1d(pkB[:,0], pkB[:,1])
+    pkB = dataB[0]
+    pkz0_full_eps_0p008_tau_32gyrs = interp1d(pkB[:,0], pkB[:,1])
 
-pkC = dataC[0]
-pkz0_full_eps_0p0032_tau_10gyrs = interp1d(pkC[:,0], pkC[:,1])
+    pkC = dataC[0]
+    pkz0_full_eps_0p0032_tau_10gyrs = interp1d(pkC[:,0], pkC[:,1])
 ###################################################################################################
 
 # read data files FLUID CALCULATION 
 
-filesAa = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_0p002_tau_1gyr_fluid_z1_pk.dat']
-dataAa = []
-for data_fileAa in filesAa:
-    dataAa.append(np.loadtxt(data_fileAa))
+    filesAa = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_0p002_tau_1gyr_fluid_z1_pk.dat']
+    dataAa = []
+    for data_fileAa in filesAa:
+        dataAa.append(np.loadtxt(data_fileAa))
     
 
-filesBb = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_0p008_tau_32gyrs_fluid_z1_pk.dat']
-dataBb = []
-for data_fileBb in filesBb:
-    dataBb.append(np.loadtxt(data_fileBb))
+    filesBb = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_0p008_tau_32gyrs_fluid_z1_pk.dat']
+    dataBb = []
+    for data_fileBb in filesBb:
+        dataBb.append(np.loadtxt(data_fileBb))
     
-filesCc = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_0p0032_tau_10gyrs_fluid_z1_pk.dat']
-dataCc = []
-for data_fileCc in filesCc:
-    dataCc.append(np.loadtxt(data_fileCc))
+    filesCc = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_0p0032_tau_10gyrs_fluid_z1_pk.dat']
+    dataCc = []
+    for data_fileCc in filesCc:
+        dataCc.append(np.loadtxt(data_fileCc))
+        
+        pkAa = dataAa[0]
+        pkz0_approx_eps_0p002_tau_1gyr = interp1d(pkAa[:,0], pkAa[:,1])
+        
+        pkBb = dataBb[0]
+        pkz0_approx_eps_0p008_tau_32gyrs = interp1d(pkBb[:,0], pkBb[:,1])
+        
+        pkCc = dataCc[0]
+        pkz0_approx_eps_0p0032_tau_10gyrs = interp1d(pkCc[:,0], pkCc[:,1])
+
+
+
+    plt.xscale('log')
+
+    plt.xlim(kk[0],kk[-1])
+    plt.ylim(-0.1,+0.1)
+
+
+    plt.plot(kk,(pkz0_approx_eps_0p002_tau_1gyr(kk)-pkz0_full_eps_0p002_tau_1gyr(kk))/fpk_LCDM(kk),'blue', label=r'$\tau = 1 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.002, \, \, \, \, S_8 \, \mathrm{residuals} = 0.37 \%$')
+    plt.plot(kk,(pkz0_approx_eps_0p0032_tau_10gyrs(kk)-pkz0_full_eps_0p0032_tau_10gyrs(kk))/fpk_LCDM(kk),'green', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032, \, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
+    plt.plot(kk,(pkz0_approx_eps_0p008_tau_32gyrs(kk)-pkz0_full_eps_0p008_tau_32gyrs(kk))/fpk_LCDM(kk),'red', label=r'$\tau = 32 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.008, \, \, \, \, S_8 \, \mathrm{residuals} = 0.89 \%$')
+
+
+
+    plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
+    plt.ylabel(r'$\frac{P_{\mathrm{approx}}-P_{\mathrm{full}}}{P_{\Lambda\mathrm{CDM}}}$', fontsize=20)
+    plt.title(r'$z=0$',fontsize=15)
+    k_range_sigma8 = np.linspace(0.1,0.9,1000) #which are the exact wavenumbers probed by DES-Y1?
+    plt.fill_between(k_range_sigma8, -10000,10000, color='lightgray' )
     
-pkAa = dataAa[0]
-pkz0_approx_eps_0p002_tau_1gyr = interp1d(pkAa[:,0], pkAa[:,1])
+    plt.legend(loc='upper left', fontsize=13)
 
-pkBb = dataBb[0]
-pkz0_approx_eps_0p008_tau_32gyrs = interp1d(pkBb[:,0], pkBb[:,1])
+    plt.tick_params(axis="x", labelsize=18)
+    plt.tick_params(axis="y", labelsize=18)
 
-pkCc = dataCc[0]
-pkz0_approx_eps_0p0032_tau_10gyrs = interp1d(pkCc[:,0], pkCc[:,1])
-
-
-
-plt.xscale('log')
-
-plt.xlim(kk[0],kk[-1])
-#plt.ylim(-0.1,+0.1)
+    plt.show()
+    plt.clf()
+    
 
 
-#plt.plot(kk,(pkz0_approx_eps_0p002_tau_1gyr(kk)-pkz0_full_eps_0p002_tau_1gyr(kk))/fpk_LCDM(kk),'blue', label=r'$\tau = 1 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.002, \, \, \, \, S_8 \, \mathrm{residuals} = 0.37 \%$')
-#plt.plot(kk,(pkz0_approx_eps_0p0032_tau_10gyrs(kk)-pkz0_full_eps_0p0032_tau_10gyrs(kk))/fpk_LCDM(kk),'green', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032, \, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
-#plt.plot(kk,(pkz0_approx_eps_0p008_tau_32gyrs(kk)-pkz0_full_eps_0p008_tau_32gyrs(kk))/fpk_LCDM(kk),'red', label=r'$\tau = 32 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.008, \, \, \, \, S_8 \, \mathrm{residuals} = 0.89 \%$')
+#%% READ PERTURBATION DATA FILES
+
+filesD = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_cold_gam_H0_fluid_perturbations_k3_s.dat']
+dataD = []
+for data_fileD in filesD:
+    dataD.append(np.loadtxt(data_fileD))
+perts_k3_eps_cold_gam_H0_fluid = dataD[0]
+
+filesE = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_cold_gam_10H0_fluid_perturbations_k3_s.dat']
+dataE = []
+for data_fileE in filesE:
+    dataE.append(np.loadtxt(data_fileE))
+perts_k3_eps_cold_gam_10H0_fluid = dataE[0]
+
+filesF = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_warm2_gam_H0_fluid_perturbations_k3_s.dat']
+dataF = []
+for data_fileF in filesF:
+    dataF.append(np.loadtxt(data_fileF))
+perts_k3_eps_warm2_gam_H0_fluid = dataF[0]
+
+    
+filesG = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_warm2_gam_10H0_fluid_perturbations_k3_s.dat']
+dataG = []
+for data_fileG in filesG:
+    dataG.append(np.loadtxt(data_fileG))
+perts_k3_eps_warm2_gam_10H0_fluid = dataG[0]
+
+    
+    
+filesH = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_cold_gam_H0_fluid_perturbations_k0_s.dat']
+dataH = []
+for data_fileH in filesH:
+    dataH.append(np.loadtxt(data_fileH))
+perts_k0_eps_cold_gam_H0_fluid = dataH[0]
+    
+filesI = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_cold_gam_10H0_fluid_perturbations_k0_s.dat']
+dataI = []
+for data_fileI in filesI:
+    dataI.append(np.loadtxt(data_fileI))
+perts_k0_eps_cold_gam_10H0_fluid = dataI[0]
+    
+filesJ = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_warm2_gam_H0_fluid_perturbations_k0_s.dat']
+dataJ = []
+for data_fileJ in filesJ:
+    dataJ.append(np.loadtxt(data_fileJ))
+perts_k0_eps_warm2_gam_H0_fluid = dataJ[0]
+
+    
+filesK = ['/Users/gfranco/class_majoron/output/sup4/dcdm_eps_warm2_gam_10H0_fluid_perturbations_k0_s.dat']
+dataK = []
+for data_fileK in filesK:
+    dataK.append(np.loadtxt(data_fileK))
+perts_k0_eps_warm2_gam_10H0_fluid = dataK[0]
 
 
-plt.semilogy(kk,pkz0_approx_eps_0p002_tau_1gyr(kk),'red', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032 \,, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
-plt.semilogy(kk,pkz0_full_eps_0p002_tau_1gyr(kk),'blue', label=r'$\tau = 10 \, \mathrm{Gyrs}, \, \, \, \varepsilon = 0.0032 \,, \, \, \, S_8 \, \mathrm{residuals} = 0.88 \%$')
-plt.semilogy(kk,fpk_LCDM(kk),'green', label=r'LCDM')
+#%% START PLOTTING 
+
+# FOR K0
+
+ax_1 = plt.subplot(221)
+ax_2 = plt.subplot(222)
+ax_3 = plt.subplot(223)
+ax_4 = plt.subplot(224)
+   
+plt.subplots_adjust(hspace=0, wspace=0)
+
+
+plt.suptitle(r'$k = 1 \, \, \mathrm{Mpc}^{-1}$', fontsize=15,  y=0.93)
+
+
+ax_1.set_xscale('log')
+ax_2.set_xscale('log')
+ax_3.set_xscale('log')
+ax_4.set_xscale('log')
+
+ax_1.set_yscale('log')
+ax_2.set_yscale('log')
+ax_3.set_yscale('log')
+ax_4.set_yscale('log')
+
+
+ax_1.set_ylim([3e-4,2e5])
+ax_2.set_ylim([3e-4,2e5])
+ax_3.set_ylim([3e-4,2e5])
+ax_4.set_ylim([3e-4,2e5])
+ax_1.set_xlim(0.5,1.35e4)
+ax_2.set_xlim(0.5,1.35e4)
+ax_3.set_xlim(0.5,1.35e4)
+ax_4.set_xlim(0.5,1.35e4)
+
+ax_1.axvline(1.0, color='black', linestyle='dashed')
+ax_1.axvline(4.43e2, color='black', linestyle='solid')
+
+ax_2.axvline(1.0, color='black', linestyle='dashed')
+ax_2.axvline(4.43e2, color='black', linestyle='solid')
+ax_2.axvline(6.69e3, color='purple', linestyle='dotted')
+
+ax_3.axvline(1.0, color='black', linestyle='dashed')
+ax_3.axvline(6.21e3, color='black', linestyle='solid')
+
+ax_4.axvline(1.0, color='black', linestyle='dashed')
+ax_4.axvline(6.3e3, color='black', linestyle='solid')
+ax_4.axvline(6.7e3, color='purple', linestyle='dotted')
+
+
+ax_1.text(10,5e-3,r"$\Gamma = H_0$", fontsize=12)
+ax_1.text(10,1e-3,r"$\varepsilon =0.01$", fontsize=12)
+
+ax_2.text(10,5e-3,r"$\Gamma = 10 H_0$", fontsize=12)
+ax_2.text(10,1e-3,r"$\varepsilon =0.01$", fontsize=12)
+ 
+ax_3.text(10,5e-3,r"$\Gamma = H_0$", fontsize=12)
+ax_3.text(10,1e-3,r"$\varepsilon =0.001$", fontsize=12)
+  
+ax_4.text(10,5e-3,r"$\Gamma = 10 H_0$", fontsize=12)
+ax_4.text(10,1e-3,r"$\varepsilon =0.001$", fontsize=12)
+ 
+
+ax_3.set_xlabel(r'$\tau \,\,\,\, [\mathrm{Mpc}]$', fontsize=15)
+ax_4.set_xlabel(r'$\tau \,\,\,\, [\mathrm{Mpc}]$', fontsize=15)
+
+ax_1.plot(perts_k3_eps_warm2_gam_H0_fluid[:,1], abs(perts_k3_eps_warm2_gam_H0_fluid[:,38]),'blue', label=r'$\delta_{\rm dcdm}$')
+ax_1.plot(perts_k3_eps_warm2_gam_H0_fluid[:,1], abs(perts_k3_eps_warm2_gam_H0_fluid[:,28]), 'green',label=r'$\delta_{\rm wdm}$')
+ax_1.plot(perts_k3_eps_warm2_gam_H0_fluid[:,1], abs(perts_k3_eps_warm2_gam_H0_fluid[:,40]),'red',label=r'$\delta_{\rm dr}$')
+
+ax_2.plot(perts_k3_eps_warm2_gam_10H0_fluid[:,1], abs(perts_k3_eps_warm2_gam_10H0_fluid[:,38]),'blue', label=r'$\delta_{\rm dcdm}$')
+ax_2.plot(perts_k3_eps_warm2_gam_10H0_fluid[:,1], abs(perts_k3_eps_warm2_gam_10H0_fluid[:,28]), 'green',label=r'$\delta_{\rm wdm}$')
+ax_2.plot(perts_k3_eps_warm2_gam_10H0_fluid[:,1], abs(perts_k3_eps_warm2_gam_10H0_fluid[:,40]),'red',label=r'$\delta_{\rm dr}$')
+
+ax_3.plot(perts_k3_eps_cold_gam_H0_fluid[:,1], abs(perts_k3_eps_cold_gam_H0_fluid[:,38]),'blue', label=r'$\delta_{\rm dcdm}$')
+ax_3.plot(perts_k3_eps_cold_gam_H0_fluid[:,1], abs(perts_k3_eps_cold_gam_H0_fluid[:,28]), 'green',label=r'$\delta_{\rm wdm}$')
+ax_3.plot(perts_k3_eps_cold_gam_H0_fluid[:,1], abs(perts_k3_eps_cold_gam_H0_fluid[:,40]),'red',label=r'$\delta_{\rm dr}$')
+
+ax_4.plot(perts_k3_eps_cold_gam_10H0_fluid[:,1], abs(perts_k3_eps_cold_gam_10H0_fluid[:,38]),'blue', label=r'$\delta_{\rm dcdm}$')
+ax_4.plot(perts_k3_eps_cold_gam_10H0_fluid[:,1], abs(perts_k3_eps_cold_gam_10H0_fluid[:,28]), 'green',label=r'$\delta_{\rm wdm}$')
+ax_4.plot(perts_k3_eps_cold_gam_10H0_fluid[:,1], abs(perts_k3_eps_cold_gam_10H0_fluid[:,40]),'red',label=r'$\delta_{\rm dr}$')
+
+
+ax_1.legend(frameon=False,fontsize =12,loc=(0.25, 0.7),borderaxespad=0.)
+
+
+ax_1.tick_params(axis="y", labelsize=14)
+ax_3.tick_params(axis="y", labelsize=14)
+ax_3.tick_params(axis="x", labelsize=14)
+ax_4.tick_params(axis="x", labelsize=14)
 
 
 
-plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
-plt.ylabel(r'$\frac{P_{\mathrm{approx}}-P_{\mathrm{full}}}{P_{\Lambda\mathrm{CDM}}}$', fontsize=20)
-plt.title(r'$z=0$',fontsize=15)
-k_range_sigma8 = np.linspace(0.1,0.9,1000) #which are the exact wavenumbers probed by DES-Y1?
-plt.fill_between(k_range_sigma8, -10000,10000, color='lightgray' )
+ax_1.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
+ax_2.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
+ax_2.tick_params(axis='y', which='both', bottom='False',right='False',left='False',labelleft='False')
+ax_4.tick_params(axis='y', which='both', bottom='False',right='False',left='False',labelleft='False')
 
-plt.legend(loc='upper left', fontsize=13)
-
-plt.tick_params(axis="x", labelsize=18)
-plt.tick_params(axis="y", labelsize=18)
 
 plt.show()
 plt.clf()
 
+#%%
+
+# FOR K0
 
 
+ax_1 = plt.subplot(221)
+ax_2 = plt.subplot(222)
+ax_3 = plt.subplot(223)
+ax_4 = plt.subplot(224)
+   
+plt.subplots_adjust(hspace=0, wspace=0)
+
+#plt.suptitle(r'$k = 10^{-3} \, \, \mathrm{Mpc}^{-1}$', fontsize=15,  y=0.93)
+plt.suptitle(r'$k = 10^{-2} \, \, \mathrm{Mpc}^{-1}$', fontsize=15,  y=0.93)
+
+
+ax_1.set_xscale('log')
+ax_2.set_xscale('log')
+ax_3.set_xscale('log')
+ax_4.set_xscale('log')
+
+ax_1.set_yscale('log')
+ax_2.set_yscale('log')
+ax_3.set_yscale('log')
+ax_4.set_yscale('log')
+
+
+#ax_1.set_ylim([1.1e-3,20])
+#ax_2.set_ylim([1.1e-3,20])
+#ax_3.set_ylim([1.1e-3,20])
+#ax_4.set_ylim([1.1e-3,20])
+
+ax_1.set_ylim([4e-3,1600])
+ax_2.set_ylim([4e-3,1600])
+ax_3.set_ylim([4e-3,1600])
+ax_4.set_ylim([4e-3,1600])
+
+
+ax_1.set_xlim(50,1.3e4)
+ax_2.set_xlim(50,1.3e4)
+ax_3.set_xlim(50,1.3e4)
+ax_4.set_xlim(50,1.3e4)
+
+
+
+#ax_1.axvline(1.76e3, color='black', linestyle='dashed')
+#ax_2.axvline(1.76e3, color='black', linestyle='dashed')
+#ax_3.axvline(1.76e3, color='black', linestyle='dashed')
+#ax_4.axvline(1.76e3, color='black', linestyle='dashed')
+# NOTE: these values above are only valid for k0 = 10^{-3}  Mpc^{-1}
+
+ax_1.axvline(1.17e2, color='black', linestyle='dashed')
+ax_2.axvline(1.17e2, color='black', linestyle='dashed')
+ax_2.axvline(6.69e3, color='purple', linestyle='dotted')
+ax_3.axvline(1.17e2, color='black', linestyle='dashed')
+ax_4.axvline(1.17e2, color='black', linestyle='dashed')
+ax_4.axvline(6.69e3, color='purple', linestyle='dotted')
+# NOTE: these values above are only valid for k1 = 10^{-2}  Mpc^{-1}
+
+
+# FOR BOTH k0 = 10^{-3}  Mpc^{-1} AND  k1 = 10^{-2}  Mpc^{-1} (and the values of Gamma and epsilon considered),
+# the WDM never crosses the free-streaming scale, that's why this crossing time is not plotted
+
+ax_1.text(1e3,2e-2,r"$\Gamma = H_0$", fontsize=12)
+ax_1.text(1e3,7e-3,r"$\varepsilon =0.01$", fontsize=12)
+
+ax_2.text(1e3,2e-2,r"$\Gamma = 10 H_0$", fontsize=12)
+ax_2.text(1e3,7e-3,r"$\varepsilon =0.01$", fontsize=12)
+ 
+ax_3.text(1e3,2e-2,r"$\Gamma = H_0$", fontsize=12)
+ax_3.text(1e3,7e-3,r"$\varepsilon =0.001$", fontsize=12)
   
-    
+ax_4.text(1e3,2e-2,r"$\Gamma = 10 H_0$", fontsize=12)
+ax_4.text(1e3,7e-3,r"$\varepsilon =0.001$", fontsize=12)
+ 
 
-  
-    
+ax_3.set_xlabel(r'$\tau \,\,\,\, [\mathrm{Mpc}]$', fontsize=15)
+ax_4.set_xlabel(r'$\tau \,\,\,\, [\mathrm{Mpc}]$', fontsize=15)
 
+ax_1.plot(perts_k0_eps_warm2_gam_H0_fluid[:,1], abs(perts_k0_eps_warm2_gam_H0_fluid[:,38]),'blue', label=r'$\delta_{\rm dcdm}$')
+ax_1.plot(perts_k0_eps_warm2_gam_H0_fluid[:,1], abs(perts_k0_eps_warm2_gam_H0_fluid[:,28]), 'green',label=r'$\delta_{\rm wdm}$')
+ax_1.plot(perts_k0_eps_warm2_gam_H0_fluid[:,1], abs(perts_k0_eps_warm2_gam_H0_fluid[:,40]),'red',label=r'$\delta_{\rm dr}$')
+
+ax_2.plot(perts_k0_eps_warm2_gam_10H0_fluid[:,1], abs(perts_k0_eps_warm2_gam_10H0_fluid[:,38]),'blue', label=r'$\delta_{\rm dcdm}$')
+ax_2.plot(perts_k0_eps_warm2_gam_10H0_fluid[:,1], abs(perts_k0_eps_warm2_gam_10H0_fluid[:,28]), 'green',label=r'$\delta_{\rm wdm}$')
+ax_2.plot(perts_k0_eps_warm2_gam_10H0_fluid[:,1], abs(perts_k0_eps_warm2_gam_10H0_fluid[:,40]),'red',label=r'$\delta_{\rm dr}$')
+
+ax_3.plot(perts_k0_eps_cold_gam_H0_fluid[:,1], abs(perts_k0_eps_cold_gam_H0_fluid[:,38]),'blue', label=r'$\delta_{\rm dcdm}$')
+ax_3.plot(perts_k0_eps_cold_gam_H0_fluid[:,1], abs(perts_k0_eps_cold_gam_H0_fluid[:,28]), 'green',label=r'$\delta_{\rm wdm}$')
+ax_3.plot(perts_k0_eps_cold_gam_H0_fluid[:,1], abs(perts_k0_eps_cold_gam_H0_fluid[:,40]),'red',label=r'$\delta_{\rm dr}$')
+
+ax_4.plot(perts_k0_eps_cold_gam_10H0_fluid[:,1], abs(perts_k0_eps_cold_gam_10H0_fluid[:,38]),'blue', label=r'$\delta_{\rm dcdm}$')
+ax_4.plot(perts_k0_eps_cold_gam_10H0_fluid[:,1], abs(perts_k0_eps_cold_gam_10H0_fluid[:,28]), 'green',label=r'$\delta_{\rm wdm}$')
+ax_4.plot(perts_k0_eps_cold_gam_10H0_fluid[:,1], abs(perts_k0_eps_cold_gam_10H0_fluid[:,40]),'red',label=r'$\delta_{\rm dr}$')
+
+
+ax_1.legend(frameon=False,fontsize =12,loc=(0.17, 0.7),borderaxespad=0.)
+
+
+ax_1.tick_params(axis="y", labelsize=14)
+ax_3.tick_params(axis="y", labelsize=14)
+ax_3.tick_params(axis="x", labelsize=14)
+ax_4.tick_params(axis="x", labelsize=14)
+
+
+ax_1.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
+ax_2.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
+ax_2.tick_params(axis='y', which='both', bottom='False',right='False',left='False',labelleft='False')
+ax_4.tick_params(axis='y', which='both', bottom='False',right='False',left='False',labelleft='False')
+
+
+plt.show()
+plt.clf()
    
 
 

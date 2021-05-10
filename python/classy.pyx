@@ -972,12 +972,21 @@ cdef class Class:
     def n_s(self):
         return self.pm.n_s
 
+    def A_s(self):
+        return self.pm.A_s
+
     def tau_reio(self):
         return self.th.tau_reio
 
     # Defined twice ?
     def Omega_m(self):
         return self.ba.Omega0_b+self.ba.Omega0_cdm+self.ba.Omega0_ncdm_tot + self.ba.Omega0_dcdm+self.ba.Omega0_wdm
+
+    def tau_gyr(self):
+        return 1./((self.ba.Gamma_dcdm*2.99792e5)*1.02e-3)
+
+    def omega_ini_dcdm(self):
+        return self.ba.Omega_ini_dcdm * self.ba.h * self.ba.h
 
     # This is commented because in the current form it only applies
     # to minimal LambdaCDM.
@@ -986,10 +995,10 @@ cdef class Class:
     #    return self.ba.Omega0_g+self.ba.Omega0_ur
     def rho0_wdm_over_rho0_m(self):
         return self.ba.rho0_wdm_over_rho0_m
-    
+
     def k_fss_wdm(self):
         return self.ba.k_fss_wdm
-    
+
     def Omega_Lambda(self):
         return self.ba.Omega0_lambda
 
@@ -1791,3 +1800,6 @@ cdef class Class:
 
     def Omega0_cdm(self):
         return self.ba.Omega0_cdm
+
+    def omega_cdm(self):
+        return self.ba.Omega0_cdm* self.ba.h * self.ba.h

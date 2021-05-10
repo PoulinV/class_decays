@@ -228,9 +228,9 @@ int input_init(
    * These two arrays must contain the strings of names to be searched
    *  for and the corresponding new parameter */
   char * const target_namestrings[] = {"100*theta_s","Omega_dcdmdr","omega_dcdmdr","Omega_dcdmdrwdm", "omega_dcdmdrwdm",
-                                       "Omega_scf","Omega_ini_dcdm","omega_ini_dcdm","Omega_ini_dcdm2","omega_ini_dcdm2","sigma8"};
+                                       "Omega_scf","Omega_ini_dcdm","omega_ini_dcdm","f_dcdm","Omega_ini_dcdm2","omega_ini_dcdm2","sigma8"};
   char * const unknown_namestrings[] = {"h","Omega_ini_dcdm","Omega_ini_dcdm","Omega_ini_dcdm2","Omega_ini_dcdm2",
-                                        "scf_shooting_parameter","Omega_dcdmdr","omega_dcdmdr","Omega_dcdmdrwdm","omega_dcdmdrwdm","A_s"};
+                                        "scf_shooting_parameter","Omega_dcdmdr","omega_dcdmdr","omega_dcdmdr","Omega_dcdmdrwdm","omega_dcdmdrwdm","A_s"};
   enum computation_stage target_cs[] = {cs_thermodynamics, cs_background, cs_background, cs_background, cs_background,
                                         cs_background, cs_background, cs_background, cs_background, cs_background, cs_spectra};
 
@@ -797,6 +797,8 @@ int input_read_parameters(
     class_call(parser_read_double(pfc,"f_dcdm",&param3,&flag3,errmsg),
                errmsg,
                errmsg);
+
+    // NOTE GFA: I think f_dcdm also needs to be implemented in the shooting method part
 
     class_test(class_at_least_two_of_three(flag1,flag2,flag3),
                 errmsg,
@@ -4273,6 +4275,7 @@ int input_try_unknown_parameters(double * unknown_parameter,
       break;
     case Omega_ini_dcdm:
     case omega_ini_dcdm:
+    case f_dcdm:
       rho_dcdm_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_dcdm];
       if (ba.has_dr == _TRUE_)
         rho_dr_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_dr];
@@ -4472,6 +4475,7 @@ int input_get_guess(double *xguess,
       }
       break;
     case omega_ini_dcdm:
+    case f_dcdm:
       Omega0_dcdmdr = 1./(ba.h*ba.h);
     case Omega_ini_dcdm:
       /** - This works since correspondence is
@@ -4638,6 +4642,7 @@ int input_auxillary_target_conditions(struct file_content * pfc,
   case Omega_scf:
   case Omega_ini_dcdm:
   case omega_ini_dcdm:
+  case f_dcdm:
   case Omega_ini_dcdm2: /* GFA */
   case omega_ini_dcdm2: /* GFA */
     /* Check that Omega's or omega's are nonzero: */

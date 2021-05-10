@@ -9382,7 +9382,8 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
   double tau;
   double qmin_tmp;
   double ca2_ncdm; /* GFA */
-  double a_k0 = 1.0, a_k1 = 1.0; /* GFA */
+  double a_k0, a_k1, tau_k0, tau_k1; /* GFA */
+  double a_kfs0, a_kfs1, tau_kfs0, tau_kfs1; /* GFA  */
   double rho_ncdm_bg, p_ncdm_bg, pseudo_p_ncdm, w_ncdm, rho_dcdm_bg, ratio_rho, gamma, eps, H_D; /* GFA*/
   struct background_parameters_for_distributions pbadist;
 
@@ -9437,7 +9438,8 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
     /* GFA: compute free-streaming length of the warm dark daughter,
     evaluated at the time of decay a_D (equal to present time if lifetime >age universe) */
     pba->k_fss_wdm = sqrt(3./2.)*a_D*H_D/sqrt(ca2_ncdm);
-    printf("k_fss_wdm =%f Mpc^{-1}\n",pba->k_fss_wdm );
+   //  printf("k_fss_wdm =%f Mpc^{-1}\n",pba->k_fss_wdm );
+   printf("At decay a_D =%f, tau = %f Mpc \n",a_D, tau);
     //Note: works well for lifetime > age_universe, but not on the contrary, maybe I should evaluate it before a_D
     // for lifetimes smaller than age of universe, maybe I should evaluate at a_nr, smaller than a_D by some velocity factors (see page 13 in Aoyama paper)
 
@@ -9476,13 +9478,14 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
 
           if(a_step*pvecback[pba->index_bg_H] > ppt->k_output_values[0]){
            a_k0 = a_step;
+           tau_k0 = tau;
 
           }else{
              break;
            }
        }
 
-       printf("mode with k=%e Mpc^(-1) crosses horizon at a_k0 = %e \n",ppt->k_output_values[0], a_k0); /* GFA */
+       printf("mode with k=%e Mpc^(-1) crosses horizon at a_k0 = %e and tau_k0=%e Mpc \n",ppt->k_output_values[0], a_k0, tau_k0); /* GFA */
 
         for(i = 0; i < i_step_max; i++){
              a_step = ppr->a_ini_over_a_today_default*pba->a_today*pow(10,i*h);
@@ -9504,14 +9507,99 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
 
               if(a_step*pvecback[pba->index_bg_H] > ppt->k_output_values[1]){
                a_k1 = a_step;
+               tau_k1 = tau;
               }else{
                  break;
                }
            }
 
-       printf("mode with k=%e Mpc^(-1) crosses horizon at a_k1 = %e \n",ppt->k_output_values[1], a_k1); /* GFA */
+       printf("mode with k=%e Mpc^(-1) crosses horizon at a_k1 = %e and tau_k1=%e Mpc \n",ppt->k_output_values[1], a_k1, tau_k1); /* GFA */
 
      }
+
+     /* GFA: loop to find free-streaming-crossing time (only valid for two modes requested) */
+      if (ppt->k_output_values_num == 2) {
+        h =  (log10(pba->a_today)-log10(pba->a_today*1e-10))/(i_step_max-1);
+        for(i = 0; i < i_step_max; i++){
+
+          a_step = 1e-10*pba->a_today*pow(10,i*h);
+
+          class_call(background_tau_of_z(pba,
+                                         1/a_step-1,
+                                         &tau),
+                     pba->error_message,
+                     ppr->error_message);
+          /* set values of first_index_back/thermo */
+          class_call(background_at_tau(pba,
+                                       tau,
+                                       pba->normal_info,
+                                       pba->inter_normal,
+                                       &first_index_back,
+                                       pvecback),
+                     pba->error_message,
+                     ppr->error_message);
+          a_D = a_step;
+          H_D= pvecback[pba->index_bg_H];
+          rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm]; /* background density */
+          p_ncdm_bg = pvecback[pba->index_bg_p_ncdm1+n_ncdm]; /* background pressure */
+          pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm]; /* pseudo-pressure (see CLASS IV paper) */
+          w_ncdm = p_ncdm_bg/rho_ncdm_bg; /* equation of state parameter */
+          rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
+          ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+          gamma = pba->Gamma_dcdm;
+          eps = pba->epsilon_dcdm;
+          ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H_D))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H_D)*(1.-eps));
+
+           if(sqrt(3./2.)*a_D*H_D/sqrt(ca2_ncdm) > ppt->k_output_values[0]){
+            a_kfs0 = a_step;
+            tau_kfs0 = tau;
+           }else{
+              break;
+            }
+        }
+
+        printf("mode with k=%e Mpc^(-1) crosses free-streaming-horizon at a_kfs0 = %e and tau_kfs0=%e Mpc \n",ppt->k_output_values[0], a_kfs0, tau_kfs0); /* GFA */
+        h =  (log10(pba->a_today)-log10(pba->a_today*1e-10))/(i_step_max-1);
+         for(i = 0; i < i_step_max; i++){
+              a_step = 1e-10*pba->a_today*pow(10,i*h);
+              class_call(background_tau_of_z(pba,
+                                             1/a_step-1,
+                                             &tau),
+                         pba->error_message,
+                         ppr->error_message);
+              /* set values of first_index_back/thermo */
+              class_call(background_at_tau(pba,
+                                           tau,
+                                           pba->normal_info,
+                                           pba->inter_normal,
+                                           &first_index_back,
+                                           pvecback),
+                         pba->error_message,
+                         ppr->error_message);
+
+              a_D = a_step;
+              H_D= pvecback[pba->index_bg_H];
+              rho_ncdm_bg = pvecback[pba->index_bg_rho_ncdm1+n_ncdm]; /* background density */
+              p_ncdm_bg = pvecback[pba->index_bg_p_ncdm1+n_ncdm]; /* background pressure */
+              pseudo_p_ncdm = pvecback[pba->index_bg_pseudo_p_ncdm1+n_ncdm]; /* pseudo-pressure (see CLASS IV paper) */
+              w_ncdm = p_ncdm_bg/rho_ncdm_bg; /* equation of state parameter */
+              rho_dcdm_bg = pvecback[pba->index_bg_rho_dcdm]; /* GFA */
+              ratio_rho = rho_dcdm_bg/rho_ncdm_bg;
+              gamma = pba->Gamma_dcdm;
+              eps = pba->epsilon_dcdm;
+              ca2_ncdm = w_ncdm*(5.0-(pseudo_p_ncdm/p_ncdm_bg)-ratio_rho*(gamma/(3.0*w_ncdm*H_D))*pow(eps,2)/(1.-eps))/(3.0*(1.0+w_ncdm)-ratio_rho*(gamma/H_D)*(1.-eps));
+
+               if(sqrt(3./2.)*a_D*H_D/sqrt(ca2_ncdm) > ppt->k_output_values[1]){
+                a_kfs1 = a_step;
+                tau_kfs1 = tau;
+               }else{
+                  break;
+                }
+            }
+
+        printf("mode with k=%e Mpc^(-1) crosses free-steaming-horizon at a_kfs1 = %e and tau_kfs1=%e Mpc \n",ppt->k_output_values[1], a_kfs1, tau_kfs1); /* GFA */
+
+      }
 
 
 

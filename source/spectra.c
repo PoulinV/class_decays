@@ -3212,12 +3212,16 @@ int spectra_pk(
              psp->error_message,
              psp->error_message);
 
-//  if (psp->spectra_verbose>0)
+  if (psp->spectra_verbose>1){
     fprintf(stdout," -> sigma8=%g (computed till k = %g h/Mpc)\n",
             psp->sigma8,
             exp(psp->ln_k[psp->ln_k_size-1])/pba->h);
 
     fprintf(stdout," -> and Omega_m =%g, so that S_8 = %g\n",pba->Omega0_m,psp->sigma8*sqrt(pba->Omega0_m/0.3));
+    fprintf(stdout," -> and sigma8 (Omega_m)^0.25  = %g\n",psp->sigma8*pow(pba->Omega0_m, 0.25));
+  }
+
+
 
   if(pba->has_ncdm){
     class_call(spectra_sigma_cb(pba,ppm,psp,8./pba->h,0.,&(psp->sigma8_cb)),

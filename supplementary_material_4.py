@@ -266,8 +266,8 @@ ax_2.semilogx(ll,clEE_approx_warm_g0p1H0(ll)/clEE_full_warm_g0p1H0(ll)-1,'green'
 ax_1.semilogx(ll,clTT_approx_warm_gH0(ll)/clTT_full_warm_gH0(ll)-1,'green',linestyle='dotted')
 ax_2.semilogx(ll,clEE_approx_warm_gH0(ll)/clEE_full_warm_gH0(ll)-1,'green',linestyle='dotted')
 
-#ax_1.semilogx(ll,clTT_approx_warm_g10H0(ll)/clTT_full_warm_g10H0(ll)-1,'green',linestyle='dashed')
-#ax_2.semilogx(ll,clEE_approx_warm_g10H0(ll)/clEE_full_warm_g10H0(ll)-1,'green',linestyle='dashed')
+ax_1.semilogx(ll,clTT_approx_warm_g10H0(ll)/clTT_full_warm_g10H0(ll)-1,'green',linestyle='dashed')
+ax_2.semilogx(ll,clEE_approx_warm_g10H0(ll)/clEE_full_warm_g10H0(ll)-1,'green',linestyle='dashed')
 
 ax_1.semilogx(ll,clTT_approx_warm2_g0p1H0(ll)/clTT_full_warm2_g0p1H0(ll)-1,'blue')
 ax_2.semilogx(ll,clEE_approx_warm2_g0p1H0(ll)/clEE_full_warm2_g0p1H0(ll)-1,'blue')
@@ -298,7 +298,7 @@ black_line2 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$
 black_line3 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$\Gamma = 10 H_0$')
 
 
-legend1 = ax_1.legend([lines[i] for i in [0,3,5,8]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc=(0.8,0.6), fontsize=13, frameon=False)
+legend1 = ax_1.legend([lines[i] for i in [0,3,6,9]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc=(0.8,0.6), fontsize=13, frameon=False)
 legend2 = ax_1.legend(handles= [black_line1,black_line2,black_line3], loc=(0.55, 0.65), fontsize=13, frameon=False)
 
 

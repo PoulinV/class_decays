@@ -5,7 +5,6 @@ import matplotlib.lines as mlines
 #from matplotlib import pyplot
 import numpy as np
 from classy import Class
-from operator import truediv
 from scipy.interpolate import interp1d
 
 import time
@@ -44,16 +43,20 @@ fpk_z3_dcdm_full  = interp1d(pk_z3_dcdm[:,0],pk_z3_dcdm[:,1])
 
 f = plt.figure(figsize=(10,15))
 
-ax_1 = f.add_subplot(311)
-ax_2 = f.add_subplot(312, sharex = ax_1)
-ax_3 = f.add_subplot(313, sharex = ax_2)
+#ax_1 = f.add_subplot(311)
+#ax_2 = f.add_subplot(312, sharex = ax_1)
+#ax_3 = f.add_subplot(313, sharex = ax_2)
+
+ax_1 = f.add_subplot(211)
+ax_3 = f.add_subplot(212, sharex = ax_1)
+
 plt.subplots_adjust(hspace=0)
 
 ax_1.set_ylim([-0.04,0.04])
-ax_2.set_ylim([-0.21,0.21])
+#ax_2.set_ylim([-0.21,0.21])
 ax_3.set_ylim([-0.19,0.19])
 ax_1.set_xlim([2,2500])
-ax_2.set_xlim([2,2500])
+#ax_2.set_xlim([2,2500])
 ax_3.set_xlim([2,2500])
 
 
@@ -378,7 +381,7 @@ print("~~~~~ready to plot~~~~~")
 
 # WITH FLUID APPROXIMATION
 ax_1.semilogx(ll_DCDM_0,fTT_DCDM(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'red',label=r'$\Lambda$DDM  Best-fit')
-ax_2.semilogx(ll_DCDM_0,fEE_DCDM(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'red',label=r'$\Lambda$DDM  Best-fit')
+#ax_2.semilogx(ll_DCDM_0,fEE_DCDM(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'red',label=r'$\Lambda$DDM  Best-fit')
 ax_3.semilogx(ll_DCDM_0,fphiphi_DCDM(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'red',label=r'$\Lambda$DDM  Best-fit')
 
 # WITH FULL CALCULATION
@@ -389,7 +392,7 @@ ax_3.semilogx(ll_DCDM_0,fphiphi_DCDM(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'red',l
 
 
 ax_1.semilogx(ll_DCDM_0,fTT_mNU(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'blue',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV})$'%M_ncdm)
-ax_2.semilogx(ll_DCDM_0,fEE_mNU(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'blue',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV})$'%M_ncdm)
+#ax_2.semilogx(ll_DCDM_0,fEE_mNU(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'blue',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV})$'%M_ncdm)
 ax_3.semilogx(ll_DCDM_0,fphiphi_mNU(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'blue',label= r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV}) $'%M_ncdm)
 
 #Planck error bars
@@ -404,8 +407,8 @@ ax_1.fill_between(lTT, -(DlTT_error_plus)/DlTT_mean, +(DlTT_error_plus)/DlTT_mea
 
 # FOR EE
 l_cosmic_variance = np.linspace(0,48,1000)
-ax_2.fill_between(l_cosmic_variance, -0.21,0.21, color='lightgray' )
-ax_2.fill_between(lEE, -(DlEE_error_plus)/DlEE_mean, +(DlEE_error_plus)/DlEE_mean, color = 'lightgray')
+#ax_2.fill_between(l_cosmic_variance, -0.21,0.21, color='lightgray' )
+#ax_2.fill_between(lEE, -(DlEE_error_plus)/DlEE_mean, +(DlEE_error_plus)/DlEE_mean, color = 'lightgray')
 
 #FOR PHI-PHI
 l_pp_1 =np.linspace(8,20,10)
@@ -441,19 +444,19 @@ ax_3.fill_between(l_pp_14,-0.30/0.0518,0.30/0.0518, color='lightgray' )
 #Q: WHAT ARE THE MEAN VALUES BY WHICH I SHOULD DIVIDE THE ERROR BARS?
 # SHOULD I "SMOOTH" THE LOOK OF THE BOXES?
 
-ax_3.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=15)
-ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}}{C_\ell^\mathrm{TT}(\mathrm{ref} )} -1$',fontsize=20)
-ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}}{C_\ell^\mathrm{EE}(\mathrm{ref} )} -1$',fontsize=20)
-ax_3.set_ylabel(r'$\frac{C_\ell^{\phi \phi} }{C_\ell^{\phi \phi} (\mathrm{ref} )} -1$',fontsize=20)
+ax_3.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=20)
+ax_1.set_ylabel(r'$C_\ell^\mathrm{TT}/C_\ell^\mathrm{TT}(\mathrm{ref}) -1$',fontsize=22)
+#ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}}{C_\ell^\mathrm{EE}(\mathrm{ref} )} -1$',fontsize=22)
+ax_3.set_ylabel(r'$C_\ell^{\phi \phi}/C_\ell^{\phi \phi} (\mathrm{ref} ) -1$',fontsize=22)
 
 
 ax_3.tick_params(axis="x", labelsize=18)
 ax_1.tick_params(axis="y", labelsize=18)
-ax_2.tick_params(axis="y", labelsize=18)
+#ax_2.tick_params(axis="y", labelsize=18)
 ax_3.tick_params(axis="y", labelsize=18)
 
 
-ax_1.legend(frameon=False,fontsize =15,loc='upper left',borderaxespad=0.)
+ax_1.legend(frameon=False,fontsize =18,loc='upper left',borderaxespad=0.)
 
 plt.show()
 plt.clf()
@@ -467,8 +470,8 @@ axes.set_xlim(kk[0],kk[-1])
 axes.set_ylim(-0.4,0.05)
 
 
-axes.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
-axes.set_ylabel(r'$\frac{P(k)}{P_{ref}(k)}-1$', fontsize=20)
+axes.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=20)
+axes.set_ylabel(r'$P(k)/P_{ref}(k)-1$', fontsize=25)
 
 
 #DCDM
@@ -495,8 +498,8 @@ lines = axes.get_lines()
 black_line1 = mlines.Line2D([], [], color='black', linestyle='-', label='z = 0')
 black_line2 = mlines.Line2D([], [], color='black', linestyle='--', label='z = 3')
 
-legend1 = plt.legend([lines[i] for i in [0,2]], [r'$\Lambda$DDM  Best-fit', r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV}) $'%M_ncdm], loc='lower left', fontsize=15, frameon=False)
-legend2 = plt.legend(handles= [black_line1,black_line2], loc=6, fontsize=15, frameon=False)
+legend1 = plt.legend([lines[i] for i in [0,2]], [r'$\Lambda$DDM  Best-fit', r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV}) $'%M_ncdm], loc='lower left', fontsize=18, frameon=False)
+legend2 = plt.legend(handles= [black_line1,black_line2], loc=6, fontsize=18, frameon=False)
 
 axes.add_artist(legend1)
 axes.add_artist(legend2)
@@ -505,16 +508,10 @@ axes.add_artist(legend2)
 k_range_desy1 = np.linspace(0.09,0.62,1000) #which are the exact wavenumbers probed by DES-Y1?
 k_range_sigma8 = np.linspace(0.1,0.9,1000) #which are the exact wavenumbers probed by DES-Y1?
 
-plt.fill_between(k_range_sigma8, -1.0,0.5, color='lightgray' )
+#plt.fill_between(k_range_sigma8, -1.0,0.5, color='lightgray' )
 
-#plt.text(2.0e-4, -0.26, r'$\Omega_{m} =0.31 \, \, \, \, \, \, \, \, \, \, \, \, \sigma_{8} = 0.75  $', fontsize =15)
+plt.text(5.0e-3, -0.26, r'$ S_{8} = 0.77  $', fontsize =18)
 
-plt.text(5.0e-3, -0.26, r'$ S_{8} = 0.76  $', fontsize =15)
-
-# Q: SO, EVEN IF WE ARE PLOTTING RESIDUALS IN P(K) FOR FIXED H0, THE S8 VALUE WE SHOW
-# IS FROM THE CALCULATION AT FIXED 100*THETA_S, IS THAT RIGHT?
-#ACTUALLY THE S8 FROM THE CALCULATION AT FIXED H0 IS SMALLER THAN S8=0.75, IS IT FINE
-# IF S8=0.75 IS NOT REPRESENTING THE POWER SUPPRESSION WE ARE SHOWING?
 
 plt.tick_params(axis="x", labelsize=18)
 plt.tick_params(axis="y", labelsize=18)

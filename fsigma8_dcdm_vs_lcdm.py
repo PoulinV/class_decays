@@ -1,11 +1,8 @@
+# Script by Guillermo Franco-Abellán
 # import necessary modules
 import matplotlib.pyplot as plt
-import matplotlib.lines as mlines
-#from matplotlib import pyplot
 import numpy as np
 from classy import Class
-from operator import truediv
-from scipy.interpolate import interp1d
 
 import time
 start_time = time.time()
@@ -165,9 +162,9 @@ plt.ylim(0.2,0.7)
 plt.xlabel(r'$z$', fontsize=15)
 plt.ylabel(r'$f \, \sigma_8$', fontsize=20)
 
-plt.plot(zz, fsigma8_lcdm, 'k', label=r'$\nu\Lambda$CDM Baseline')
+plt.plot(zz, fsigma8_lcdm, 'k', label=r'$\Lambda$CDM')
 plt.plot(zz, fsigma8_dcdm, 'k--', label=r'$\Lambda$DDM  Best-fit')
-plt.plot(zz, fsigma8_mNu, 'k:', label=r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV}) $'%M_ncdm)
+#plt.plot(zz, fsigma8_mNu, 'k:', label=r'$\nu\Lambda\mathrm{CDM} \, \, (M_{\nu} =%.2f \, \mathrm{eV}) $'%M_ncdm)
 
 #plot data points
 

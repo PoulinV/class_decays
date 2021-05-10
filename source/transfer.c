@@ -3039,7 +3039,9 @@ int transfer_dNdz_analytic(
   alpha = 2.0;
   beta = 1.5;
 
-  *dNdz = pow(z/z0,alpha) * exp(-pow(z/z0,beta));
+//  *dNdz = pow(z/z0,alpha) * exp(-pow(z/z0,beta));
+  *dNdz = pow(z,alpha) * exp(-pow(z/z0,beta)); //GFA
+
 
   *dln_dNdz_dz = (alpha - pow(z/z0,beta)*beta)/z;
 
