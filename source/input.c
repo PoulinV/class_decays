@@ -812,9 +812,23 @@ int input_read_parameters(
       pba->Omega_ini_dcdm = (param3/(1.-param3))*pba->Omega0_cdm;
 
     /** - Read Gamma in same units as H0, i.e. km/(s Mpc)*/
-    class_read_double("Gamma_dcdm",pba->Gamma_dcdm);
-    /* Convert to Mpc */
-    pba->Gamma_dcdm *= (1.e3 / _c_);
+    class_call(parser_read_double(pfc,"Gamma_dcdm",&param1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+    class_call(parser_read_double(pfc,"Log10_Gamma_dcdm",&param2,&flag2,errmsg),
+               errmsg,
+               errmsg);
+               
+    class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+               errmsg,
+               "In input file, you can only enter one of Gamma_dcdm or Log10_Gamma_dcdm, choose one");
+
+     /* Convert to Mpc */
+    if (flag1 == _TRUE_)
+      pba->Gamma_dcdm = param1*(1.e3 / _c_);
+    if (flag2 == _TRUE_)
+      pba->Gamma_dcdm = pow(10.,param2)*(1.e3 / _c_);
+
     pba->epsilon_dcdm = 1;
 
   }
