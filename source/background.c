@@ -1753,7 +1753,7 @@ int background_ncdm_momenta(
           // factor becomes so tiny that it is difficult to handle it numerically. This produces weird
           // results such as negative w_ncdm, making the fluid equation to crash. In order to avoid this,
           // we simply force the exponential to get frozen  when its argument reaches a certain threshold.
-          // This makes w_ncdm and the fluid eqs to behave normally. It shouldn't be a problem, because once
+          // This makes w_ncdm and the fluid eqs to behave normally. This should be accurate, because once
           // the neutrinos have decayed, it doesn't matter whether the neutrino density is of order 10^{-150}
           // or 10^{-250}, what matters is that in practice it is so small that terms like rho*delta
           // vanish in the perturbation equations (so evolution of neutrino perts after decay is irrelevant)

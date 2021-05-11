@@ -1133,8 +1133,22 @@ int input_read_parameters(
     /* Read omega of each ncdm species: (Use pba->M_ncdm temporarily)*/
     class_read_list_of_doubles_or_default("omega_ncdm",pba->M_ncdm,0.0,N_ncdm);
 
-    /* Read omega of each ncdm species: (Use pba->M_ncdm temporarily)*/
+    /* Read Gamma of each neutrino species: */
     class_read_list_of_doubles_or_default("Gamma_neutrinos",pba->Gamma_neutrinos,0.0,N_ncdm);
+
+    class_call(parser_read_list_of_doubles(pfc,"Log10_Gamma_neutrinos",&(int1),&(pointer1),&flag1,errmsg),errmsg,errmsg);
+
+    if ((flag1 == _TRUE_) && (int1>0)) {
+      for (i=0; i<int1; i++) {
+        pba->Gamma_neutrinos[i] = pow(10,pointer1[i]);
+      }
+      free(pointer1);
+    }
+
+
+
+
+
     /** what is the neutrino mass hierarchy? */
     class_call(parser_read_string(pfc,"neutrino_hierarchy",&string1,&flag1,errmsg),
                   errmsg,
