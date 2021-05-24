@@ -9439,7 +9439,7 @@ int compute_dfdlnq_ncdm(  struct precision *ppr,
     evaluated at the time of decay a_D (equal to present time if lifetime >age universe) */
     pba->k_fss_wdm = sqrt(3./2.)*a_D*H_D/sqrt(ca2_ncdm);
    //  printf("k_fss_wdm =%f Mpc^{-1}\n",pba->k_fss_wdm );
-   printf("At decay a_D =%f, tau = %f Mpc \n",a_D, tau);
+//   printf("At decay a_D =%f, tau = %f Mpc \n",a_D, tau);
     //Note: works well for lifetime > age_universe, but not on the contrary, maybe I should evaluate it before a_D
     // for lifetimes smaller than age of universe, maybe I should evaluate at a_nr, smaller than a_D by some velocity factors (see page 13 in Aoyama paper)
 

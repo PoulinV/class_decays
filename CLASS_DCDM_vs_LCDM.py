@@ -5,7 +5,7 @@ from classy import Class
 from scipy.interpolate import interp1d
 
 
-plt.rcParams["figure.figsize"] = [8.0,6.0]
+plt.rcParams["figure.figsize"] = [7.0,9.0]
 
 import time
 start_time = time.time()
@@ -13,9 +13,10 @@ start_time = time.time()
 
 plot_type = 0 
 
-lTT,DlTT_mean,DlTT_error_minus,DlTT_error_plus,DlTT_bestfit= np.loadtxt("error_Planck/Planck2018_errorTT.txt",unpack=True)
-lEE,DlEE_mean,DlEE_error_minus,DlEE_error_plus,DlEE_bestfit= np.loadtxt("error_Planck/Planck2018_errorEE.txt",unpack=True)
-lTE,DlTE_mean,DlTE_error_minus,DlTE_error_plus,DlTE_bestfit= np.loadtxt("error_Planck/Planck2018_errorTE.txt",unpack=True)
+#lTT,DlTT_mean,DlTT_error_minus,DlTT_error_plus,DlTT_bestfit= np.loadtxt("error_Planck/Planck2018_errorTT.txt",unpack=True)
+#lEE,DlEE_mean,DlEE_error_minus,DlEE_error_plus,DlEE_bestfit= np.loadtxt("error_Planck/Planck2018_errorEE.txt",unpack=True)
+#lTE,DlTE_mean,DlTE_error_minus,DlTE_error_plus,DlTE_bestfit= np.loadtxt("error_Planck/Planck2018_errorTE.txt",unpack=True)
+
 
 #%% compute reference
 
@@ -28,7 +29,6 @@ else:
     
     Gamma_dcdm = np.array([3.2679,9.8039, 32.679, 98.0392])
     epsilon =  np.array([0.1,0.1,0.1, 0.1])
-
 
 
 
@@ -172,9 +172,9 @@ for i in range(4):
         Omega_dcdm_ini =0.1194/(M.h()**2) 
         analytical_ratio = (Omega_dcdm_ini/derived['Omega_m'])*(1.0-np.exp(-derived['age']/tau[0]))*np.sqrt(1.0-2.0*epsilon[0])
         print("and its analytical formula gives %f"%analytical_ratio)
+        
     elif i==1:
         clM_1 = M.lensed_cl(2500)
-#        clM_1 = M.raw_cl(2500)
         ll_DCDM_1 = clM_1['ell'][2:]
         clTT_DCDM_1 = clM_1['tt'][2:]
         clEE_DCDM_1 = clM_1['ee'][2:]
@@ -195,7 +195,6 @@ for i in range(4):
         print("and its analytical formula gives %f"%analytical_ratio)
     elif i==2:
         clM_2 = M.lensed_cl(2500)
-#        clM_2 = M.raw_cl(2500)
         ll_DCDM_2 = clM_2['ell'][2:]
         clTT_DCDM_2 = clM_2['tt'][2:]
         clEE_DCDM_2 = clM_2['ee'][2:]
@@ -216,7 +215,6 @@ for i in range(4):
         print("and its analytical formula gives %f"%analytical_ratio)
     else:
         clM_3 = M.lensed_cl(2500)
-#        clM_2 = M.raw_cl(2500)
         ll_DCDM_3 = clM_3['ell'][2:]
         clTT_DCDM_3 = clM_3['tt'][2:]
         clEE_DCDM_3 = clM_3['ee'][2:]
@@ -335,104 +333,104 @@ print("~~~~~ready to plot~~~~~")
 #plot
 
 ##create plot
-ax_1 = plt.subplot(111)
-#ax_1 = plt.subplot(311)
-#ax_2 = plt.subplot(312, sharex = ax_1)
-#ax_3 = plt.subplot(313, sharex = ax_2)
-#plt.subplots_adjust(hspace=0)
+
+ax_1 = plt.subplot(311)
+ax_2 = plt.subplot(312, sharex = ax_1)
+ax_3 = plt.subplot(313, sharex = ax_2)
+plt.subplots_adjust(hspace=0)
 
 ax_1.set_ylim([-0.15,0.15])
-#ax_2.set_ylim([-0.1,0.1])
-#ax_3.set_ylim([-0.35,0.35])
+ax_2.set_ylim([-0.1,0.1])
+ax_3.set_ylim([-0.35,0.35])
 
 
 
 ax_1.set_xlim([2,2500])
-#ax_2.set_xlim([2,2500])
-#ax_3.set_xlim([2,2500])
+ax_2.set_xlim([2,2500])
+ax_3.set_xlim([2,2500])
 
 
-#ax_3.tick_params(axis='both', which='minor', labelsize=12)
-ax_1.tick_params(axis='both', which='minor', labelsize=12)
-
+ax_3.tick_params(axis='both', which='minor', labelsize=12)
 
 #Planck error bars
-
 # FOR TT
-l_cosmic_variance_1 = np.linspace(0,30,1000)
-l_cosmic_variance_2 = np.linspace(30,48,2)
-slope =np.array([0.15,0.0343])
-ax_1.fill_between(l_cosmic_variance_1, -0.18,0.18, color='lightgray' )
-ax_1.fill_between(l_cosmic_variance_2, -slope, slope, color='lightgray' )
-ax_1.fill_between(lTT, -(DlTT_error_plus)/DlTT_mean, +(DlTT_error_plus)/DlTT_mean, color='lightgray')
+#l_cosmic_variance_1 = np.linspace(0,30,1000)
+#l_cosmic_variance_2 = np.linspace(30,48,2)
+#slope =np.array([0.15,0.0343])
+#ax_1.fill_between(l_cosmic_variance_1, -0.18,0.18, color='lightgray' )
+#ax_1.fill_between(l_cosmic_variance_2, -slope, slope, color='lightgray' )
+#ax_1.fill_between(lTT, -(DlTT_error_plus)/DlTT_mean, +(DlTT_error_plus)/DlTT_mean, color='lightgray')
 
 
 
 if plot_type ==1:
     
     ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
-#    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
-#    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_0(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
+    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
+    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_0(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
     
     ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.1f$'%epsilon[1])
-#    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.1f$'%epsilon[1])
-#    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_1(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.1f$'%epsilon[1])
+    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.1f$'%epsilon[1])
+    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_1(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'g',label=r'$\varepsilon = %.1f$'%epsilon[1])
 
     ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
-#    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
-#    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_2(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
+    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
+    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_2(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'b',label=r'$\varepsilon = %.2f$'%epsilon[2])
     
-#    ax_1.semilogx(ll_DCDM_0,fTT_ourcode_3(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'k',label=r'$\varepsilon = %.3f$'%epsilon[3])
-#    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_3(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'k',label=r'$\varepsilon = %.3f$'%epsilon[3])
-#    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_3(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'k',label=r'$\varepsilon = %.3f$'%epsilon[3])
+    ax_1.semilogx(ll_DCDM_0,fTT_ourcode_3(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'k',label=r'$\varepsilon = %.3f$'%epsilon[3])
+    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_3(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'k',label=r'$\varepsilon = %.3f$'%epsilon[3])
+    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_3(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'k',label=r'$\varepsilon = %.3f$'%epsilon[3])
 
 else:
     
-#    ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'k',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
-#    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'k',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
-#    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_0(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'k',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+    ax_1.semilogx(ll_DCDM_0,fTT_ourcode_0(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'k',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_0(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'k',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_0(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'k',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
 
     ax_1.semilogx(ll_DCDM_0,fTT_ourcode_1(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
-#    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
-#    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_1(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
+    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_1(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
+    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_1(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'b',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
 
     ax_1.semilogx(ll_DCDM_0,fTT_ourcode_2(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'g',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
-#    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
-#    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_2(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
+    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_2(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
+    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_2(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'g',label=r'$$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
 
     ax_1.semilogx(ll_DCDM_0,fTT_ourcode_3(ll_DCDM_0)/fTT_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
-#    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_3(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
-#    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_3(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
+    ax_2.semilogx(ll_DCDM_0,fEE_ourcode_3(ll_DCDM_0)/fEE_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
+    ax_3.semilogx(ll_DCDM_0,fphiphi_ourcode_3(ll_DCDM_0)/fphiphi_ref(ll_DCDM_0)-1,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
 
 
 
 
 #ax_3.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=15)
 ax_1.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=18)
-ax_1.set_ylabel(r'$C_{\ell \ (\Lambda \mathrm{DDM}) }^\mathrm{TT}/C_{\ell \ (\Lambda \mathrm{CDM} )}^\mathrm{TT} -1$',fontsize=18)
-#ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{TT}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
-#ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{EE}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
-#ax_3.set_ylabel(r'$\frac{C_\ell^{\phi \phi}(\Lambda \mathrm{DDM})}{C_\ell^{\phi \phi}(\Lambda \mathrm{CDM})} -1$',fontsize=22)
+ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{TT}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
+ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{EE}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
+ax_3.set_ylabel(r'$\frac{C_\ell^{\phi \phi}(\Lambda \mathrm{DDM})}{C_\ell^{\phi \phi}(\Lambda \mathrm{CDM})} -1$',fontsize=22)
 
 
-#ax_3.tick_params(axis="x", labelsize=18)
-ax_1.tick_params(axis="x", labelsize=18)
+ax_3.tick_params(axis="x", labelsize=18)
 ax_1.tick_params(axis="y", labelsize=18)
-#ax_2.tick_params(axis="y", labelsize=18)
-#ax_3.tick_params(axis="y", labelsize=18)
+ax_2.tick_params(axis="y", labelsize=18)
+ax_3.tick_params(axis="y", labelsize=18)
 
 
 if plot_type == 1:
-    ax_1.text(200, -0.1, r'$\Gamma^{-1} = %.0f \,  \mathrm{Gyrs}$'%tau[0], fontsize =18)
+    ax_1.text(200, -0.1, r'$\Gamma^{-1} = %.0f \,  \mathrm{Gyrs}$'%tau[0], fontsize =12)
     
 else:
-    ax_1.text(200, -0.1, r'$\varepsilon = %.1f$'%epsilon[0], fontsize =18)
+    ax_1.text(200, -0.1, r'$\varepsilon = %.1f$'%epsilon[0], fontsize =12)
     
-#ax_1.legend(frameon=False,fontsize =12,loc='lower left',borderaxespad=0., ncol=2)
-ax_1.legend(frameon=False,fontsize =18,loc='lower left',borderaxespad=0., ncol=1)
+ax_1.legend(frameon=False,fontsize =12,loc='lower left',borderaxespad=0., ncol=2)
 
 
-plt.savefig('cl_dcdm_full_several_gamma.png',dpi=300)
+
+
+if plot_type ==1:
+    plt.savefig('cl_dcdm_full_several_epsilon.png',dpi=300,bbox_inches='tight')
+else:
+    plt.savefig('cl_dcdm_full_several_gamma.png',dpi=300,bbox_inches='tight')
+
 
 plt.show()
 plt.clf()
@@ -510,8 +508,6 @@ if plot_type ==1:
 else:
     axe_1.text(0.13e-3, -0.2,  r'$\varepsilon = %.1f$'%epsilon[0], fontsize =12)
 
-#axe_1.text(0.7e-2, -0.8,  r'$\bf{z=0}$', fontsize =12)
-#axe_2.text(0.7e-2, -0.3,  r'$\bf{z=3}$', fontsize =12)
 
 axe_1.text(0.7e-2, -0.8,  r'$\bf{z=0}$', fontsize =12)
 axe_2.text(0.7e-2, -0.4,  r'$\bf{z=%.0f}$'%zhigh, fontsize =12)
