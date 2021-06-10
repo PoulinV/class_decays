@@ -87,6 +87,7 @@ struct background
 
   double Gamma_dcdm; /**< \f$ \Gamma_{dcdm} \f$: decay constant for decaying cold dark matter */
   double * Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: list of decay constant for decaying neutrinos */
+  double * integral_dec_nu_1;  /**< First integral appearing in the background psd for decaying neutrinos  */
   double M_dcdm; /**< \f$ M_{dcdm} \f$: mass [GeV] of the  decaying cold dark matter */
   double m_dcdm; /**< \f$ m_{dcdm} \f$: mass [GeV] of the  daugher particle */
   double epsilon_dcdm; /**< \f$ epsilon_{dcdm} \f$: fraction of mass energy converted to the daughter radiation */

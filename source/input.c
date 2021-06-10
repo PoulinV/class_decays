@@ -1346,7 +1346,8 @@ int input_read_parameters(
 
             }
             else if(pba->background_ncdm_distribution[n] == _decaying_neutrinos_){
-              pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
+            //  pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
+              pba->loop_over_background = _FALSE_;
 
               pba->M_ncdm[n] = pba->m_ncdm_in_eV[n]/_k_B_*_eV_/pba->T_ncdm[n]/pba->T_cmb;
               // pba->background_ncdm_distribution[n] = _fermi_dirac_; //the final
@@ -3425,6 +3426,7 @@ int input_default_params(
   pba->rho0_wdm_over_rho0_m = 0.0; /* GFA */
   pba->Gamma_dcdm = 0.0;
   pba->Gamma_neutrinos = NULL;
+  pba->integral_dec_nu_1 = NULL; /* GFA */
   pba->neutrino_hierarchy = degenerate;
   pba->convergence_tol_decaying_neutrinos = 1e-3;
   ppt->include_new_term_decay_neutrinos = 1;

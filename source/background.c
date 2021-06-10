@@ -841,7 +841,6 @@ int background_free_input(
       free(pba->dlnf0_dlnq_ncdm[k]);
       free(pba->f0[k]);
     }
-
     free(pba->ncdm_quadrature_strategy);
     free(pba->background_ncdm_distribution);
     free(pba->ncdm_input_q_size_bg);
@@ -852,6 +851,7 @@ int background_free_input(
     free(pba->q_ncdm);
     free(pba->w_ncdm);
     free(pba->Hq_table);
+    free(pba->integral_dec_nu_1);
     free(pba->tq_table);
     free(pba->q_ncdm_bg);
     free(pba->w_ncdm_bg);
@@ -1385,6 +1385,9 @@ int background_ncdm_init(
     if(pba->background_ncdm_distribution[k]==_massive_daughter_){
       qmin_tmp = ppr->a_ini_over_a_today_default * pba->a_today;
     }
+
+
+
     /*Do we need to read in a file to interpolate the distribution function? */
     if ((pba->got_files!=NULL)&&(pba->got_files[k]==_TRUE_)){
       psdfile = fopen(pba->ncdm_psd_files+filenum*_ARGUMENT_LENGTH_MAX_,"r");
@@ -1479,6 +1482,11 @@ int background_ncdm_init(
       pba->Hq_table[k]=realloc(pba->Hq_table[k],pba->q_size_ncdm_bg[k]*sizeof(double));
       pba->tq_table[k]=realloc(pba->tq_table[k],pba->q_size_ncdm_bg[k]*sizeof(double));
       // pba->is_q_initialized_dcdm=realloc(pba->is_q_initialized_dcdm,pba->q_size_ncdm_bg[k]*sizeof(double));
+
+      if(pba->background_ncdm_distribution[k]==_decaying_neutrinos_){ //GFA
+        class_alloc(pba->integral_dec_nu_1, sizeof(double)*pba->q_size_ncdm_bg[k],pba->error_message);
+      }
+
 
     if(pba->background_ncdm_distribution[k] == _massive_daughter_ || pba->background_ncdm_distribution[k] == _decaying_neutrinos_){
       //we need to correct w_ncdm because we use a slightly different definition for the description of dcdm perturbations
@@ -1700,11 +1708,13 @@ int background_ncdm_momenta(
   int last_index;
   double exp_factor = 0;
   double * pvecback;
+  double a=0, t_old, t_new;
   // double Omega_m, Omega_r, t, H;
   /** Summary: */
 
   /** - rescale normalization at given redshift */
   factor2 = factor*pow(1+z,4);
+  a = pow(1+z,-1);
 
   /** - initialize quantities */
   if (n!=NULL) *n = 0.;
@@ -1747,8 +1757,23 @@ int background_ncdm_momenta(
 
       /* integrand of the various quantities */
       if(background_ncdm_distribution == _decaying_neutrinos_){
-        exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
-        if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
+        if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
+          exp_factor =1.0;
+          t_new = t;
+          pba->integral_dec_nu_1[index_q] = 0.;
+        } else {
+          t_old = t_new;
+          t_new = t;
+          pba->integral_dec_nu_1[index_q] += (t_new-t_old)*pow(a,2)*pow(1.+q2/pow(a*M,2),-1/2);
+          exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
+        //  printf("integral_dec_nu_1[index_q] =%e\n",pba->integral_dec_nu_1[index_q]);
+          printf("(t_new-t_old) =%e\n",(t_new-t_old));
+        }
+
+      //  exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
+
+      //  if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
+        if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q])>150) {
           // GFA: When Gamma_neutrinos is very high (equal or bigger than 10^5 km/s/Mpc), at late times the exponential
           // factor becomes so tiny that it is difficult to handle it numerically. This produces weird
           // results such as negative w_ncdm, making the fluid equation to crash. In order to avoid this,
@@ -1801,11 +1826,6 @@ int background_ncdm_momenta(
     }
   }
 
-  /** - adjust normalization */
-
-  if(background_ncdm_distribution == _massive_daughter_){
-    // factor2 *= 2*_PI_; //Not clear where it comes from;
-  }
 
   if (n!=NULL) *n *= factor2/(1.+z);
   if (n!=NULL && background_ncdm_distribution == _decaying_neutrinos_) *n *= 1/(pba->T_cmb*0.71*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_); //one extra factor of 2pi is weird...
