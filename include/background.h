@@ -78,6 +78,8 @@ struct background
                     perturbation structure, but we leave it here in
                     such way to have all fld parameters grouped. */
 
+  short inside_background_solve; //GFA
+
   double c_gamma_over_c_fld; /**< ppf parameter defined in eq. (16) of 0808.3125 [astro-ph] */
 
   double Omega0_ur; /**< \f$ \Omega_{0 \nu r} \f$: ultra-relativistic neutrinos */

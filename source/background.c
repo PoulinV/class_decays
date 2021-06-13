@@ -1706,7 +1706,7 @@ int background_ncdm_momenta(
   double factor2;
   double zq = 1e100;
   int last_index;
-  double exp_factor = 0;
+  double exp_factor = 0, exp_factor_2=0;
   double * pvecback;
   double a=0, t_old, t_new;
   // double Omega_m, Omega_r, t, H;
@@ -1723,6 +1723,19 @@ int background_ncdm_momenta(
   if (drho_dM!=NULL) *drho_dM = 0.;
   if (pseudo_p!=NULL) *pseudo_p = 0.;
   if (pseudo_n!=NULL) *pseudo_n = 0.;
+
+  if (background_ncdm_distribution == _decaying_neutrinos_){
+    if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
+     if ( (t != 0) && (pba->inside_background_solve = _TRUE_) ) {
+        t_new = t;
+        }
+      } else {
+       if ( (t != 0) && (pba->inside_background_solve = _TRUE_) ) {
+        t_old = t_new;
+        t_new = t;
+       }
+     }
+   }
 
   /** - loop over momenta */
   for (index_q=0; index_q<qsize; index_q++) {
@@ -1757,20 +1770,25 @@ int background_ncdm_momenta(
 
       /* integrand of the various quantities */
       if(background_ncdm_distribution == _decaying_neutrinos_){
+
         if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
           exp_factor =1.0;
-          t_new = t;
-          pba->integral_dec_nu_1[index_q] = 0.;
+          if ( (t != 0) && (pba->inside_background_solve = _TRUE_) ) {
+            pba->integral_dec_nu_1[index_q] = 0.;
+          }
+
         } else {
-          t_old = t_new;
-          t_new = t;
-          pba->integral_dec_nu_1[index_q] += (t_new-t_old)*pow(a,2)*pow(1.+q2/pow(a*M,2),-1/2);
-          exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
-        //  printf("integral_dec_nu_1[index_q] =%e\n",pba->integral_dec_nu_1[index_q]);
-          printf("(t_new-t_old) =%e\n",(t_new-t_old));
+            if ( (t != 0) && (pba->inside_background_solve = _TRUE_) ) {
+              pba->integral_dec_nu_1[index_q] += (t_new-t_old)*pow(1.+q2/pow(a*M,2),-1/2);
+              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
+              exp_factor_2 = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
+              printf(" exp_factor_approx =%e\n", exp_factor_2);
+              printf(" exp_factor_exact =%e\n", exp_factor);
+              // at late times (non-relat transition), both exp should agree, if its not the case, refine integration method
+            }
         }
 
-      //  exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
+
 
       //  if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
         if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q])>150) {
@@ -1784,6 +1802,8 @@ int background_ncdm_momenta(
           // vanish in the perturbation equations (so evolution of neutrino perts after decay is irrelevant)
           exp_factor = exp(-150);
         }
+
+
 
         if (n!=NULL) *n += q2*wvec[index_q]*exp_factor;
         if (rho!=NULL) *rho += q2*epsilon*wvec[index_q]*exp_factor;
@@ -1928,6 +1948,7 @@ int background_ncdm_M_from_Omega(
  * @param pba Input/Output: background structure
  */
 
+
 int background_solve(
                      struct precision *ppr,
                      struct background *pba
@@ -2000,9 +2021,12 @@ int background_solve(
 
   /** - loop over integration steps: call background_functions(), find step size, save data in growTable with gt_add(), perform one step with generic_integrator(), store new value of tau */
 
+
   while (pvecback_integration[pba->index_bi_a] < pba->a_today) {
 
     tau_start = tau_end;
+
+    pba->inside_background_solve = _TRUE_;
 
     /* -> find step size (trying to adjust the last step as close as possible to the one needed to reach a=a_today; need not be exact, difference corrected later) */
     class_call(background_functions(pba,pvecback_integration, pba->short_info, pvecback),
@@ -2029,6 +2053,7 @@ int background_solve(
     pba->bt_size++;
 
     /* -> perform one step */
+    pba->inside_background_solve = _FALSE_;
     class_call(generic_integrator(background_derivs,
                                   tau_start,
                                   tau_end,
@@ -2047,6 +2072,7 @@ int background_solve(
 
   }
 
+  pba->inside_background_solve = _FALSE_;
   /** - save last data in growTable with gt_add() */
   class_call(gt_add(&gTable,_GT_END_,(void *) pvecback_integration,sizeof(double)*pba->bi_size),
              gTable.error_message,

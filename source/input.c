@@ -1346,8 +1346,7 @@ int input_read_parameters(
 
             }
             else if(pba->background_ncdm_distribution[n] == _decaying_neutrinos_){
-            //  pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
-              pba->loop_over_background = _FALSE_;
+              pba->loop_over_background = _TRUE_; //enforce loop_over_background = TRUE later on
 
               pba->M_ncdm[n] = pba->m_ncdm_in_eV[n]/_k_B_*_eV_/pba->T_ncdm[n]/pba->T_cmb;
               // pba->background_ncdm_distribution[n] = _fermi_dirac_; //the final
@@ -3461,6 +3460,7 @@ int input_default_params(
   pba->Omega0_fld = 0.;
   pba->a_today = 1.;
   pba->use_ppf = _TRUE_;
+  pba->inside_background_solve = _FALSE_;
   pba->c_gamma_over_c_fld = 0.4;
   pba->fluid_equation_of_state = CLP;
   pba->w0_fld = -1.;
