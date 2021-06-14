@@ -1724,18 +1724,6 @@ int background_ncdm_momenta(
   if (pseudo_p!=NULL) *pseudo_p = 0.;
   if (pseudo_n!=NULL) *pseudo_n = 0.;
 
-  if (background_ncdm_distribution == _decaying_neutrinos_){
-    if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
-     if ( (t != 0) && (pba->inside_background_solve = _TRUE_) ) {
-        t_new = t;
-        }
-      } else {
-       if ( (t != 0) && (pba->inside_background_solve = _TRUE_) ) {
-        t_old = t_new;
-        t_new = t;
-       }
-     }
-   }
 
   /** - loop over momenta */
   for (index_q=0; index_q<qsize; index_q++) {
@@ -1779,12 +1767,12 @@ int background_ncdm_momenta(
 
         } else {
             if ( (t != 0) && (pba->inside_background_solve = _TRUE_) ) {
-              pba->integral_dec_nu_1[index_q] += (t_new-t_old)*pow(1.+q2/pow(a*M,2),-1/2);
-              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
-              exp_factor_2 = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
-              printf(" exp_factor_approx =%e\n", exp_factor_2);
-              printf(" exp_factor_exact =%e\n", exp_factor);
-              // at late times (non-relat transition), both exp should agree, if its not the case, refine integration method
+              pba->integral_dec_nu_1[index_q] += (ppr->back_integration_stepsize/(a*H))*a*pow(1.+q2/pow(a*M,2),-1/2);
+          //    exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
+              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
+          //    printf(" exp_factor_exact =%e\n", exp_factor);
+          //    printf(" exp_factor_approx =%e\n", exp_factor_2);
+
             }
         }
 
