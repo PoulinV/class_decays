@@ -4802,10 +4802,10 @@ int perturb_initial_conditions(struct precision * ppr,
             epsilon = sqrt(q*q+a*a*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
             t = ppw->pvecback[pba->index_bg_time];
             if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-      //        exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
-      //        dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
-      //        +exp_factor*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
-                dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]; // GFA: neglect decay at initial times
+              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+              dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
+              +exp_factor*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
+      //          dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]; // GFA: neglect decay at initial times
             }
 
             else if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
@@ -8488,7 +8488,7 @@ int perturb_derivs(double tau,
             epsilon = sqrt(q*q+a2*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
             qk_div_epsilon = k*q/epsilon;
             if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-              if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
+              if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-3) {
                 dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
                 pba->integral_dec_nu_2[index_q] = 0.;
                 pba->integral_dec_nu_3[index_q] = 0.;
@@ -8502,11 +8502,11 @@ int perturb_derivs(double tau,
                   }
                 dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor*pba->f0[n_ncdm][index_q]*pba->Gamma_neutrinos[n_ncdm]*pow(q/pba->M_ncdm[n_ncdm],2)*pba->integral_dec_nu_3[index_q];
-                printf("dlnf0_dlnq_new =%e\n", dlnf0_dlnq);
+                printf("dlnf0_dlnq_new[%d] =%e, a=%e \n",index_q, dlnf0_dlnq,a);
                 exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
                 dlnf0_dlnq_old = exp_factor_old*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor_old*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
-                printf("dlnf0_dlnq_old =%e\n", dlnf0_dlnq_old);
+                printf("dlnf0_dlnq_old[%d] =%e, a=%e \n",index_q, dlnf0_dlnq_old,a);
 
               }
 
