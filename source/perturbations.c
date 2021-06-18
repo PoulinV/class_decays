@@ -8478,14 +8478,14 @@ int perturb_derivs(double tau,
 
         for (n_ncdm=0; n_ncdm<pv->N_ncdm; n_ncdm++) {
 
-          if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-            if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
-              a_new = a;
-            } else {
-              a_old = a_new;
-              a_new = a;
-            }
-          }
+//          if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+//            if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
+//              a_new = a;
+//            } else {
+//              a_old = a_new;
+//              a_new = a;
+//            }
+//          }
 
           /** - -----> loop over momentum */
 
@@ -8508,15 +8508,17 @@ int perturb_derivs(double tau,
                 dlnf0_dlnq_old = exp_factor_old*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor_old*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
                 printf("dlnf0_dlnq_old[%d] =%e, a=%e \n",index_q, dlnf0_dlnq_old,a);
-                pba->integral_dec_nu_2[index_q] += (ppr->perturb_integration_stepsize*timescale/2.0)*(a_new*pow(1.+q*q/pow(a_new*pba->M_ncdm[n_ncdm],2),-1/2)+a_old*pow(1.+q*q/pow(a_old*pba->M_ncdm[n_ncdm],2),-1/2));
-                pba->integral_dec_nu_3[index_q] += (ppr->perturb_integration_stepsize*timescale/2.0)*(pow(a_new,-1)*pow(1.+q*q/pow(a_new*pba->M_ncdm[n_ncdm],2),-3/2)+pow(a_old,-1)*pow(1.+q*q/pow(a_old*pba->M_ncdm[n_ncdm],2),-3/2));
+            //    pba->integral_dec_nu_2[index_q] += (ppr->perturb_integration_stepsize*timescale/2.0)*(a_new*pow(1.+q*q/pow(a_new*pba->M_ncdm[n_ncdm],2),-1/2)+a_old*pow(1.+q*q/pow(a_old*pba->M_ncdm[n_ncdm],2),-1/2));
+            //    pba->integral_dec_nu_3[index_q] += (ppr->perturb_integration_stepsize*timescale/2.0)*(pow(a_new,-1)*pow(1.+q*q/pow(a_new*pba->M_ncdm[n_ncdm],2),-3/2)+pow(a_old,-1)*pow(1.+q*q/pow(a_old*pba->M_ncdm[n_ncdm],2),-3/2));
+                pba->integral_dec_nu_2[index_q] += (ppr->perturb_integration_stepsize*timescale)*a*pow(1.+q*q/pow(a*pba->M_ncdm[n_ncdm],2),-1/2);
+                pba->integral_dec_nu_3[index_q] += (ppr->perturb_integration_stepsize*timescale)*pow(a,-1)*pow(1.+q*q/pow(a*pba->M_ncdm[n_ncdm],2),-3/2);
                 exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_2[index_q]);
                   if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_2[index_q])>150) {
                     exp_factor = exp(-150);
                   }
                 dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor*pba->f0[n_ncdm][index_q]*pba->Gamma_neutrinos[n_ncdm]*pow(q/pba->M_ncdm[n_ncdm],2)*pba->integral_dec_nu_3[index_q];
-                printf("dlnf0_dlnq_new[%d] =%e, a=%e \n",index_q, dlnf0_dlnq,a);
+                printf("dlnf0_dlnq[%d] =%e, a=%e \n",index_q, dlnf0_dlnq,a);
               }
 
             }else if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
