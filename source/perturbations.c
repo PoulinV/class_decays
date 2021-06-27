@@ -5982,9 +5982,9 @@ int perturb_total_stress_energy(
                   ppw->N_ncdm_perts[n_ncdm][0] += q2*weight_0*pba->w_ncdm[n_ncdm][index_q]*y[idx]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
                   ppw->N_ncdm_perts[n_ncdm][1] += q2*weight_1*pba->w_ncdm[n_ncdm][index_q]*y[idx+1]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
                   ppw->N_ncdm_perts[n_ncdm][2] += q2*weight_2*pba->w_ncdm[n_ncdm][index_q]*y[idx+2]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
-              //    ppw->N_ncdm_perts[n_ncdm][3] += q2*weight_3*pba->w_ncdm[n_ncdm][index_q]*y[idx+3]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
+                  ppw->N_ncdm_perts[n_ncdm][3] += q2*weight_3*pba->w_ncdm[n_ncdm][index_q]*y[idx+3]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
 
-                  for(l = 3; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
+                  for(l = 4; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
                    ppw->N_ncdm_perts[n_ncdm][l] = 0;
                   }
 
@@ -8097,7 +8097,7 @@ int perturb_derivs(double tau,
             dy[pv->index_pt_F0_dr]   += a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][0]/pow(pba->H0,2)*pow(a,3);
             dy[pv->index_pt_F0_dr+1] += a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][1]/pow(pba->H0,2)*pow(a,3);
             dy[pv->index_pt_F0_dr+2] += a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][2]/pow(pba->H0,2)*pow(a,3);
-        //    dy[pv->index_pt_F0_dr+3] += a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][3]/pow(pba->H0,2)*pow(a,3);
+            dy[pv->index_pt_F0_dr+3] += a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][3]/pow(pba->H0,2)*pow(a,3);
 
           //  dy[pv->index_pt_F0_dr] +=  a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][0]/pow(pba->H0,2)*pow(a,3); //pow(pba->H0,2)=rho_crit_today in CLASS units.
           //  dy[pv->index_pt_F0_dr+1] += pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_rho_ncdm1+n_ncdm]*pow(a,5)/pow(pba->H0,2)/k*ppw->theta_ncdm[n_ncdm]*ppt->include_new_term_decay_neutrinos;
