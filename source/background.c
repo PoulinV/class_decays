@@ -1772,11 +1772,12 @@ int background_ncdm_momenta(
         } else {
             if ( (t != 0) && (pba->inside_background_solve == _TRUE_) ) {
               pba->integral_dec_nu_1[index_q] += (7.0e-3/(a*H))*a*pow(1.+q2/pow(a*M,2),-1/2); //ppr->back_integration_stepsize = 7e-3 hard coded here
-              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
-              printf("exp_factor = %e\n",exp_factor );
-              exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
-              printf("exp_factor_old = %e\n",exp_factor_old );
             }
+            exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
+          //  printf("exp_factor_old = %e\n",exp_factor_old );
+            exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
+          //  printf("exp_factor = %e\n",exp_factor );
+
 
         }
 
@@ -2062,7 +2063,7 @@ int background_solve(
 
   }
 
-  pba->inside_background_solve = _FALSE_;
+  pba->inside_background_solve = _TRUE_;
   /** - save last data in growTable with gt_add() */
   class_call(gt_add(&gTable,_GT_END_,(void *) pvecback_integration,sizeof(double)*pba->bi_size),
              gTable.error_message,
