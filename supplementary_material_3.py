@@ -298,9 +298,11 @@ pkz0_approx_warm2_g10H0 = interp1d(pk12b[:,0], pk12b[:,1])
 #%%  TIME TO PLOT
 #k = pk1[:,0]
 
-if False:
+if True:
 
-    fig, (ax_1, ax_2) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]})
+#    fig, (ax_1, ax_2) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]})
+    fig, ax_1 = plt.subplots(1, 1)
+
 
     plt.subplots_adjust(wspace=0)
 
@@ -311,30 +313,30 @@ if False:
     ax_1.set_xscale('log')
 
     ax_1.set_xlim(k[0],k[-1])
-    ax_1.set_ylim(-0.075,0.075)
+    ax_1.set_ylim(-0.2,0.2)
+#    ax_1.set_ylim(-1,1)
 
-    ax_1.plot(k,(pkz0_approx_hot_g0p1H0(k)-pkz0_full_hot_g0p1H0(k))/fpk_LCDM(k),'red')
-    ax_1.plot(k,(pkz0_approx_hot_gH0(k)-pkz0_full_hot_gH0(k))/fpk_LCDM(k),'red',linestyle='dotted')
-    ax_1.plot(k,(pkz0_approx_hot_g10H0(k)-pkz0_full_hot_g10H0(k))/fpk_LCDM(k),'red',linestyle='dashed')
-    ax_1.plot(k,(pkz0_approx_warm_g0p1H0(k)-pkz0_full_warm_g0p1H0(k))/fpk_LCDM(k),'green')
-    ax_1.plot(k,(pkz0_approx_warm_gH0(k)-pkz0_full_warm_gH0(k))/fpk_LCDM(k),'green',linestyle='dotted')
-    ax_1.plot(k,(pkz0_approx_warm_g10H0(k)-pkz0_full_warm_g10H0(k))/fpk_LCDM(k),'green',linestyle='dashed')
-## ERRORS (ON S_8) IN THIS CASE ARE BIG , BUT SHOULDN'T BE A PROBLEM, EXCLUDED BY PLANCK
-
-    ax_1.plot(k,(pkz0_approx_warm2_g0p1H0(k)-pkz0_full_warm2_g0p1H0(k))/fpk_LCDM(k),'blue')
-    ax_1.plot(k,(pkz0_approx_warm2_gH0(k)-pkz0_full_warm2_gH0(k))/fpk_LCDM(k),'blue',linestyle='dotted')
-    ax_1.plot(k,(pkz0_approx_warm2_g10H0(k)-pkz0_full_warm2_g10H0(k))/fpk_LCDM(k),'blue',linestyle='dashed')
-    ax_1.plot(k,(pkz0_approx_cold_g0p1H0(k)-pkz0_full_cold_g0p1H0(k))/fpk_LCDM(k),'black')
-    ax_1.plot(k,(pkz0_approx_cold_gH0(k)-pkz0_full_cold_gH0(k))/fpk_LCDM(k),'black',linestyle='dotted')
-    ax_1.plot(k,(pkz0_approx_cold_g10H0(k)-pkz0_full_cold_g10H0(k))/fpk_LCDM(k),'black',linestyle='dashed')
+  
+    ax_1.plot(k,(pkz0_approx_hot_g0p1H0(k)-pkz0_full_hot_g0p1H0(k))/pkz0_full_hot_g0p1H0(k),'red')
+    ax_1.plot(k,(pkz0_approx_hot_gH0(k)-pkz0_full_hot_gH0(k))/pkz0_full_hot_gH0(k),'red',linestyle='dotted')
+    ax_1.plot(k,(pkz0_approx_hot_g10H0(k)-pkz0_full_hot_g10H0(k))/pkz0_full_hot_g10H0(k),'red',linestyle='dashed')
+    ax_1.plot(k,(pkz0_approx_warm_g0p1H0(k)-pkz0_full_warm_g0p1H0(k))/pkz0_full_warm_g0p1H0(k),'green')
+    ax_1.plot(k,(pkz0_approx_warm_gH0(k)-pkz0_full_warm_gH0(k))/pkz0_full_warm_gH0(k),'green',linestyle='dotted')
+#    ax_1.plot(k,(pkz0_approx_warm_g10H0(k)-pkz0_full_warm_g10H0(k))/pkz0_full_warm_g10H0(k),'green',linestyle='dashed')
+    ax_1.plot(k,(pkz0_approx_warm2_g0p1H0(k)-pkz0_full_warm2_g0p1H0(k))/pkz0_full_warm2_g0p1H0(k),'blue')
+    ax_1.plot(k,(pkz0_approx_warm2_gH0(k)-pkz0_full_warm2_gH0(k))/pkz0_full_warm2_gH0(k),'blue',linestyle='dotted')
+#    ax_1.plot(k,(pkz0_approx_warm2_g10H0(k)-pkz0_full_warm2_g10H0(k))/pkz0_full_warm2_g10H0(k),'blue',linestyle='dashed')
+    ax_1.plot(k,(pkz0_approx_cold_g0p1H0(k)-pkz0_full_cold_g0p1H0(k))/pkz0_full_cold_g0p1H0(k),'black')
+    ax_1.plot(k,(pkz0_approx_cold_gH0(k)-pkz0_full_cold_gH0(k))/pkz0_full_cold_gH0(k),'black',linestyle='dotted')
+    ax_1.plot(k,(pkz0_approx_cold_g10H0(k)-pkz0_full_cold_g10H0(k))/pkz0_full_cold_g10H0(k) ,'black',linestyle='dashed')
 
     ax_1.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
-    ax_1.set_ylabel(r'$(P_{\mathrm{approx}}-P_{\mathrm{full}})/P_{\Lambda\mathrm{CDM}}$', fontsize=20)
+    ax_1.set_ylabel(r'$(P_{\mathrm{approx}}-P_{\mathrm{full}} )/P_{\mathrm{full}}  $', fontsize=20)
     ax_1.set_title(r'$z=0$',fontsize=15)
 
 
     k_range_sigma8 = np.linspace(0.1,0.9,1000) #which are the exact wavenumbers probed by DES-Y1?
-    ax_1.fill_between(k_range_sigma8, -0.2,0.2, color='lightgray' )
+#    ax_1.fill_between(k_range_sigma8, -0.2,0.2, color='lightgray' )
     
     lines = ax_1.get_lines()
     
@@ -342,7 +344,7 @@ if False:
     black_line2 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$\Gamma = H_0$')
     black_line3 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$\Gamma = 10 H_0$')
     
-    legend1 = ax_1.legend([lines[i] for i in [0,3,6,9]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc='lower left', fontsize=13, frameon=False)
+    legend1 = ax_1.legend([lines[i] for i in [0,3,5,7]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc='lower left', fontsize=13, frameon=False)
     legend2 = ax_1.legend(handles= [black_line1,black_line2,black_line3], loc='upper left', fontsize=13, frameon=False)
     
 
@@ -353,28 +355,28 @@ if False:
     ax_1.tick_params(axis="y", labelsize=16)
     
     
-    ax_2.tick_params(axis='both', which='both', bottom='False', top='False', labelbottom='False', right='False', left='False', labelleft='False')
-    ax_2.text(0.15,0.8,r"$|S_8^{\mathrm{approx}}/S_8^{\mathrm{full}} -1|$", fontsize=13)
+#    ax_2.tick_params(axis='both', which='both', bottom='False', top='False', labelbottom='False', right='False', left='False', labelleft='False')
+#    ax_2.text(0.15,0.8,r"$|S_8^{\mathrm{approx}}/S_8^{\mathrm{full}} -1|$", fontsize=13)
     
-    l1 = mlines.Line2D([], [], color='red', linestyle='solid', label=r'$0.001 \ \%$')
-    l2 = mlines.Line2D([], [], color='red', linestyle='dotted', label=r'$0.06 \ \% $')
-    l3 = mlines.Line2D([], [], color='red', linestyle='dashed', label=r'$0.36 \ \% $')
+#    l1 = mlines.Line2D([], [], color='red', linestyle='solid', label=r'$0.001 \ \%$')
+#    l2 = mlines.Line2D([], [], color='red', linestyle='dotted', label=r'$0.06 \ \% $')
+#    l3 = mlines.Line2D([], [], color='red', linestyle='dashed', label=r'$0.36 \ \% $')
     
-    l4 = mlines.Line2D([], [], color='green', linestyle='solid', label=r'$0.16 \ \%$')
-    l5 = mlines.Line2D([], [], color='green', linestyle='dotted', label=r'$1.14 \ \% $')
+#    l4 = mlines.Line2D([], [], color='green', linestyle='solid', label=r'$0.16 \ \%$')
+#    l5 = mlines.Line2D([], [], color='green', linestyle='dotted', label=r'$1.14 \ \% $')
     
-    l6 = mlines.Line2D([], [], color='blue', linestyle='solid', label=r'$0.16 \ \%$')
-    l7 = mlines.Line2D([], [], color='blue', linestyle='dotted', label=r'$1.11 \ \% $')
-    l8 = mlines.Line2D([], [], color='blue', linestyle='dashed', label=r'$1.22 \ \% $')
+#    l6 = mlines.Line2D([], [], color='blue', linestyle='solid', label=r'$0.16 \ \%$')
+#    l7 = mlines.Line2D([], [], color='blue', linestyle='dotted', label=r'$1.11 \ \% $')
+#    l8 = mlines.Line2D([], [], color='blue', linestyle='dashed', label=r'$1.22 \ \% $')
     
-    l9 = mlines.Line2D([], [], color='black', linestyle='solid', label=r'$0.03 \ \%$')
-    l10 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$0.1 \ \% $')
-    l11 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$0.11 \ \% $')
+#    l9 = mlines.Line2D([], [], color='black', linestyle='solid', label=r'$0.03 \ \%$')
+#    l10 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$0.1 \ \% $')
+#    l11 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$0.11 \ \% $')
     
 
-    legend3 = ax_2.legend(handles= [l1,l2,l3,l4,l5,l6,l7,l8,l9,l10,l11], loc=(0.2,0.2), fontsize=13, frameon=False)
+#    legend3 = ax_2.legend(handles= [l1,l2,l3,l4,l5,l6,l7,l8,l9,l10,l11], loc=(0.2,0.2), fontsize=13, frameon=False)
     
-    ax_2.add_artist(legend3)
+#    ax_2.add_artist(legend3)
     
     plt.show()
     plt.clf()

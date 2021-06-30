@@ -4,14 +4,13 @@ import numpy as np
 from classy import Class
 from scipy.interpolate import interp1d
 
-
-plt.rcParams["figure.figsize"] = [7.0,9.0]
+plt.rcParams["figure.figsize"] = [4.0,8.0]
 
 import time
 start_time = time.time()
 
 
-plot_type = 0 
+plot_type = 1
 
 #lTT,DlTT_mean,DlTT_error_minus,DlTT_error_plus,DlTT_bestfit= np.loadtxt("error_Planck/Planck2018_errorTT.txt",unpack=True)
 #lEE,DlEE_mean,DlEE_error_minus,DlEE_error_plus,DlEE_bestfit= np.loadtxt("error_Planck/Planck2018_errorEE.txt",unpack=True)
@@ -22,7 +21,7 @@ plot_type = 0
 
 
 if plot_type ==1:
-    Gamma_dcdm = np.array([98.0392, 98.0392, 98.0392,98.0392])
+    Gamma_dcdm = np.array([32.679, 32.679, 32.679,32.679])
     epsilon = np.array([0.4999, 0.1, 0.01, 0.001])
 
 else:
@@ -140,7 +139,7 @@ for i in range(4):
     'evolver': 0,
     'ncdm_fluid_approximation': 2,
     'ncdm_fluid_trigger_tau_over_tau_k': 25,
-    'Number of momentum bins perturbs': '50,300',
+    'Number of momentum bins perturbs': '50,600',
     'massive_daughter_perturbations': 'yes',
     'dark_radiation_perturbations': 'yes'
     })
@@ -339,9 +338,9 @@ ax_2 = plt.subplot(312, sharex = ax_1)
 ax_3 = plt.subplot(313, sharex = ax_2)
 plt.subplots_adjust(hspace=0)
 
-ax_1.set_ylim([-0.15,0.15])
-ax_2.set_ylim([-0.1,0.1])
-ax_3.set_ylim([-0.35,0.35])
+ax_1.set_ylim([-0.19,0.19])
+ax_2.set_ylim([-0.11,0.11])
+ax_3.set_ylim([-0.41,0.41])
 
 
 
@@ -402,26 +401,34 @@ else:
 
 
 
-#ax_3.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=15)
-ax_1.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=18)
-ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{TT}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
-ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{EE}(\Lambda \mathrm{CDM} )} -1$',fontsize=20)
-ax_3.set_ylabel(r'$\frac{C_\ell^{\phi \phi}(\Lambda \mathrm{DDM})}{C_\ell^{\phi \phi}(\Lambda \mathrm{CDM})} -1$',fontsize=22)
+ax_3.set_xlabel(r'$\mathrm{multipole} \, \ell$',fontsize=18)
+ax_1.set_ylabel(r'$\frac{C_\ell^\mathrm{TT}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{TT}(\Lambda \mathrm{CDM} )} -1$',fontsize=23)
+ax_2.set_ylabel(r'$\frac{C_\ell^\mathrm{EE}(\Lambda \mathrm{DDM})}{C_\ell^\mathrm{EE}(\Lambda \mathrm{CDM} )} -1$',fontsize=23)
+ax_3.set_ylabel(r'$\frac{C_\ell^{\phi \phi}(\Lambda \mathrm{DDM})}{C_\ell^{\phi \phi}(\Lambda \mathrm{CDM})} -1$',fontsize=23)
 
 
-ax_3.tick_params(axis="x", labelsize=18)
-ax_1.tick_params(axis="y", labelsize=18)
-ax_2.tick_params(axis="y", labelsize=18)
-ax_3.tick_params(axis="y", labelsize=18)
+ax_3.tick_params(axis="x", labelsize=16)
+ax_1.tick_params(axis="y", labelsize=16)
+ax_2.tick_params(axis="y", labelsize=16)
+ax_3.tick_params(axis="y", labelsize=16)
+
+#ax_1.locator_params(axis='y', nbins=5)
+#ax_2.locator_params(axis='y', nbins=5)
+#ax_3.locator_params(axis='y', nbins=5)
+
+
+ax_1.yaxis.set_major_locator(plt.MaxNLocator(6))
+ax_2.yaxis.set_major_locator(plt.MaxNLocator(6))
+ax_3.yaxis.set_major_locator(plt.MaxNLocator(6))
 
 
 if plot_type == 1:
-    ax_1.text(200, -0.1, r'$\Gamma^{-1} = %.0f \,  \mathrm{Gyrs}$'%tau[0], fontsize =12)
+    ax_1.text(400, -0.1, r'$\Gamma^{-1} = %.0f \,  \mathrm{Gyrs}$'%tau[0], fontsize =16)
     
 else:
-    ax_1.text(200, -0.1, r'$\varepsilon = %.1f$'%epsilon[0], fontsize =12)
+    ax_1.text(400, -0.1, r'$\varepsilon = %.1f$'%epsilon[0], fontsize =16)
     
-ax_1.legend(frameon=False,fontsize =12,loc='lower left',borderaxespad=0., ncol=2)
+ax_1.legend(frameon=False,fontsize =16,loc='lower left',borderaxespad=0., ncol=2)
 
 
 
@@ -454,8 +461,8 @@ axe_2.set_xlim([kk[0],kk[-1]])
 #plt.ylim(-1.5,2.0)
 #plt.ylabel(r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', fontsize=17)
 
-plt.text(0.000025, 0.22, r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', va='center', rotation='vertical',fontsize=18)
-axe_2.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
+plt.text(0.000025, 0.22, r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', va='center', rotation='vertical',fontsize=23)
+axe_2.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=18)
 
 
 if plot_type ==1:
@@ -484,7 +491,7 @@ else:
 
 
 
-axe_1.legend(frameon=False, loc='lower left', fontsize=12, borderaxespad=0.)
+axe_1.legend(frameon=False, loc='lower left', fontsize=16, borderaxespad=0.)
 
 #axe_1.axvline(k_fss_wdm[0], color='r', linestyle='dotted')
 #axe_1.axvline(k_fss_wdm[1], color='g', linestyle='dotted')
@@ -492,9 +499,9 @@ axe_1.legend(frameon=False, loc='lower left', fontsize=12, borderaxespad=0.)
 #axe_1.axvline(k_fss_wdm[3], color='k', linestyle='dotted')
 
 axe_1.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
-axe_1.tick_params(axis="y", labelsize=18)
-axe_2.tick_params(axis="y", labelsize=18)
-axe_2.tick_params(axis="x", labelsize=18)
+axe_1.tick_params(axis="y", labelsize=16)
+axe_2.tick_params(axis="y", labelsize=16)
+axe_2.tick_params(axis="x", labelsize=16)
 
 
 #axe_1.axhline(suppression[0], color='r', linestyle='dashed')
@@ -503,14 +510,17 @@ axe_2.tick_params(axis="x", labelsize=18)
 #axe_1.axhline(suppression[3], color='k', linestyle='dashed')
 
 if plot_type ==1:
-    axe_1.text(0.13e-3, -0.2, r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs} $'%tau[0], fontsize =12)
+    axe_1.text(0.13e-3, -0.2, r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs} $'%tau[0], fontsize =16)
+    axe_1.text(0.6e-2, -0.5,  r'$\bf{z=0}$', fontsize =16)
+    axe_2.text(0.6e-2, -0.15,  r'$\bf{z=%.0f}$'%zhigh, fontsize =16)
+
     
 else:
-    axe_1.text(0.13e-3, -0.2,  r'$\varepsilon = %.1f$'%epsilon[0], fontsize =12)
+    axe_1.text(0.13e-3, -0.2,  r'$\varepsilon = %.1f$'%epsilon[0], fontsize =16)
+    axe_1.text(0.6e-2, -0.8,  r'$\bf{z=0}$', fontsize =16)
+    axe_2.text(0.6e-2, -0.4,  r'$\bf{z=%.0f}$'%zhigh, fontsize =16)
 
 
-axe_1.text(0.7e-2, -0.8,  r'$\bf{z=0}$', fontsize =12)
-axe_2.text(0.7e-2, -0.4,  r'$\bf{z=%.0f}$'%zhigh, fontsize =12)
 
 
 
@@ -522,8 +532,8 @@ if plot_type ==1:
 else:
     plt.savefig('pk_dcdm_full_several_gamma.png',dpi=300,bbox_inches='tight')
 
+plt.tight_layout()
 plt.show()
 plt.clf()
-
 
 #%%

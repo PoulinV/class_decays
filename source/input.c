@@ -818,7 +818,7 @@ int input_read_parameters(
     class_call(parser_read_double(pfc,"Log10_Gamma_dcdm",&param2,&flag2,errmsg),
                errmsg,
                errmsg);
-               
+
     class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
                errmsg,
                "In input file, you can only enter one of Gamma_dcdm or Log10_Gamma_dcdm, choose one");
@@ -872,7 +872,7 @@ int input_read_parameters(
         pba->epsilon_dcdm = param3;
         pba->m_dcdm = pba->M_dcdm * pow(1 - 2 * pba->epsilon_dcdm,0.5);
 
-      // printf("pba->m_dcdm %e pba->epsilon_dcdm %e\n",pba->m_dcdm,pba->epsilon_dcdm);
+    //   printf("pba->m_dcdm %e pba->epsilon_dcdm %e\n",pba->m_dcdm,pba->epsilon_dcdm);
 
       if (flag1 == _FALSE_ && flag2 == _FALSE_ && flag3 == _FALSE_) {
         pba->epsilon_dcdm = 1;
