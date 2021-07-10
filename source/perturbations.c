@@ -4313,7 +4313,7 @@ int perturb_initial_conditions(struct precision * ppr,
   /** for the decaying DM with massive daugthers */
   double * pvecback;
   int first_index_back,l;
-  double exp_factor, dlnf0_dlnq, t;
+  double exp_factor, exp_factor_old, dlnf0_dlnq, dlnf0_dlnq_old, t;
   /** --> For scalars */
 
   if (_scalars_) {
@@ -4802,10 +4802,24 @@ int perturb_initial_conditions(struct precision * ppr,
             epsilon = sqrt(q*q+a*a*pba->M_ncdm[n_ncdm]*pba->M_ncdm[n_ncdm]);
             t = ppw->pvecback[pba->index_bg_time];
             if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
-              dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
-              +exp_factor*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
-      //          dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]; // GFA: neglect decay at initial times
+              if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
+                dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
+              } else {
+                exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q]);
+                exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+            //    if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
+                if ((pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q])>150) {
+                  exp_factor = exp(-150);
+                  exp_factor_old = exp(-150);
+                }
+                dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
+                +exp_factor*pba->f0[n_ncdm][index_q]*pba->Gamma_neutrinos[n_ncdm]*pow(q/pba->M_ncdm[n_ncdm],2)*pvecback[pba->index_bg_integral_dec_3+index_q];
+                // old calculation:
+                dlnf0_dlnq_old = exp_factor_old*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
+                +exp_factor_old*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
+              //   dlnf0_dlnq = dlnf0_dlnq_old;
+              }
+
             }
 
             else if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
@@ -8481,15 +8495,6 @@ int perturb_derivs(double tau,
 
         for (n_ncdm=0; n_ncdm<pv->N_ncdm; n_ncdm++) {
 
-//          if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-//            if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
-//              a_new = a;
-//            } else {
-//              a_old = a_new;
-//              a_new = a;
-//            }
-//          }
-
           /** - -----> loop over momentum */
 
           for (index_q=0; index_q < pv->q_size_ncdm[n_ncdm]; index_q++) {
@@ -8503,27 +8508,23 @@ int perturb_derivs(double tau,
             if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
               if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
                 dlnf0_dlnq = pba->dlnf0_dlnq_ncdm[n_ncdm][index_q];
-                pba->integral_dec_nu_2[index_q] = 0.;
-                pba->integral_dec_nu_3[index_q] = 0.;
               } else {
-                class_call(perturb_timescale(tau,parameters_and_workspace,&timescale,error_message),pba->error_message,ppr->error_message);
+                exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q]);
                 exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+                  if ((pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q])>150) {
+                //  if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
+                    exp_factor = exp(-150);
+                    exp_factor_old = exp(-150);
+                  }
+                dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
+                +exp_factor*pba->f0[n_ncdm][index_q]*pba->Gamma_neutrinos[n_ncdm]*pow(q/pba->M_ncdm[n_ncdm],2)*pvecback[pba->index_bg_integral_dec_3+index_q];
+            //    printf("dlnf0_dlnq_new[%d] = %e, a = %e\n",index_q,dlnf0_dlnq,a);
+                // old calculation:
                 dlnf0_dlnq_old = exp_factor_old*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor_old*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
-            //    printf("dlnf0_dlnq_old[%d] =%e, a=%e \n",index_q, dlnf0_dlnq_old,a);
-            //    pba->integral_dec_nu_2[index_q] += (ppr->perturb_integration_stepsize*timescale/2.0)*(a_new*pow(1.+q*q/pow(a_new*pba->M_ncdm[n_ncdm],2),-1/2)+a_old*pow(1.+q*q/pow(a_old*pba->M_ncdm[n_ncdm],2),-1/2));
-            //    pba->integral_dec_nu_3[index_q] += (ppr->perturb_integration_stepsize*timescale/2.0)*(pow(a_new,-1)*pow(1.+q*q/pow(a_new*pba->M_ncdm[n_ncdm],2),-3/2)+pow(a_old,-1)*pow(1.+q*q/pow(a_old*pba->M_ncdm[n_ncdm],2),-3/2));
-                pba->integral_dec_nu_2[index_q] += (ppr->perturb_integration_stepsize*timescale)*a*pow(1.+q*q/pow(a*pba->M_ncdm[n_ncdm],2),-1/2);
-                pba->integral_dec_nu_3[index_q] += (ppr->perturb_integration_stepsize*timescale)*pow(a,-1)*pow(1.+q*q/pow(a*pba->M_ncdm[n_ncdm],2),-3/2);
-                exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_2[index_q]);
-                //  if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_2[index_q])>150) {
-                  if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
-                    exp_factor = exp(-150);
-                  }
-              //  dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
-              //  +exp_factor*pba->f0[n_ncdm][index_q]*pba->Gamma_neutrinos[n_ncdm]*pow(q/pba->M_ncdm[n_ncdm],2)*pba->integral_dec_nu_3[index_q];
-                  dlnf0_dlnq =  dlnf0_dlnq_old;
-              //  printf("dlnf0_dlnq[%d] =%e, a=%e \n",index_q, dlnf0_dlnq,a);
+            //    dlnf0_dlnq = dlnf0_dlnq_old;
+            //    printf("dlnf0_dlnq_old[%d] = %e, a = %e\n",index_q,dlnf0_dlnq_old,a);
+
               }
 
             }else if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
