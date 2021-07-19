@@ -215,7 +215,7 @@ struct background
   int index_bg_p_ncdm1;       /**< pressure of first ncdm species (others contiguous) */
   int index_bg_pseudo_p_ncdm1;/**< another statistical momentum useful in ncdma approximation */
   int index_bg_pseudo_n_ncdm1;/**< GFA: another statistical momentum useful in ncdm approximation (only required for decaying neutrinos) */
-//  int index_bg_integral_dec_1; /**< Integral appearing in the background f0 for decaying neutrinos  */
+  int index_bg_integral_dec_1; /**< Integral appearing in the background f0 for decaying neutrinos  */
   int index_bg_integral_dec_2; /**< Integral appearing in the background df0/dq for decaying neutrinos (same as integraul_dec_1, bit with different momentum sampling)  */
   int index_bg_integral_dec_3;/**< Integral appearing in the background df0/dq for decaying neutrinos  */
 
@@ -280,7 +280,7 @@ struct background
   int index_bi_rho_fld; /**< {B} fluid density */
   int index_bi_phi_scf;       /**< {B} scalar field value */
   int index_bi_phi_prime_scf; /**< {B} scalar field derivative wrt conformal time */
-//  int index_bi_integral_dec_1; /**< Integral appearing in the background f0 for decaying neutrinos  */
+  int index_bi_integral_dec_1; /**< Integral appearing in the background f0 for decaying neutrinos  */
   int index_bi_integral_dec_2; /**< Integral appearing in the background df0/dq for decaying neutrinos (same as integraul_dec_1, bit with different momentum sampling)  */
   int index_bi_integral_dec_3; /**< Integral appearing in the background df0/dq for decaying neutrinos  */
 

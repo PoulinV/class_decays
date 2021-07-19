@@ -371,6 +371,10 @@ int background_functions(
      }
 
      if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+       for (index_q=0; index_q<pba->q_size_ncdm_bg[n_ncdm];index_q++){
+         pvecback[pba->index_bg_integral_dec_1+index_q]=pvecback_B[pba->index_bi_integral_dec_1+index_q];
+         pba->integral_dec_nu_1[index_q] = pvecback[pba->index_bg_integral_dec_1+index_q];
+       }
       for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm];index_q++){
         pvecback[pba->index_bg_integral_dec_2+index_q]=pvecback_B[pba->index_bi_integral_dec_2+index_q];
         pvecback[pba->index_bg_integral_dec_3+index_q]=pvecback_B[pba->index_bi_integral_dec_3+index_q];
@@ -397,19 +401,6 @@ int background_functions(
                                              &pseudo_n_ncdm),
                      pba->error_message,
                      pba->error_message);
-
-
-    // num_ncdm = 0;
-    // rho_ncdm = 0;
-    // p_ncdm = 0;
-    // pseudo_p_ncdm = 0;
-        // if(isnan(num_ncdm) || isnan(rho_ncdm) || isnan(p_ncdm) || isnan(pseudo_p_ncdm)){
-        //   num_ncdm = 0;
-        //   rho_ncdm = 0;
-        //   p_ncdm = 0;
-        //   pseudo_p_ncdm = 0;
-        // }
-
 
 
         if(pba->massive_daugther_is_radiation >= 1 && pba->has_dr == _TRUE_){
@@ -1008,7 +999,7 @@ if (pba->Omega0_dcdmdr != 0.){ /* GFA */
   class_define_index(pba->index_bg_pseudo_n_ncdm1,pba->has_decaying_neutrinos,index_bg,pba->N_ncdm); // GFA
   for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
    if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-//    class_define_index(pba->index_bg_integral_dec_1,pba->has_decaying_neutrinos,index_bg,pba->q_size_ncdm_bg[n_ncdm]); // relevant for background module
+    class_define_index(pba->index_bg_integral_dec_1,pba->has_decaying_neutrinos,index_bg,pba->q_size_ncdm_bg[n_ncdm]); // relevant for background module
     class_define_index(pba->index_bg_integral_dec_2,pba->has_decaying_neutrinos,index_bg,pba->q_size_ncdm[n_ncdm]); // relevant for perturbation module
     class_define_index(pba->index_bg_integral_dec_3,pba->has_decaying_neutrinos,index_bg,pba->q_size_ncdm[n_ncdm]); // relevant for perturbation module
    }
@@ -1109,7 +1100,7 @@ if (pba->Omega0_dcdmdr != 0.){ /* GFA */
 
   for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
    if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-//    class_define_index(pba->index_bi_integral_dec_1,pba->has_decaying_neutrinos,index_bi,pba->q_size_ncdm_bg[n_ncdm]); // GFA
+    class_define_index(pba->index_bi_integral_dec_1,pba->has_decaying_neutrinos,index_bi,pba->q_size_ncdm_bg[n_ncdm]); // GFA
     class_define_index(pba->index_bi_integral_dec_2,pba->has_decaying_neutrinos,index_bi,pba->q_size_ncdm[n_ncdm]); // GFA
     class_define_index(pba->index_bi_integral_dec_3,pba->has_decaying_neutrinos,index_bi,pba->q_size_ncdm[n_ncdm]); // GFA
    }
@@ -1508,7 +1499,11 @@ int background_ncdm_init(
 
       if(pba->background_ncdm_distribution[k]==_decaying_neutrinos_){ //GFA
         class_alloc(pba->integral_dec_nu_1, sizeof(double)*pba->q_size_ncdm_bg[k],pba->error_message);
+        for (index_q=0; index_q<pba->q_size_ncdm_bg[k];index_q++){
+          pba->integral_dec_nu_1[index_q] = 0.;
+        }
       }
+
 
 
     if(pba->background_ncdm_distribution[k] == _massive_daughter_ || pba->background_ncdm_distribution[k] == _decaying_neutrinos_){
@@ -1782,21 +1777,21 @@ int background_ncdm_momenta(
       /* integrand of the various quantities */
       if(background_ncdm_distribution == _decaying_neutrinos_){
 
-        if (pba->Gamma_neutrinos[n_ncdm]*t < 1e-4) {
+        if (pba->Gamma_neutrinos[n_ncdm]*t < 1.e-4) {
           exp_factor =1.0;
-          if ( (t != 0) && (pba->inside_background_solve == _TRUE_) ) {
-            pba->integral_dec_nu_1[index_q] = 0.;
-          }
+              //  if ( (t != 0) && (pba->inside_background_solve == _TRUE_) ) {
+              //    pba->integral_dec_nu_1[index_q] = 0.;
+              //  }
         } else {
-          //  if (intvec != NULL) {
-             if ( (t != 0) && (pba->inside_background_solve == _TRUE_) ) {
-               pba->integral_dec_nu_1[index_q] += (7.0e-3/(a*H))*a*pow(1.+q2/pow(a*M,2),-1/2); //ppr->back_integration_stepsize = 7e-3 hard coded here
-              }
+              // if ( (t != 0) && (pba->inside_background_solve == _TRUE_) ) {
+              //   pba->integral_dec_nu_1[index_q] += (7.0e-3/(a*H))*a*pow(1.+q2/pow(a*M,2),-1/2); //ppr->back_integration_stepsize = 7e-3 hard coded here
+              //  }
               exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
               exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
+//              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*int_vec[index_q]);
           //    printf("exp_factor_new[%d]= %e\n",index_q,exp_factor);
           //    printf("exp_factor_old[%d] = %e\n",index_q,exp_factor_old);
-          //    if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
+          //     if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
                if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q])>150) {
                 // GFA: When Gamma_neutrinos is very high (equal or bigger than 10^5 km/s/Mpc), at late times the exponential
                 // factor becomes so tiny that it is difficult to handle it numerically. This produces weird
@@ -1864,6 +1859,7 @@ int background_ncdm_momenta(
   if (pseudo_p!=NULL) *pseudo_p *=factor2;
   if (pseudo_n!=NULL) *pseudo_n *=factor2/(1.+z);
   if (pseudo_n!=NULL && background_ncdm_distribution == _decaying_neutrinos_) *pseudo_n *= 1/(pba->T_cmb*0.71*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
+
 
   return _SUCCESS_;
 }
@@ -2036,7 +2032,7 @@ int background_solve(
 
     tau_start = tau_end;
 
-    pba->inside_background_solve = _TRUE_;
+//    pba->inside_background_solve = _TRUE_;
 
     /* -> find step size (trying to adjust the last step as close as possible to the one needed to reach a=a_today; need not be exact, difference corrected later) */
     class_call(background_functions(pba,pvecback_integration, pba->short_info, pvecback),
@@ -2063,7 +2059,8 @@ int background_solve(
     pba->bt_size++;
 
     /* -> perform one step */
-    pba->inside_background_solve = _FALSE_;
+  //  pba->inside_background_solve = _FALSE_;
+
     class_call(generic_integrator(background_derivs,
                                   tau_start,
                                   tau_end,
@@ -2084,13 +2081,22 @@ int background_solve(
     for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
      if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
       M =  pba->M_ncdm[n_ncdm];
+      for (index_q=0; index_q<pba->q_size_ncdm_bg[n_ncdm]; index_q++)  {
+        q = pba->q_ncdm_bg[n_ncdm][index_q];
+        if (pba->Gamma_neutrinos[n_ncdm]*pvecback_integration[pba->index_bi_time] < 1.e-4) { //these integrals are only relevant when decay is important
+          pvecback_integration[pba->index_bi_integral_dec_1+index_q] = 0.;
+        } else {
+          pvecback_integration[pba->index_bi_integral_dec_1+index_q] += tau_step*a*pow(1.+ q*q/pow(a*M,2.),-1./2.); //simple rectangle rule with adatative step
+
+      }
+      }
       for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm]; index_q++)  {
         q = pba->q_ncdm[n_ncdm][index_q];
-        if (pba->Gamma_neutrinos[n_ncdm]*pvecback_integration[pba->index_bi_time] < 1e-4) { //these integrals are only relevant when decay is important
+        if (pba->Gamma_neutrinos[n_ncdm]*pvecback_integration[pba->index_bi_time] < 1.e-4) { //these integrals are only relevant when decay is important
           pvecback_integration[pba->index_bi_integral_dec_2+index_q] = 0.;
           pvecback_integration[pba->index_bi_integral_dec_3+index_q] = 0.;
         } else {
-          pvecback_integration[pba->index_bi_integral_dec_2+index_q] += tau_step*a*pow(1.+q*q/pow(a*M,2),-1/2); //simple rectangle rule with adatative step
+          pvecback_integration[pba->index_bi_integral_dec_2+index_q] += tau_step*a*pow(1.+q*q/pow(a*M,2.),-1./2.); //simple rectangle rule with adatative step
           pvecback_integration[pba->index_bi_integral_dec_3+index_q] += tau_step*pow(a,-1.)*pow(1.+q*q/pow(a*M,2.),-3./2.); //simple rectangle rule with adatative step
         }
       }
@@ -2100,7 +2106,7 @@ int background_solve(
 
   }
 
-  pba->inside_background_solve = _TRUE_;
+//  pba->inside_background_solve = _TRUE_;
   /** - save last data in growTable with gt_add() */
   class_call(gt_add(&gTable,_GT_END_,(void *) pvecback_integration,sizeof(double)*pba->bi_size),
              gTable.error_message,
@@ -2189,25 +2195,6 @@ int background_solve(
     pvecback[pba->index_bg_ang_distance] = pba->a_today*comoving_radius/(1.+pba->z_table[i]);
     pvecback[pba->index_bg_lum_distance] = pba->a_today*comoving_radius*(1.+pba->z_table[i]);
     pvecback[pba->index_bg_rs] = pData[i*pba->bi_size+pba->index_bi_rs];
-
-    a = pvecback_integration[pba->index_bi_a];
-    tau_step = ppr->back_integration_stepsize/(pvecback_integration[pba->index_bi_a]*pvecback[pba->index_bg_H]);
-
-    for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) {
-     if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-      M =  pba->M_ncdm[n_ncdm];
-      for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm]; index_q++)  {
-        q = pba->q_ncdm[n_ncdm][index_q];
-        if (pba->Gamma_neutrinos[n_ncdm]*pvecback_integration[pba->index_bi_time] < 1e-4) { //these integrals are only relevant when decay is important
-          pvecback_integration[pba->index_bi_integral_dec_2+index_q] = 0.;
-          pvecback_integration[pba->index_bi_integral_dec_3+index_q] = 0.;
-        } else {
-          pvecback_integration[pba->index_bi_integral_dec_2+index_q] += tau_step*a*pow(1.+q*q/pow(a*M,2),-1/2); //simple rectangle rule with adatative step
-          pvecback_integration[pba->index_bi_integral_dec_3+index_q] += tau_step*pow(a,-1.)*pow(1.+q*q/pow(a*M,2.),-3./2.); //simple rectangle rule with adatative step
-        }
-      }
-     }
-    }
 
     /* -> compute all other quantities depending only on {B} variables.
        The value of {B} variables in pData are also copied to pvecback.*/
@@ -2448,9 +2435,9 @@ int background_initial_conditions(
 
    for (n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
     if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
-  //    for (index_q=0; index_q<pba->q_size_ncdm_bg[n_ncdm];index_q++){
-  //      pvecback_integration[pba->index_bi_integral_dec_1+index_q]=0.;
-  //    }
+      for (index_q=0; index_q<pba->q_size_ncdm_bg[n_ncdm];index_q++){
+        pvecback_integration[pba->index_bi_integral_dec_1+index_q]=0.;
+      }
       for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm];index_q++){
         pvecback_integration[pba->index_bi_integral_dec_2+index_q]=0.;
         pvecback_integration[pba->index_bi_integral_dec_3+index_q]=0.;
@@ -2748,6 +2735,7 @@ int background_output_data(
       for (n=0; n<pba->N_ncdm; n++){
         class_store_double(dataptr,pvecback[pba->index_bg_n_ncdm1+n],_TRUE_,storeidx);
         class_store_double(dataptr,pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
+//        class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
         class_store_double(dataptr,pvecback[pba->index_bg_p_ncdm1+n],_TRUE_,storeidx);
       }
     }
@@ -2755,9 +2743,11 @@ int background_output_data(
     class_store_double(dataptr,pvecback[pba->index_bg_rho_fld],pba->has_fld,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_w_fld],pba->has_fld,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
+//    class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_crit],_TRUE_,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_dcdm],pba->has_dcdm,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_dr],pba->has_dr,storeidx);
+//    class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*pvecback[pba->index_bg_rho_dr],pba->has_dr,storeidx);
 
     class_store_double(dataptr,pvecback[pba->index_bg_rho_scf],pba->has_scf,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_p_scf],pba->has_scf,storeidx);
@@ -2877,10 +2867,13 @@ int background_derivs(
 // The vector dy[] still needs to be filled in the corresponding indices, so we arbitrarily set it to zero here
         if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
           dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;///_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ convert from eV to 1/Mpc. One extra factor of 1/2pi is weird.
-        //  for (index_q=0; index_q<pba->q_size_ncdm_bg[n_ncdm];index_q++){
-        //    dy[pba->index_bi_integral_dec_1+index_q] = 0.;
-        //  }
+          for (index_q=0; index_q<pba->q_size_ncdm_bg[n_ncdm];index_q++){
+          //  dy[pba->index_bi_integral_dec_1+index_q] = y[pba->index_bi_a]*pow(1.+ pba->q_ncdm_bg[n_ncdm][index_q]*pba->q_ncdm_bg[n_ncdm][index_q]/pow(y[pba->index_bi_a]*pba->M_ncdm[n_ncdm],2.),-1./2.);
+            dy[pba->index_bi_integral_dec_1+index_q] = 0.;
+          }
           for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm];index_q++){
+          //  dy[pba->index_bi_integral_dec_2+index_q] = y[pba->index_bi_a]*pow(1.+ pba->q_ncdm[n_ncdm][index_q]*pba->q_ncdm[n_ncdm][index_q]/pow(y[pba->index_bi_a]*pba->M_ncdm[n_ncdm],2.),-1./2.);
+          //  dy[pba->index_bi_integral_dec_3+index_q] = pow(y[pba->index_bi_a],-1.)*pow(1.+ pba->q_ncdm[n_ncdm][index_q]*pba->q_ncdm[n_ncdm][index_q]/pow(y[pba->index_bi_a]*pba->M_ncdm[n_ncdm],2.),-3./2.);
             dy[pba->index_bi_integral_dec_2+index_q] = 0.;
             dy[pba->index_bi_integral_dec_3+index_q] = 0.;
           }
