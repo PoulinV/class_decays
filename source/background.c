@@ -1774,9 +1774,8 @@ int background_ncdm_momenta(
               pba->integral_dec_nu_1[index_q] += (7.0e-3/(a*H))*a*pow(1.+q2/pow(a*M,2),-1/2); //ppr->back_integration_stepsize = 7e-3 hard coded here
             }
             exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
-          //  printf("exp_factor_old = %e\n",exp_factor_old );
-            exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
-          //  printf("exp_factor = %e\n",exp_factor );
+          //  exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
+            exp_factor = exp_factor_old;
 
 
         }

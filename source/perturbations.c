@@ -5985,6 +5985,7 @@ int perturb_total_stress_energy(
                   ppw->N_ncdm_perts[n_ncdm][3] += q2*weight_3*pba->w_ncdm[n_ncdm][index_q]*y[idx+3]*factor*a/pba->a_today/(pba->T_cmb*pba->T_ncdm[n_ncdm]*_k_B_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
 
                   for(l = 4; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
+                //  for(l = 3; l < ppw->pv->l_max_ncdm[n_ncdm]; l++){
                    ppw->N_ncdm_perts[n_ncdm][l] = 0;
                   }
 
@@ -8508,6 +8509,9 @@ int perturb_derivs(double tau,
               } else {
                 class_call(perturb_timescale(tau,parameters_and_workspace,&timescale,error_message),pba->error_message,ppr->error_message);
                 exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
+                if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
+                  exp_factor_old = exp(-150);
+                }
                 dlnf0_dlnq_old = exp_factor_old*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor_old*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon;
             //    printf("dlnf0_dlnq_old[%d] =%e, a=%e \n",index_q, dlnf0_dlnq_old,a);
@@ -8515,14 +8519,13 @@ int perturb_derivs(double tau,
             //    pba->integral_dec_nu_3[index_q] += (ppr->perturb_integration_stepsize*timescale/2.0)*(pow(a_new,-1)*pow(1.+q*q/pow(a_new*pba->M_ncdm[n_ncdm],2),-3/2)+pow(a_old,-1)*pow(1.+q*q/pow(a_old*pba->M_ncdm[n_ncdm],2),-3/2));
                 pba->integral_dec_nu_2[index_q] += (ppr->perturb_integration_stepsize*timescale)*a*pow(1.+q*q/pow(a*pba->M_ncdm[n_ncdm],2),-1/2);
                 pba->integral_dec_nu_3[index_q] += (ppr->perturb_integration_stepsize*timescale)*pow(a,-1)*pow(1.+q*q/pow(a*pba->M_ncdm[n_ncdm],2),-3/2);
-                exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_2[index_q]);
-                //  if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_2[index_q])>150) {
-                  if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
-                    exp_factor = exp(-150);
-                  }
+            //    exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_2[index_q]);
+            //      if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_2[index_q])>150) {
+            //        exp_factor = exp(-150);
+              //    }
               //  dlnf0_dlnq = exp_factor*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
               //  +exp_factor*pba->f0[n_ncdm][index_q]*pba->Gamma_neutrinos[n_ncdm]*pow(q/pba->M_ncdm[n_ncdm],2)*pba->integral_dec_nu_3[index_q];
-                  dlnf0_dlnq =  dlnf0_dlnq_old;
+                 dlnf0_dlnq =  dlnf0_dlnq_old;
               //  printf("dlnf0_dlnq[%d] =%e, a=%e \n",index_q, dlnf0_dlnq,a);
               }
 
