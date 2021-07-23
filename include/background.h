@@ -89,9 +89,7 @@ struct background
 
   double Gamma_dcdm; /**< \f$ \Gamma_{dcdm} \f$: decay constant for decaying cold dark matter */
   double * Gamma_neutrinos; /**< \f$ \Gamma_{neutrinos} \f$: list of decay constant for decaying neutrinos */
-  double * integral_dec_nu_1;  /**< First integral appearing in the background psd for decaying neutrinos  */
-  double * integral_dec_nu_2; /**< One of the two integrals appearing in the expression of df/dq for decaying neutrinos  */
-  double * integral_dec_nu_3; /**< One of the two integrals appearing in the expression of df/dq for decaying neutrinos  */
+  double * integral_dec_nu_1;  /**< Integral appearing in the background f0 for decaying neutrinos  */
   double M_dcdm; /**< \f$ M_{dcdm} \f$: mass [GeV] of the  decaying cold dark matter */
   double m_dcdm; /**< \f$ m_{dcdm} \f$: mass [GeV] of the  daugher particle */
   double epsilon_dcdm; /**< \f$ epsilon_{dcdm} \f$: fraction of mass energy converted to the daughter radiation */
@@ -217,6 +215,9 @@ struct background
   int index_bg_p_ncdm1;       /**< pressure of first ncdm species (others contiguous) */
   int index_bg_pseudo_p_ncdm1;/**< another statistical momentum useful in ncdma approximation */
   int index_bg_pseudo_n_ncdm1;/**< GFA: another statistical momentum useful in ncdm approximation (only required for decaying neutrinos) */
+  int index_bg_integral_dec_1; /**< Integral appearing in the background f0 for decaying neutrinos  */
+  int index_bg_integral_dec_2; /**< Integral appearing in the background df0/dq for decaying neutrinos (same as integraul_dec_1, bit with different momentum sampling)  */
+  int index_bg_integral_dec_3;/**< Integral appearing in the background df0/dq for decaying neutrinos  */
 
   int index_bg_Omega_r;       /**< relativistic density fraction (\f$ \Omega_{\gamma} + \Omega_{\nu r} \f$) */
 
@@ -279,6 +280,9 @@ struct background
   int index_bi_rho_fld; /**< {B} fluid density */
   int index_bi_phi_scf;       /**< {B} scalar field value */
   int index_bi_phi_prime_scf; /**< {B} scalar field derivative wrt conformal time */
+  int index_bi_integral_dec_1; /**< Integral appearing in the background f0 for decaying neutrinos  */
+  int index_bi_integral_dec_2; /**< Integral appearing in the background df0/dq for decaying neutrinos (same as integraul_dec_1, bit with different momentum sampling)  */
+  int index_bi_integral_dec_3; /**< Integral appearing in the background df0/dq for decaying neutrinos  */
 
   int index_bi_time;    /**< {C} proper (cosmological) time in Mpc */
   int index_bi_rs;      /**< {C} sound horizon */
