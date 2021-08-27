@@ -148,6 +148,7 @@ struct background
 
   double convergence_tol_decaying_neutrinos;
   short loop_over_background;
+  short use_old_formula_neutrino_psd;
   short free_input_parameters;
   //@}
 

@@ -1786,13 +1786,14 @@ int background_ncdm_momenta(
               // if ( (t != 0) && (pba->inside_background_solve == _TRUE_) ) {
               //   pba->integral_dec_nu_1[index_q] += (7.0e-3/(a*H))*a*pow(1.+q2/pow(a*M,2),-1/2); //ppr->back_integration_stepsize = 7e-3 hard coded here
               //  }
-              exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
               exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
+              exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
+
 //              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*int_vec[index_q]);
           //    printf("exp_factor_new[%d]= %e\n",index_q,exp_factor);
           //    printf("exp_factor_old[%d] = %e\n",index_q,exp_factor_old);
-          //     if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
-               if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q])>150) {
+               if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
+          //     if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q])>150) {
                 // GFA: When Gamma_neutrinos is very high (equal or bigger than 10^5 km/s/Mpc), at late times the exponential
                 // factor becomes so tiny that it is difficult to handle it numerically. This produces weird
                 // results such as negative w_ncdm, making the fluid equation to crash. In order to avoid this,
@@ -1805,7 +1806,10 @@ int background_ncdm_momenta(
                 exp_factor_old = exp(-150);
               }
               // old calculation:
-            //  exp_factor =  exp_factor_old;
+              if (pba->use_old_formula_neutrino_psd == _TRUE_) {
+                exp_factor =  exp_factor_old;
+              }
+
         }
 
         if (n!=NULL) *n += q2*wvec[index_q]*exp_factor;

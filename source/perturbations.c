@@ -4807,8 +4807,8 @@ int perturb_initial_conditions(struct precision * ppr,
               } else {
                 exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q]);
                 exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
-            //    if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
-                if ((pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q])>150) {
+                if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
+            //    if ((pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q])>150) {
                   exp_factor = exp(-150);
                   exp_factor_old = exp(-150);
                 }
@@ -4817,7 +4817,11 @@ int perturb_initial_conditions(struct precision * ppr,
                 // old calculation:
                 dlnf0_dlnq_old = exp_factor_old*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor_old*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon/epsilon;
-              //   dlnf0_dlnq = dlnf0_dlnq_old;
+                
+                if (pba->use_old_formula_neutrino_psd == _TRUE_) {
+                  dlnf0_dlnq = dlnf0_dlnq_old;
+                }
+
               }
 
             }
@@ -8512,8 +8516,8 @@ int perturb_derivs(double tau,
               } else {
                 exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q]);
                 exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
-                  if ((pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q])>150) {
-              //    if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
+              //    if ((pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q])>150) {
+                  if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
                     exp_factor = exp(-150);
                     exp_factor_old = exp(-150);
                   }
@@ -8523,7 +8527,10 @@ int perturb_derivs(double tau,
                 // old calculation:
                 dlnf0_dlnq_old = exp_factor_old*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor_old*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon/epsilon;
-            //     dlnf0_dlnq = dlnf0_dlnq_old;
+
+                if (pba->use_old_formula_neutrino_psd == _TRUE_) {
+                  dlnf0_dlnq = dlnf0_dlnq_old;
+                }
             //    printf("dlnf0_dlnq_old[%d] = %e, a = %e\n",index_q,dlnf0_dlnq_old,a);
 
               }

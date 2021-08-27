@@ -1083,6 +1083,23 @@ int input_read_parameters(
       pba->loop_over_background = _FALSE_;
     }
 
+
+    class_call(parser_read_string(pfc,"use_old_formula_neutrino_psd",&string1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+
+    if (flag1 == _TRUE_){
+      if((strstr(string1,"y") != NULL) || (strstr(string1,"Y") != NULL)){
+        pba->use_old_formula_neutrino_psd = _TRUE_;
+      }
+      else {
+        pba->use_old_formula_neutrino_psd = _FALSE_;
+      }
+    }
+    else{
+      pba->use_old_formula_neutrino_psd = _FALSE_;
+    }
+
     class_read_double("convergence_tol_decaying_neutrinos",pba->convergence_tol_decaying_neutrinos);
     class_read_double("include_new_term_decay_neutrinos",ppt->include_new_term_decay_neutrinos);//1 or 0
     class_read_double("include_fluid_decay_term_neutrinos",ppt->include_fluid_decay_term_neutrinos);//1 or 0
@@ -3431,6 +3448,7 @@ int input_default_params(
   ppt->include_new_term_decay_neutrinos = 1;
   ppt->include_fluid_decay_term_neutrinos = 0;
   pba->loop_over_background = _FALSE_;
+  pba->use_old_formula_neutrino_psd = _FALSE_;
   pba->M_dcdm = 0.0;
   pba->m_dcdm = 0.0;
   pba->N_ncdm = 0;
