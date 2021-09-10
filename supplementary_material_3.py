@@ -330,7 +330,7 @@ if True:
     ax_1.plot(k,(pkz0_approx_cold_gH0(k)-pkz0_full_cold_gH0(k))/pkz0_full_cold_gH0(k),'black',linestyle='dotted')
     ax_1.plot(k,(pkz0_approx_cold_g10H0(k)-pkz0_full_cold_g10H0(k))/pkz0_full_cold_g10H0(k) ,'black',linestyle='dashed')
 
-    ax_1.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=15)
+    ax_1.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=18)
     ax_1.set_ylabel(r'$(P_{\mathrm{approx}}-P_{\mathrm{full}} )/P_{\mathrm{full}}  $', fontsize=20)
     ax_1.set_title(r'$z=0$',fontsize=15)
 
@@ -344,8 +344,8 @@ if True:
     black_line2 = mlines.Line2D([], [], color='black', linestyle='dotted', label=r'$\Gamma = H_0$')
     black_line3 = mlines.Line2D([], [], color='black', linestyle='dashed', label=r'$\Gamma = 10 H_0$')
     
-    legend1 = ax_1.legend([lines[i] for i in [0,3,5,7]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc='lower left', fontsize=13, frameon=False)
-    legend2 = ax_1.legend(handles= [black_line1,black_line2,black_line3], loc='upper left', fontsize=13, frameon=False)
+    legend1 = ax_1.legend([lines[i] for i in [0,3,5,7]], [r'$\varepsilon = 0.5$', r'$\varepsilon = 0.1$',r'$\varepsilon=0.01$',r'$\varepsilon = 0.001$'], loc='lower left', fontsize=16, frameon=False)
+    legend2 = ax_1.legend(handles= [black_line1,black_line2,black_line3], loc='upper left', fontsize=16, frameon=False)
     
 
     ax_1.add_artist(legend1)
@@ -832,5 +832,55 @@ ax_4.tick_params(axis='y', which='both', bottom='False',right='False',left='Fals
 plt.show()
 plt.clf()
    
+#%%
 
+
+files = ['/Users/gfranco/class_majoron/output/trial_CDM_pk.dat']
+data = []
+for data_file in files:
+    data.append(np.loadtxt(data_file))
+pk = data[0]
+pk_CDM = interp1d(pk[:,0], pk[:,1])
+
+
+files = ['/Users/gfranco/class_majoron/output/trial_WDM_m1keV_full_pk.dat']
+data = []
+for data_file in files:
+    data.append(np.loadtxt(data_file))
+pk = data[0]
+pk_WDM_m1keV_full = interp1d(pk[:,0], pk[:,1])
+
+
+files = ['/Users/gfranco/class_majoron/output/trial_WDM_m1keV_fluid_pk.dat']
+data = []
+for data_file in files:
+    data.append(np.loadtxt(data_file))
+pk = data[0]
+pk_WDM_m1keV_fluid= interp1d(pk[:,0], pk[:,1])
+
+
+
+k = np.logspace(-1,2,1000) # k in h/Mpc
+plt.xscale('log')
+plt.yscale('log')
+
+plt.xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=18)
+plt.ylabel(r'$P(k,z=0)$', fontsize=20,labelpad=10 )
+
+plt.xlim(k[0],k[-1])
+plt.ylim(1e-12,1e4)
+
+
+plt.plot(k,pk_CDM(k), 'black', label=r'CDM')
+plt.plot(k,pk_WDM_m1keV_full(k), 'fuchsia', label=r'WDM, $m = 1 \ \mathrm{keV}$, full' )
+plt.plot(k,pk_WDM_m1keV_fluid(k), 'blue',   label=r'WDM, $m = 1 \ \mathrm{keV}$, approx' )
+
+
+plt.legend(loc='lower left',frameon=False, fontsize=16)
+
+plt.tick_params(axis="x", labelsize=16)
+plt.tick_params(axis="y", labelsize=16)
+
+plt.show()
+plt.clf()
 
