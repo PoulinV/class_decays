@@ -2041,6 +2041,7 @@ int perturb_workspace_init(
       if(pba->Gamma_neutrinos > 0 && pba->has_dr == _TRUE_){
         class_alloc(ppw->N_ncdm_perts,pba->N_ncdm*sizeof(double),ppt->error_message);
           for(n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
+
             class_alloc(ppw->N_ncdm_perts[n_ncdm],(ppr->l_max_ncdm+1)*sizeof(double),ppt->error_message);
           }
       }
@@ -7492,7 +7493,8 @@ int perturb_derivs(double tau,
             // dy[pv->index_pt_F0_dr] +=  fprime_dr*(ppw->delta_ncdm[n_ncdm]+metric_euler/k2);
             // dy[pv->index_pt_F0_dr+1] += fprime_dr/k*ppw->theta_ncdm[n_ncdm];
             //relativistic case
-            for (l = 0; l < pv->l_max_ncdm[n_ncdm]; l++) {
+          //  for (l = 0; l < pv->l_max_ncdm[n_ncdm]; l++) {
+            for (l = 0; l < 1; l++) {
               dy[pv->index_pt_F0_dr+l] +=  a2_M_Gamma*ppw->N_ncdm_perts[n_ncdm][l]/pow(pba->H0,2)*pow(a,3); //pow(pba->H0,2)=rho_crit_today in CLASS units.//weird: extra factor of a^3, otherwise does not match the non-relat limit.
             }
           }

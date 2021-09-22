@@ -1057,10 +1057,8 @@ int input_read_parameters(
                          pba->error_message,
                          errmsg);
                pba->Omega0_ncdm[n] = rho_ncdm/pba->H0/pba->H0; //placeholder
-               pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//ignore decay for simplicity
-              // printf("pba->M_ncdm[n] %e \n", pba->M_ncdm[n]);
-              // printf("IM HERE %e \n",pba->Omega0_ncdm[n]);
-//
+              // pba->Omega0_ncdm_tot += pba->Omega0_ncdm[n];//GFA: I think this should be commented out,
+              // contribution to pba->Omega0_ncdm_tot from decaying neutrinos is already added in the background module
             }
 
     }

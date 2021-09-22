@@ -370,6 +370,9 @@ int background_functions(
        }
      }
 
+     if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){ //GFA
+       pvecback[pba->index_bg_offset_dec_nu]=pvecback_B[pba->index_bi_offset_dec_nu];
+     }
       // printf("t %e\n", t/_Gyr_over_Mpc_);
         class_call(background_ncdm_momenta(pba,
                                            pba->q_ncdm_bg[n_ncdm],
@@ -928,6 +931,7 @@ int background_indices(
   class_define_index(pba->index_bg_rho_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_p_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
   class_define_index(pba->index_bg_pseudo_p_ncdm1,pba->has_ncdm,index_bg,pba->N_ncdm);
+  class_define_index(pba->index_bg_offset_dec_nu,pba->has_ncdm,index_bg,1); //GFA
 
   /* - index for dcdm */
   class_define_index(pba->index_bg_rho_dcdm,pba->has_dcdm,index_bg,1);
@@ -1021,7 +1025,7 @@ int background_indices(
   /* -> scalar field and its derivative wrt conformal time (Zuma) */
   class_define_index(pba->index_bi_phi_scf,pba->has_scf,index_bi,1);
   class_define_index(pba->index_bi_phi_prime_scf,pba->has_scf,index_bi,1);
-
+  class_define_index(pba->index_bi_offset_dec_nu,pba->has_ncdm,index_bi,1); //GFA
   /* End of {B} variables, now continue with {C} variables */
   pba->bi_B_size = index_bi;
 
@@ -1811,7 +1815,7 @@ int background_solve(
   /* final conformal time */
   double tau_end;
   /* an index running over bi indices */
-  int i, n;
+  int i, n, n_ncdm;
   /* vector of quantities to be integrated */
   double * pvecback_integration;
   /* vector of all background quantities */
@@ -1820,6 +1824,7 @@ int background_solve(
   int last_index=0;
   /* comoving radius coordinate in Mpc (equal to conformal distance in flat case) */
   double comoving_radius=0.;
+  double M, a, tau_step; //GFA
 
   /*ncdm variables */
   double number_density_ncdm, rho_ncdm, p_ncdm, pseudo_p_ncdm;
@@ -1901,6 +1906,24 @@ int background_solve(
 
     /* -> store value of tau */
     pvecback_integration[pba->index_bi_tau]=tau_end;
+
+    a = pvecback_integration[pba->index_bi_a];
+    tau_step = ppr->back_integration_stepsize/(pvecback_integration[pba->index_bi_a]*pvecback[pba->index_bg_H]);
+
+
+    for (n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++) { //GFA
+     if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
+      M =  pba->M_ncdm[n_ncdm];
+      if (pba->Gamma_neutrinos*pvecback_integration[pba->index_bi_time] < 1.e-4) {
+        pvecback_integration[pba->index_bi_offset_dec_nu ] = 0.;
+      } else {
+        pvecback_integration[pba->index_bi_offset_dec_nu ] += tau_step*pow(a,5)*(pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_)*pba->Gamma_neutrinos*pvecback_integration[pba->index_bi_time]*pvecback[pba->index_bg_H]*pvecback[pba->index_bg_n_ncdm1+n_ncdm];
+        printf(" pvecback_integration[pba->index_bi_offset_dec_nu ] =%e \n",pvecback_integration[pba->index_bi_offset_dec_nu ] );
+      }
+     }
+    }
+
+
 
   }
 
@@ -2204,6 +2227,14 @@ int background_initial_conditions(
       printf("Density is %g. a_today=%g. Omega_ini=%g\n",pvecback_integration[pba->index_bi_rho_dcdm],pba->a_today,pba->Omega_ini_dcdm);
   }
 
+  for (n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
+    if (pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){ //GFA
+      pvecback_integration[pba->index_bi_offset_dec_nu ] = 0.;
+    }
+  }
+
+
+
   if (pba->has_dr == _TRUE_){
     if (pba->has_dcdm == _TRUE_){
       /**  - f is the critical density fraction of DR. The exact solution is:
@@ -2425,7 +2456,8 @@ int background_output_titles(struct background * pba,
     for (n=0; n<pba->N_ncdm; n++){
       sprintf(tmp,"(.)n_ncdm[%d]",n);
       class_store_columntitle(titles,tmp,_TRUE_);
-      sprintf(tmp,"(.)rho_ncdm[%d]",n);
+    //  sprintf(tmp,"(.)rho_ncdm[%d]",n);
+      sprintf(tmp,"a^4rho_nu[%d]+a^4rho_dr",n);
       class_store_columntitle(titles,tmp,_TRUE_);
       sprintf(tmp,"(.)p_ncdm[%d]",n);
       class_store_columntitle(titles,tmp,_TRUE_);
@@ -2434,7 +2466,9 @@ int background_output_titles(struct background * pba,
   class_store_columntitle(titles,"(.)rho_lambda",pba->has_lambda);
   class_store_columntitle(titles,"(.)rho_fld",pba->has_fld);
   class_store_columntitle(titles,"(.)w_fld",pba->has_fld);
-  class_store_columntitle(titles,"(.)rho_ur",pba->has_ur);
+//  class_store_columntitle(titles,"(.)rho_ur",pba->has_ur);
+  class_store_columntitle(titles,"a^4rho_ur",pba->has_ur);
+  class_store_columntitle(titles,"a^4rho_ur-offset",pba->has_ncdm);
   class_store_columntitle(titles,"(.)rho_crit",_TRUE_);
   class_store_columntitle(titles,"(.)rho_dcdm",pba->has_dcdm);
   class_store_columntitle(titles,"(.)rho_dr",pba->has_dr);
@@ -2480,14 +2514,18 @@ int background_output_data(
     if (pba->has_ncdm == _TRUE_){
       for (n=0; n<pba->N_ncdm; n++){
         class_store_double(dataptr,pvecback[pba->index_bg_n_ncdm1+n],_TRUE_,storeidx);
-        class_store_double(dataptr,pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
+      //  class_store_double(dataptr,pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
+        class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*(pvecback[pba->index_bg_rho_ncdm1+n]+pvecback[pba->index_bg_rho_dr]),_TRUE_,storeidx);
         class_store_double(dataptr,pvecback[pba->index_bg_p_ncdm1+n],_TRUE_,storeidx);
       }
     }
     class_store_double(dataptr,pvecback[pba->index_bg_rho_lambda],pba->has_lambda,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_fld],pba->has_fld,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_w_fld],pba->has_fld,storeidx);
-    class_store_double(dataptr,pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
+//    class_store_double(dataptr,pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
+    class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
+    class_store_double(dataptr,3.046*7./8.*pow(4./11.,4./3.)*pba->Omega0_g*pow(pba->H0,2)-pvecback[pba->index_bg_offset_dec_nu],pba->has_ncdm,storeidx);
+
     class_store_double(dataptr,pvecback[pba->index_bg_rho_crit],_TRUE_,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_dcdm],pba->has_dcdm,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_dr],pba->has_dr,storeidx);
@@ -2600,6 +2638,7 @@ int background_derivs(
         if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
           dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_n_ncdm1+n_ncdm]*pba->m_ncdm_in_eV[n_ncdm]*_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_;///_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_ convert from eV to 1/Mpc. One extra factor of 1/2pi is weird.
           // printf("pvecback[pba->index_bg_rho_ncdm1] %e pvecback[pba->index_bg_n_ncdm1]*pba->M_ncdm[n_ncdm] %e _eV_/_h_P_/2./_PI_*_c_/_Mpc_over_m_ %e\n",pvecback[pba->index_bg_rho_ncdm1+n_ncdm],pvecback[pba->index_bg_n_ncdm1]*pba->m_ncdm_in_eV[n_ncdm]*1.56e+29,_eV_/_h_P_/2./_PI_/_c_*_Mpc_over_m_);
+          dy[pba->index_bi_offset_dec_nu] = 0.; //GFA
         }
       }
     }
