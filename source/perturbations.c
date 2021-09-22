@@ -4306,6 +4306,7 @@ int perturb_initial_conditions(struct precision * ppr,
   double ktau_two,ktau_three;
   double f_dr;
   double f0 = 0; //GFA
+  double exponent;
 
   double delta_tot;
   double velocity_tot;
@@ -4807,8 +4808,14 @@ int perturb_initial_conditions(struct precision * ppr,
               } else {
                 exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q]);
                 exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
-                if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
-            //    if ((pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q])>150) {
+
+                if (pba->use_old_formula_neutrino_psd == _TRUE_) {
+                  exponent = pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t;
+                } else {
+                  exponent = pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q];
+                }
+
+                if (exponent>150) {
                   exp_factor = exp(-150);
                   exp_factor_old = exp(-150);
                 }
@@ -4817,7 +4824,7 @@ int perturb_initial_conditions(struct precision * ppr,
                 // old calculation:
                 dlnf0_dlnq_old = exp_factor_old*pba->dlnf0_dlnq_ncdm[n_ncdm][index_q]
                 +exp_factor_old*pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]*a*t*pba->f0[n_ncdm][index_q]*q*q/epsilon/epsilon/epsilon;
-                
+
                 if (pba->use_old_formula_neutrino_psd == _TRUE_) {
                   dlnf0_dlnq = dlnf0_dlnq_old;
                 }
@@ -7696,6 +7703,7 @@ int perturb_derivs(double tau,
 
   /* for use with dcdm and dr */
   double f_dr, fprime_dr, M,a2_M_Gamma;
+  double exponent;
 
   /** - rename the fields of the input structure (just to avoid heavy notations) */
 
@@ -8516,8 +8524,14 @@ int perturb_derivs(double tau,
               } else {
                 exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q]);
                 exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t);
-              //    if ((pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q])>150) {
-                  if ((pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t)>150) {
+
+                if (pba->use_old_formula_neutrino_psd == _TRUE_) {
+                  exponent = pba->Gamma_neutrinos[n_ncdm]*pba->M_ncdm[n_ncdm]/(epsilon)*a*t;
+                } else {
+                  exponent = pba->Gamma_neutrinos[n_ncdm]*pvecback[pba->index_bg_integral_dec_2+index_q];
+                }
+
+                  if (exponent>150) {
                     exp_factor = exp(-150);
                     exp_factor_old = exp(-150);
                   }

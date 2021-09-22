@@ -617,6 +617,7 @@ int background_init(
   double Neff;
   double w_fld, dw_over_da, integral_fld;
   int filenum=0;
+  double H_at_znr; //GFA
   pba->free_input_parameters = _TRUE_; //this is set to FALSE only if we loop over background in thermo.c
   /** - in verbose mode, provide some information */
   if (pba->background_verbose > 0) {
@@ -695,6 +696,17 @@ int background_init(
   class_test(_Gyr_over_Mpc_ <= 0,
              pba->error_message,
              "_Gyr_over_Mpc = %e instead of strictly positive",_Gyr_over_Mpc_);
+
+  for(n_ncdm=0; n_ncdm<pba->N_ncdm; n_ncdm++){
+    if(pba->background_ncdm_distribution[n_ncdm]==_decaying_neutrinos_ ) {
+      H_at_znr = pba->H0*sqrt(pba->Omega0_cdm+pba->Omega0_b)*pow(pba->m_ncdm_in_eV[n_ncdm]*pba->deg_ncdm[n_ncdm]/(9*pba->T_ncdm[n_ncdm]*pba->T_cmb*_k_B_/_eV_),3./2.);
+      class_test(pba->Gamma_neutrinos[n_ncdm] > H_at_znr,
+                 pba->error_message,
+                 "Gamma_neutrinos = %e km/s/Mpc is bigger than H(z_nr) =%e km/s/Mpc",pba->Gamma_neutrinos[n_ncdm]*(_c_/1.e3),H_at_znr*(_c_/1.e3));
+    }
+  }
+
+
 
   /** - this function integrates the background over time, allocates
       and fills the background table */
@@ -1725,6 +1737,7 @@ int background_ncdm_momenta(
   double zq = 1e100;
   int last_index;
   double exp_factor = 0, exp_factor_old=0.;
+  double exponent;
   double * pvecback;
   double a=0, t_old, t_new;
   // double Omega_m, Omega_r, t, H;
@@ -1789,11 +1802,13 @@ int background_ncdm_momenta(
               exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q]);
               exp_factor_old = exp(-pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t);
 
-//              exp_factor = exp(-pba->Gamma_neutrinos[n_ncdm]*int_vec[index_q]);
-          //    printf("exp_factor_new[%d]= %e\n",index_q,exp_factor);
-          //    printf("exp_factor_old[%d] = %e\n",index_q,exp_factor_old);
-               if ((pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t)>150) {
-          //     if ((pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q])>150) {
+               if (pba->use_old_formula_neutrino_psd == _TRUE_) {
+                 exponent = pba->Gamma_neutrinos[n_ncdm]*M/(epsilon*(1+z))*t;
+               } else {
+                 exponent = pba->Gamma_neutrinos[n_ncdm]*pba->integral_dec_nu_1[index_q];
+               }
+
+               if (exponent>150) {
                 // GFA: When Gamma_neutrinos is very high (equal or bigger than 10^5 km/s/Mpc), at late times the exponential
                 // factor becomes so tiny that it is difficult to handle it numerically. This produces weird
                 // results such as negative w_ncdm, making the fluid equation to crash. In order to avoid this,
@@ -2091,7 +2106,6 @@ int background_solve(
           pvecback_integration[pba->index_bi_integral_dec_1+index_q] = 0.;
         } else {
           pvecback_integration[pba->index_bi_integral_dec_1+index_q] += tau_step*a*pow(1.+ q*q/pow(a*M,2.),-1./2.); //simple rectangle rule with adatative step
-
       }
       }
       for (index_q=0; index_q<pba->q_size_ncdm[n_ncdm]; index_q++)  {
@@ -2470,12 +2484,10 @@ int background_initial_conditions(
       // printf("pba->Omega0_dcdmdrwdm %e pba->Gamma_dcdm %e pba->epsilon_dcdm %e \n",pba->Omega0_dcdmdrwdm,pba->Gamma_dcdm,pba->epsilon_dcdm);
       pvecback_integration[pba->index_bi_rho_dr] = f*pba->H0*pba->H0/pow(a/pba->a_today,4);
     }
-    /* GFA */
-  //  else if(pba->has_ncdm == _TRUE_){
-  //    pvecback_integration[pba->index_bi_rho_dr] = 0; /*currently ignore the small amount of decay from a=0 to a=a_ini_class.*/
-  //  }
+
     else{
       /** There is also a space reserved for a future case where dr is not sourced by dcdm */
+      // GFA: should we implement something here in the case of decaying neutrinos?
       pvecback_integration[pba->index_bi_rho_dr] = 0.0;
     }
   }
@@ -2683,7 +2695,8 @@ int background_output_titles(struct background * pba,
     for (n=0; n<pba->N_ncdm; n++){
       sprintf(tmp,"(.)n_ncdm[%d]",n);
       class_store_columntitle(titles,tmp,_TRUE_);
-      sprintf(tmp,"(.)rho_ncdm[%d]",n);
+//      sprintf(tmp,"(.)rho_ncdm[%d]",n);
+      sprintf(tmp,"a^4rho_nu[%d]+a^4rho_dr",n);
       class_store_columntitle(titles,tmp,_TRUE_);
       sprintf(tmp,"(.)p_ncdm[%d]",n);
       class_store_columntitle(titles,tmp,_TRUE_);
@@ -2692,7 +2705,8 @@ int background_output_titles(struct background * pba,
   class_store_columntitle(titles,"(.)rho_lambda",pba->has_lambda);
   class_store_columntitle(titles,"(.)rho_fld",pba->has_fld);
   class_store_columntitle(titles,"(.)w_fld",pba->has_fld);
-  class_store_columntitle(titles,"(.)rho_ur",pba->has_ur);
+//  class_store_columntitle(titles,"(.)rho_ur",pba->has_ur);
+  class_store_columntitle(titles,"a^4rho_ur",pba->has_ur);
   class_store_columntitle(titles,"(.)rho_crit",_TRUE_);
   class_store_columntitle(titles,"(.)rho_dcdm",pba->has_dcdm);
   class_store_columntitle(titles,"(.)rho_dr",pba->has_dr);
@@ -2738,21 +2752,19 @@ int background_output_data(
     if (pba->has_ncdm == _TRUE_){
       for (n=0; n<pba->N_ncdm; n++){
         class_store_double(dataptr,pvecback[pba->index_bg_n_ncdm1+n],_TRUE_,storeidx);
-        class_store_double(dataptr,pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
-//        class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
+//        class_store_double(dataptr,pvecback[pba->index_bg_rho_ncdm1+n],_TRUE_,storeidx);
+        class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*(pvecback[pba->index_bg_rho_ncdm1+n]+pvecback[pba->index_bg_rho_dr]),_TRUE_,storeidx);
         class_store_double(dataptr,pvecback[pba->index_bg_p_ncdm1+n],_TRUE_,storeidx);
       }
     }
     class_store_double(dataptr,pvecback[pba->index_bg_rho_lambda],pba->has_lambda,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_fld],pba->has_fld,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_w_fld],pba->has_fld,storeidx);
-    class_store_double(dataptr,pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
-//    class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
+//    class_store_double(dataptr,pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
+    class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_crit],_TRUE_,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_dcdm],pba->has_dcdm,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_dr],pba->has_dr,storeidx);
-//    class_store_double(dataptr,pow(pvecback[pba->index_bg_a],4.)*pvecback[pba->index_bg_rho_dr],pba->has_dr,storeidx);
-
     class_store_double(dataptr,pvecback[pba->index_bg_rho_scf],pba->has_scf,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_p_scf],pba->has_scf,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_phi_scf],pba->has_scf,storeidx);
