@@ -46,15 +46,15 @@ Pk3 = [] # P(k) in (Mpc/h)**3
 Pk4 = []# P(k) in (Mpc/h)**3
 Pk5 = []# P(k) in (Mpc/h)**3
 
-Pk6 = [] # P(k) in (Mpc/h)**3
-Pk7 = []# P(k) in (Mpc/h)**3
-Pk8 = []# P(k) in (Mpc/h)**3
-Pk9 = []# P(k) in (Mpc/h)**3
-Pk10 = []# P(k) in (Mpc/h)**3
+#Pk6 = [] # P(k) in (Mpc/h)**3
+#Pk7 = []# P(k) in (Mpc/h)**3
+#Pk8 = []# P(k) in (Mpc/h)**3
+#Pk9 = []# P(k) in (Mpc/h)**3
+#Pk10 = []# P(k) in (Mpc/h)**3
 
 
 
-zhigh=2.
+#zhigh=2.
 
 #%%
 
@@ -67,8 +67,8 @@ common_settings = {'output':'tCl,pCl,lCl, mPk',
                    'tau_reio':0.0582,
                    'omega_b': 0.0224,
                    '100*theta_s':1.042168,
-                   'P_k_max_h/Mpc':1.0,
-                   'z_max_pk' : 4.0
+                   'P_k_max_h/Mpc':1.0
+ #                  'z_max_pk' : 4.0
                    }
 
 #Before I had Planck 2018 best-fit (TT,TE,EE+lowE+lensing)
@@ -108,14 +108,14 @@ h = M.h() # get reduced Hubble for conversions to 1/Mpc
 
 for k in kk:
     Pk1.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-    Pk6.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
+#    Pk6.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
 
 
 M.struct_cleanup()
 M.empty()
 
 fpk_ref = interp1d(kk, Pk1)
-fpk_ref2 = interp1d(kk, Pk6)
+#fpk_ref2 = interp1d(kk, Pk6)
 
 
 timeafterref=time.time()
@@ -139,7 +139,7 @@ for i in range(4):
     'evolver': 0,
     'ncdm_fluid_approximation': 2,
     'ncdm_fluid_trigger_tau_over_tau_k': 25,
-    'Number of momentum bins perturbs': '50,600',
+    'Number of momentum bins perturbs': '50,300',
     'massive_daughter_perturbations': 'yes',
     'dark_radiation_perturbations': 'yes'
     })
@@ -159,7 +159,7 @@ for i in range(4):
         clphiphi_DCDM_0 = clM_0['pp'][2:]
         for k in kk:
             Pk2.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-            Pk7.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
+#            Pk7.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
         k_fss_wdm[0]=derived['k_fss_wdm']
         om_m=derived['Omega_m']
         om_l=1.0-om_m
@@ -180,7 +180,7 @@ for i in range(4):
         clphiphi_DCDM_1 = clM_1['pp'][2:]
         for k in kk:
             Pk3.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-            Pk8.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
+#            Pk8.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
         k_fss_wdm[1]=derived['k_fss_wdm']
         om_m=derived['Omega_m']
         om_l=1.0-om_m
@@ -200,7 +200,7 @@ for i in range(4):
         clphiphi_DCDM_2 = clM_2['pp'][2:]
         for k in kk:
             Pk4.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-            Pk9.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
+#            Pk9.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
         k_fss_wdm[2]=derived['k_fss_wdm']
         om_m=derived['Omega_m']
         om_l=1.0-om_m
@@ -220,7 +220,7 @@ for i in range(4):
         clphiphi_DCDM_3 = clM_3['pp'][2:]
         for k in kk:
             Pk5.append(M.pk(k*h,0.)*h**3) # function .pk(k,z)
-            Pk10.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
+#            Pk10.append(M.pk(k*h,zhigh)*h**3) # function .pk(k,z)
         k_fss_wdm[3]=derived['k_fss_wdm']
         om_m=derived['Omega_m']
         om_l=1.0-om_m
@@ -257,10 +257,10 @@ fpk_ourcode_1 = interp1d(kk, Pk3)
 fpk_ourcode_2 = interp1d(kk, Pk4)
 fpk_ourcode_3 = interp1d(kk, Pk5)
 
-fpk_ourcode_4 = interp1d(kk, Pk7)
-fpk_ourcode_5 = interp1d(kk, Pk8)
-fpk_ourcode_6 = interp1d(kk, Pk9)
-fpk_ourcode_7 = interp1d(kk, Pk10)
+#fpk_ourcode_4 = interp1d(kk, Pk7)
+#fpk_ourcode_5 = interp1d(kk, Pk8)
+#fpk_ourcode_6 = interp1d(kk, Pk9)
+#fpk_ourcode_7 = interp1d(kk, Pk10)
 
 
 
@@ -445,15 +445,18 @@ plt.clf()
 #%%
 #plt.figure(2)
 
-axe_1 = plt.subplot(211)
-axe_2 = plt.subplot(212, sharex = ax_1)
-plt.subplots_adjust(hspace=0)
+#axe_1 = plt.subplot(211)
+#axe_2 = plt.subplot(212, sharex = ax_1)
+#plt.subplots_adjust(hspace=0)
+
+axe_1 = plt.subplot(111)
 
 #axe_1.set_ylim([-1.5,2])
 #axe_2.set_ylim([-0.14,0.23])
 
 axe_1.set_xlim([kk[0],kk[-1]])
-axe_2.set_xlim([kk[0],kk[-1]])
+
+#axe_2.set_xlim([kk[0],kk[-1]])
 
 
 
@@ -461,33 +464,50 @@ axe_2.set_xlim([kk[0],kk[-1]])
 #plt.ylim(-1.5,2.0)
 #plt.ylabel(r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', fontsize=17)
 
-plt.text(0.000025, 0.22, r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', va='center', rotation='vertical',fontsize=23)
-axe_2.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=18)
+#plt.text(0.000025, 0.22, r'$P_{\Lambda\mathrm{DDM}}/P_{\Lambda\mathrm{CDM}}-1$', va='center', rotation='vertical',fontsize=23)
+#axe_2.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=18)
+
+axe_1.set_ylabel(r'$P(k) \,\,\,\, [(\mathrm{Mpc}/h)^3] $', fontsize=18)
+axe_1.set_xlabel(r'$k \,\,\,\, [h/\mathrm{Mpc}]$', fontsize=18)
 
 
 if plot_type ==1:
     
-    axe_1.semilogx(kk,fpk_ourcode_0(kk)/fpk_ref(kk)-1.0,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
-    axe_1.semilogx(kk,fpk_ourcode_1(kk)/fpk_ref(kk)-1.0,'g', label=r'$\varepsilon = %.1f$'%epsilon[1])
-    axe_1.semilogx(kk,fpk_ourcode_2(kk)/fpk_ref(kk)-1.0,'b', label = r'$\varepsilon = %.2f$'%epsilon[2])
-    axe_1.semilogx(kk,fpk_ourcode_3(kk)/fpk_ref(kk)-1.0,'k', label = r'$\varepsilon = %.3f$'%epsilon[3])
+    axe_1.loglog(kk,fpk_ref(kk),color='black',label=r'$\Lambda \mathrm{CDM}$')
+    axe_1.loglog(kk,fpk_ourcode_0(kk),color='orange',label=r'$\varepsilon = %.1f$'%epsilon[0])
+    axe_1.loglog(kk,fpk_ourcode_1(kk),color='cyan', label=r'$\varepsilon = %.1f$'%epsilon[1])
+    axe_1.loglog(kk,fpk_ourcode_2(kk),color='dodgerblue', label = r'$\varepsilon = %.2f$'%epsilon[2])
+    axe_1.loglog(kk,fpk_ourcode_3(kk),color='steelblue', label = r'$\varepsilon = %.3f$'%epsilon[3])
 
-    axe_2.semilogx(kk,fpk_ourcode_4(kk)/fpk_ref2(kk)-1.0,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
-    axe_2.semilogx(kk,fpk_ourcode_5(kk)/fpk_ref2(kk)-1.0,'g', label=r'$\varepsilon = %.1f$'%epsilon[1])
-    axe_2.semilogx(kk,fpk_ourcode_6(kk)/fpk_ref2(kk)-1.0,'b', label = r'$\varepsilon = %.2f$'%epsilon[2])
-    axe_2.semilogx(kk,fpk_ourcode_7(kk)/fpk_ref2(kk)-1.0,'k', label = r'$\varepsilon = %.3f$'%epsilon[3])
+    
+#    axe_1.semilogx(kk,fpk_ourcode_0(kk)/fpk_ref(kk)-1.0,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
+#    axe_1.semilogx(kk,fpk_ourcode_1(kk)/fpk_ref(kk)-1.0,'g', label=r'$\varepsilon = %.1f$'%epsilon[1])
+#    axe_1.semilogx(kk,fpk_ourcode_2(kk)/fpk_ref(kk)-1.0,'b', label = r'$\varepsilon = %.2f$'%epsilon[2])
+#    axe_1.semilogx(kk,fpk_ourcode_3(kk)/fpk_ref(kk)-1.0,'k', label = r'$\varepsilon = %.3f$'%epsilon[3])
+
+#    axe_2.semilogx(kk,fpk_ourcode_4(kk)/fpk_ref2(kk)-1.0,'r',label=r'$\varepsilon = %.1f$'%epsilon[0])
+#    axe_2.semilogx(kk,fpk_ourcode_5(kk)/fpk_ref2(kk)-1.0,'g', label=r'$\varepsilon = %.1f$'%epsilon[1])
+#    axe_2.semilogx(kk,fpk_ourcode_6(kk)/fpk_ref2(kk)-1.0,'b', label = r'$\varepsilon = %.2f$'%epsilon[2])
+#    axe_2.semilogx(kk,fpk_ourcode_7(kk)/fpk_ref2(kk)-1.0,'k', label = r'$\varepsilon = %.3f$'%epsilon[3])
     
 else:
     
-    axe_1.semilogx(kk,fpk_ourcode_0(kk)/fpk_ref(kk)-1.0,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
-    axe_1.semilogx(kk,fpk_ourcode_1(kk)/fpk_ref(kk)-1.0,'g', label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
-    axe_1.semilogx(kk,fpk_ourcode_2(kk)/fpk_ref(kk)-1.0,'b', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
-    axe_1.semilogx(kk,fpk_ourcode_3(kk)/fpk_ref(kk)-1.0,'k', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
+    axe_1.semilogx(kk,fpk_ref(kk),color='black',label=r'$\Lambda \mathrm{CDM}$')
+    axe_1.semilogx(kk,fpk_ourcode_0(kk),color='orange',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+    axe_1.semilogx(kk,fpk_ourcode_1(kk),color='cyan', label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
+    axe_1.semilogx(kk,fpk_ourcode_2(kk),color='dodgerblue', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
+    axe_1.semilogx(kk,fpk_ourcode_3(kk),color='steelblue', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
 
-    axe_2.semilogx(kk,fpk_ourcode_4(kk)/fpk_ref2(kk)-1.0,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
-    axe_2.semilogx(kk,fpk_ourcode_5(kk)/fpk_ref2(kk)-1.0,'g', label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
-    axe_2.semilogx(kk,fpk_ourcode_6(kk)/fpk_ref2(kk)-1.0,'b', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
-    axe_2.semilogx(kk,fpk_ourcode_7(kk)/fpk_ref2(kk)-1.0,'k', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
+    
+#    axe_1.semilogx(kk,fpk_ourcode_0(kk)/fpk_ref(kk)-1.0,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+#    axe_1.semilogx(kk,fpk_ourcode_1(kk)/fpk_ref(kk)-1.0,'g', label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
+#   axe_1.semilogx(kk,fpk_ourcode_2(kk)/fpk_ref(kk)-1.0,'b', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
+#   axe_1.semilogx(kk,fpk_ourcode_3(kk)/fpk_ref(kk)-1.0,'k', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
+
+#    axe_2.semilogx(kk,fpk_ourcode_4(kk)/fpk_ref2(kk)-1.0,'r',label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[0])
+#    axe_2.semilogx(kk,fpk_ourcode_5(kk)/fpk_ref2(kk)-1.0,'g', label=r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[1])
+#    axe_2.semilogx(kk,fpk_ourcode_6(kk)/fpk_ref2(kk)-1.0,'b', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[2])
+#    axe_2.semilogx(kk,fpk_ourcode_7(kk)/fpk_ref2(kk)-1.0,'k', label = r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs}$'%tau[3])
 
 
 
@@ -498,10 +518,14 @@ axe_1.legend(frameon=False, loc='lower left', fontsize=16, borderaxespad=0.)
 #axe_1.axvline(k_fss_wdm[2], color='b', linestyle='dotted')
 #axe_1.axvline(k_fss_wdm[3], color='k', linestyle='dotted')
 
-axe_1.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
+#axe_1.tick_params(axis='x', which='both', bottom='False',labelbottom='False')
+#axe_1.tick_params(axis="y", labelsize=16)
+#axe_2.tick_params(axis="y", labelsize=16)
+#axe_2.tick_params(axis="x", labelsize=16)
+
 axe_1.tick_params(axis="y", labelsize=16)
-axe_2.tick_params(axis="y", labelsize=16)
-axe_2.tick_params(axis="x", labelsize=16)
+axe_1.tick_params(axis="x", labelsize=16)
+
 
 
 #axe_1.axhline(suppression[0], color='r', linestyle='dashed')
@@ -511,14 +535,14 @@ axe_2.tick_params(axis="x", labelsize=16)
 
 if plot_type ==1:
     axe_1.text(0.13e-3, -0.2, r'$\Gamma^{-1} = %.0f \, \mathrm{Gyrs} $'%tau[0], fontsize =16)
-    axe_1.text(0.6e-2, -0.5,  r'$\bf{z=0}$', fontsize =16)
-    axe_2.text(0.6e-2, -0.15,  r'$\bf{z=%.0f}$'%zhigh, fontsize =16)
+#    axe_1.text(0.6e-2, -0.5,  r'$\bf{z=0}$', fontsize =16)
+#    axe_2.text(0.6e-2, -0.15,  r'$\bf{z=%.0f}$'%zhigh, fontsize =16)
 
     
 else:
     axe_1.text(0.13e-3, -0.2,  r'$\varepsilon = %.1f$'%epsilon[0], fontsize =16)
-    axe_1.text(0.6e-2, -0.8,  r'$\bf{z=0}$', fontsize =16)
-    axe_2.text(0.6e-2, -0.4,  r'$\bf{z=%.0f}$'%zhigh, fontsize =16)
+#    axe_1.text(0.6e-2, -0.8,  r'$\bf{z=0}$', fontsize =16)
+#    axe_2.text(0.6e-2, -0.4,  r'$\bf{z=%.0f}$'%zhigh, fontsize =16)
 
 
 

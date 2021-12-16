@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import numpy as np
 from scipy.interpolate import interp1d
+from classy import Class
+import matplotlib.patches as patches
+
 
 # read Planck errors
 lTT,DlTT_mean,DlTT_error_minus,DlTT_error_plus,DlTT_bestfit= np.loadtxt("error_Planck/Planck2018_errorTT.txt",unpack=True)
@@ -232,9 +235,54 @@ cl12b = data12b[0]
 clTT_approx_warm2_g10H0 = interp1d(cl12b[:,0], cl12b[:,1])
 clEE_approx_warm2_g10H0 = interp1d(cl12b[:,0], cl12b[:,2])
 
-
-
 #%% TIME TO PLOT 
+
+common_settings = {'output':'tCl,pCl,lCl,mPk',
+                   'lensing':'yes',
+                   'format':'camb',
+                   'l_max_scalars':5000,                    
+                   'n_s':0.9652,
+                   'ln10^{10}A_s':3.043,
+                   'tau_reio':0.0540,
+                   'omega_b':0.02233,
+                   'h':0.6737,
+                   'omega_cdm': 0.1198
+                   }
+
+M = Class()
+M.set(common_settings)
+M.set({
+'N_ncdm':1,
+'background_ncdm_distribution': 0,
+'N_ur':2.0328,
+'m_ncdm':0.06,
+})
+M.compute()
+clM = M.lensed_cl(5000)
+ll_LCDM = clM['ell'][2:]
+clTT_LCDM = clM['tt'][2:]
+clEE_LCDM = clM['ee'][2:]
+T_cmb = 2.7225 #we change units for Planck
+fTT_ref = interp1d(ll_LCDM,clTT_LCDM*(ll_LCDM)*(ll_LCDM+1)/2/np.pi*(T_cmb*1.e6)**2)
+fEE_ref = interp1d(ll_LCDM,clEE_LCDM*(ll_LCDM)*(ll_LCDM+1)/2/np.pi*(T_cmb*1.e6)**2)
+M.struct_cleanup()
+M.empty()
+
+def binned_cosmic_variance (result,l_ini,width):
+    result = 0
+    Clb = 0
+    for i in range(0,int(width)):
+        result += 2/(2*(l_ini+float(i))+1)*(l_ini+float(i))*(l_ini+float(i)+1)*(l_ini+float(i))*(l_ini+float(i)+1)*fTT_ref(l_ini+i)*fTT_ref(l_ini+i)
+        Clb += (l_ini+float(i))*(l_ini+float(i)+1)*fTT_ref(l_ini+i)
+    return np.sqrt(result)/Clb
+
+l_min = 2.;
+l_max = 3100;
+n_step = 100.;
+j=0.
+step = l_min
+width= 25
+
 
 ll = cl1[:,0]
 
@@ -306,18 +354,36 @@ ax_1.add_artist(legend1)
 ax_1.add_artist(legend2)
 
 
-#ax_1.legend(frameon=False,fontsize = 13,loc='upper right',borderaxespad=0.)
-
 #plot cosmic variance and Planck error bars
+while step < l_max:
+        result = 0.0
+        if step < 29:
+            width = 1
+            step = l_min+j*width
+            j+=1
+            if step == 29:
+                j = 0
+                l_min = 30
+        else:
+            width = 30
+            step = l_min+j*width
+            j+=1
+
+        ax_1.add_patch(patches.Rectangle((int(step), -1*binned_cosmic_variance(result,int(step),width)), width, 2*binned_cosmic_variance(result,int(step),width),color='red', alpha=0.1))
+        ax_2.add_patch(patches.Rectangle((int(step), -1*binned_cosmic_variance(result,int(step),width)), width, 2*binned_cosmic_variance(result,int(step),width),color='red',alpha=0.1))
+
+
+
 l_cosmic_variance = np.linspace(0,48,1000)
 l_cosmic_variance_1 = np.linspace(0,30,1000)
 l_cosmic_variance_2 = np.linspace(30,48,2)
-slope =np.array([0.15,0.0343])
-ax_1.fill_between(l_cosmic_variance_1, -0.15,0.15, color='lightgray' )
+slope =np.array([0.13,0.0343])
+
+ax_1.fill_between(l_cosmic_variance_1, -0.13,0.13, color='lightgray' )
 ax_1.fill_between(l_cosmic_variance_2, -slope, slope, color='lightgray' )
 ax_1.fill_between(lTT, -(DlTT_error_plus)/DlTT_mean, +(DlTT_error_plus)/DlTT_mean, color='lightgray')
 
-ax_2.fill_between(l_cosmic_variance, -0.18,0.18, color='lightgray' )
+ax_2.fill_between(l_cosmic_variance, -0.13,0.13, color='lightgray' )
 ax_2.fill_between(lEE, -(DlEE_error_plus)/DlEE_mean, +(DlEE_error_plus)/DlEE_mean, color = 'lightgray')
 
 

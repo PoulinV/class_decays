@@ -138,7 +138,7 @@ enum computation_stage {cs_background, cs_thermodynamics, cs_perturbations,
                         cs_primordial, cs_nonlinear, cs_transfer, cs_spectra};
 enum target_names {theta_s, Omega_dcdmdr, omega_dcdmdr, Omega_dcdmdrwdm, omega_dcdmdrwdm, Omega_scf, Omega_ini_dcdm, omega_ini_dcdm, f_dcdm, Omega_ini_dcdm2, omega_ini_dcdm2, sigma8};
 
-#define _NUM_TARGETS_ 11 //Keep this number as number of target_names
+#define _NUM_TARGETS_ 12 //Keep this number as number of target_names
 
 struct input_pprpba {
   struct precision * ppr;
