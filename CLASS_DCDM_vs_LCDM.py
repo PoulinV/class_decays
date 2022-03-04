@@ -9,7 +9,6 @@ plt.rcParams["figure.figsize"] = [4.0,8.0]
 import time
 start_time = time.time()
 
-
 plot_type = 1
 
 #lTT,DlTT_mean,DlTT_error_minus,DlTT_error_plus,DlTT_bestfit= np.loadtxt("error_Planck/Planck2018_errorTT.txt",unpack=True)

@@ -1,4 +1,4 @@
-/** @file background.c Documented background module
+/** @file background.c Documented background module 
  *
  * * Julien Lesgourgues, 17.04.2011
  * * routines related to ncdm written by T. Tram in 2011
@@ -2175,7 +2175,6 @@ int background_solve(
 
   /* GFA: compute the total matter amount  */
   pba->Omega0_m = pba->Omega0_wdm+pba->Omega0_dcdm+pba->Omega0_cdm+pba->Omega0_b+pba->Omega0_ncdm_tot;
-
 
 
   /** - done */
