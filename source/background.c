@@ -1,4 +1,4 @@
-/** @file background.c Documented background module 
+/** @file background.c Documented background module
  *
  * * Julien Lesgourgues, 17.04.2011
  * * routines related to ncdm written by T. Tram in 2011
@@ -196,7 +196,7 @@ int background_tau_of_z(
 
   /* necessary for calling array_interpolate(), but never used */
   int last_index;
-
+  // printf("z %e %e %e\n", z,pba->z_table[pba->bt_size-1],pba->z_table[0]);
   /** - check that \f$ z \f$ is in the pre-computed range */
   class_test(z < pba->z_table[pba->bt_size-1],
              pba->error_message,
@@ -219,6 +219,7 @@ int background_tau_of_z(
                                       pba->error_message),
              pba->error_message,
              pba->error_message);
+             // printf("tau %e\n", tau);
 
   return _SUCCESS_;
 }
@@ -2727,7 +2728,8 @@ int background_derivs(
     dy[pba->index_bi_rho_dr] = -4.*y[pba->index_bi_a]*pvecback[pba->index_bg_H]*y[pba->index_bi_rho_dr];
     if(pba->has_dcdm == _TRUE_)
       dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_dcdm*y[pba->index_bi_rho_dcdm]*pba->epsilon_dcdm;
-    if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos[n_ncdm] > 0){
+    // if(pba->has_ncdm == _TRUE_ && pba->Gamma_neutrinos[n_ncdm] > 0){
+    if(pba->has_ncdm == _TRUE_ && pba->has_decaying_neutrinos == _TRUE_){
       // dy[pba->index_bi_rho_dr] += y[pba->index_bi_a]*pba->Gamma_neutrinos*pvecback[pba->index_bg_rho_ncdm1]; //5.06e15*_Mpc_over_m_ convert from GeV to invMpc
       for(n_ncdm = 0; n_ncdm<pba->N_ncdm; n_ncdm++){
         if(pba->background_ncdm_distribution[n_ncdm] == _decaying_neutrinos_){
