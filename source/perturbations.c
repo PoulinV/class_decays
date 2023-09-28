@@ -209,7 +209,6 @@ int perturb_init(
       if(pba->background_ncdm_distribution[n_ncdm] == _massive_daughter_){
         // pba->background_ncdm_distribution[n_ncdm] = _fermi_dirac_;
         compute_dfdlnq_ncdm(ppr,pba,ppt, n_ncdm);
-        printf("here\n");
       }
     }
 
