@@ -298,6 +298,10 @@ struct primordial {
 
   ErrorMsg error_message; /**< zone for writing error messages */
 
+  double A_s_ratio_correction; /**< new parameters when shooting on sigma8 */
+
+
+
 };
 
 struct primordial_inflation_parameters_and_workspace {

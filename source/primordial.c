@@ -132,7 +132,6 @@ int primordial_spectrum_at_k(
   /** - otherwise, interpolate in the pre-computed table */
 
   else {
-
     class_call(array_interpolate_spline(
                                         ppm->lnk,
                                         ppm->lnk_size,
@@ -148,9 +147,11 @@ int primordial_spectrum_at_k(
                ppm->error_message);
 
     /* if mode==logarithmic, output is already in the correct format. Otherwise, apply necessary transformation. */
-
+    for (index_ic1 = 0; index_ic1 < ppm->ic_size[index_md]; index_ic1++) {
+      index_ic1_ic2 = index_symmetric_matrix(index_ic1,index_ic1,ppm->ic_size[index_md]);
+      output[index_ic1_ic2]+=log(ppm->A_s_ratio_correction);//*As_ratio becomes +log(A_s_ratio).
+    }
     if (mode == linear) {
-
       for (index_ic1 = 0; index_ic1 < ppm->ic_size[index_md]; index_ic1++) {
         index_ic1_ic2 = index_symmetric_matrix(index_ic1,index_ic1,ppm->ic_size[index_md]);
         output[index_ic1_ic2]=exp(output[index_ic1_ic2]);
@@ -939,7 +940,8 @@ int primordial_analytic_spectrum(
     *pk = ppm->amplitude[index_md][index_ic1_ic2]
       *exp((ppm->tilt[index_md][index_ic1_ic2]-1.)*log(k/ppm->k_pivot)
            + 0.5 * ppm->running[index_md][index_ic1_ic2] * pow(log(k/ppm->k_pivot), 2.));
-
+    // if(ppm->adjust_As == _TRUE_)
+    *pk *= ppm->A_s_ratio_correction;//ppm->A_s_ratio_correction is introduced in case we want to get the right sigma8 by adjusting As. This parameter is computed later. There is a square in the definition.
   }
   else {
     *pk = 0.;

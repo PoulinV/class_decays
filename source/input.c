@@ -2168,6 +2168,15 @@ int input_read_parameters(
       else if (flag2 == _TRUE_)
         ppm->A_s = exp(param2)*1.e-10;
 
+    class_call(parser_read_double(pfc,"sigma8_wanted",&param1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+     if (flag1 == _TRUE_) {
+       psp->sigma8_wanted = param1;
+       psp->adjust_As = _TRUE_;
+     }else{
+       psp->adjust_As = _FALSE_;
+     }
       if (ppt->has_ad == _TRUE_) {
 
         class_read_double("n_s",ppm->n_s);
@@ -3680,7 +3689,9 @@ int input_default_params(
   psp->A_lens = 1;
   psp->A_lens_pp = 1;
   ple->A_lens_TTTEEE = 1;
-
+  psp->sigma8_wanted = 0.8;
+  psp->adjust_As=_FALSE_;
+  ppm->A_s_ratio_correction = 1;
   /** - nonlinear structure */
 
   /** - lensing structure */
@@ -4330,6 +4341,7 @@ int input_try_unknown_parameters(double * unknown_parameter,
       break;
     case sigma8:
       output[i] = sp.sigma8-pfzw->target_value[i];
+      printf("output[i] %e wanted %e \n",output[i],pfzw->target_value[i]);
       break;
     }
   }

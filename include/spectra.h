@@ -184,6 +184,8 @@ struct spectra {
                     */
 
   double sigma8;    /**< sigma8 parameter */
+  double sigma8_wanted;    /**< sigma8 parameter to shoot for in spectra */
+  short adjust_As;    /**< if we shoot for sigma8 in spectra, set to True. */
 
   double sigma8_cb; /**< if ncdm present: contribution to sigma8 from only baryons and cdm */
 
