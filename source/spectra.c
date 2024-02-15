@@ -3225,10 +3225,15 @@ int spectra_pk(
         //if sigma8 is not equal to sigma8wanted we adjust As and we loop
         //ppm->A_s_ratio_correction is passed to the primordial structure when computing the P(k) and corrects the value of As.
         ppm->A_s_ratio_correction = pow(psp->sigma8_wanted/psp->sigma8,2);//As propto sigma8**2
-        free(psp->ddln_pk);//will be reallocated in the loop
-        free(psp->ddln_pk_l);
-        free(psp->ddln_pk_cb);
-        free(psp->ddln_pk_cb_l);
+        if(psp->ln_tau_size > 1){
+          free(psp->ddln_pk);//will be reallocated in the loop
+          free(psp->ddln_pk_l);
+          if(pba->has_ncdm){
+            free(psp->ddln_pk_cb);
+            free(psp->ddln_pk_cb_l);
+          }
+        }
+
       }
 
     }
