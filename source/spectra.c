@@ -3225,6 +3225,8 @@ int spectra_pk(
         //if sigma8 is not equal to sigma8wanted we adjust As and we loop
         //ppm->A_s_ratio_correction is passed to the primordial structure when computing the P(k) and corrects the value of As.
         ppm->A_s_ratio_correction = pow(psp->sigma8_wanted/psp->sigma8,2);//As propto sigma8**2
+        // printf("A_s=%e \n",ppm->A_s*ppm->A_s_ratio_correction);
+        class_test(ppm->A_s * ppm->A_s_ratio_correction > 3e-9 || ppm->A_s * ppm->A_s_ratio_correction < 1e-9,psp->error_message,"A_s %e is way too small, we reject the point to avoid bug.\n",ppm->A_s * ppm->A_s_ratio_correction);
         if(psp->ln_tau_size > 1){
           free(psp->ddln_pk);//will be reallocated in the loop
           free(psp->ddln_pk_l);
